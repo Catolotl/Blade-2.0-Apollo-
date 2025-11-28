@@ -302,7 +302,7 @@
 
     
 
-    <button class="upgrade-btn" onclick="window.open('https://www.mini-crafts.com', '_blank')">
+    <button class="upgrade-btn" onclick="window.open('https://mini-crafts.com', '_blank')">
       Free Upgrade
     </button>
 
@@ -336,5 +336,60 @@
       </div>
     </div>
   <script src="script.js"></script>
+    <script>
+// ——— CONFIG ——— (change these values whenever you want)
+const SESSION_LIMIT_SECONDS = 10;        // ← change this number easily
+const REFILL_EVERY_HOURS = 2;            // ← refills after this many hours
+// ——————————————
+
+const banner = document.getElementById("timeLimitBanner");
+const timerDisplay = document.getElementById("timerDisplay");
+
+let startTime = localStorage.getItem("sessionStart");
+let lastRefill = localStorage.getItem("lastRefill");
+const now = Date.now();
+
+if (!lastRefill || now - lastRefill > REFILL_EVERY_HOURS * 60 * 60 * 1000) {
+  // First visit or refill time reached → give full session
+  startTime = now;
+  localStorage.setItem("sessionStart", startTime);
+  localStorage.setItem("lastRefill", now);
+} else if (!startTime) {
+  // Should never happen, but safety
+  startTime = now;
+  localStorage.setItem("sessionStart", startTime);
+}
+
+let timeLeft = Math.max(0, SESSION_LIMIT_SECONDS - Math.floor((now - startTime) / 1000));
+
+function updateTimer() {
+  if (timeLeft <= 0) {
+    banner.classList.add("show");
+    timerDisplay.textContent = "Time’s up! Unlock unlimited chats →";
+    document.body.style.filter = "blur(8px)"; // optional soft lock
+    return;
+  }
+
+  const mins = Math.floor(timeLeft / 60).toString().padStart(2, "0");
+  const secs = (timeLeft % 60).toString().padStart(2, "0");
+  timerDisplay.textContent = `Time remaining: ${mins}:${secs}`;
+
+  timeLeft--;
+  setTimeout(updateTimer, 1000);
+}
+
+// Run timer only if user still has time
+if (timeLeft > 0) {
+  updateTimer();
+} else {
+  banner.classList.add("show");
+  document.body.style.filter = "blur(8px)";
+}
+
+// Optional: allow closing the blur if they actually upgrade (you can remove if you want hard-lock)
+document.getElementById("upgradeNowBtn").addEventListener("click", () => {
+  document.body.style.filter = "none";
+});
+</script>
 </body>
 </html>
