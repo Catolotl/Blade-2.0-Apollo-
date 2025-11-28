@@ -247,9 +247,60 @@
         transform: translate(-50%, 0);
         opacity: 0.8;
       }
+
+
+
+
+      /* Time-limit banner */
+#timeLimitBanner {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  background: rgba(30, 25, 55, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 20px;
+  text-align: center;
+  z-index: 9999;
+  transition: all 0.4s ease;
+  transform: translateY(-100%);
+}
+#timeLimitBanner.show { transform: translateY(0); }
+
+#timerDisplay {
+  font-size: 1.1rem;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+#upgradeNowBtn {
+  background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+  transition: all 0.2s;
+}
+#upgradeNowBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.5);
+}
     </style>
   </head>
   <body>
+
+
+    <div id="timeLimitBanner">
+  <div id="timerDisplay">Time remaining: 10s</div>
+  <button id="upgradeNowBtn" onclick="window.open('https://mini-crafts.com','_blank')">
+    Upgrade for free
+  </button>
+</div>
+
+
+    
 
     <button class="upgrade-btn" onclick="window.open('https://www.mini-crafts.com', '_blank')">
       Free Upgrade
