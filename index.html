@@ -227,22 +227,26 @@
 
       /* Free Upgrade button — sacred, untouched */
       @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
-      .upgrade-btn {
-        position: fixed;
-        top: 20px;
-        left: 61%;
-        transform: translateX(-50%);
-        font-family: 'Roboto', sans-serif;
-        background: rgba(0, 153, 255, 0.4);
-        color: white;
-        padding: 10px 10px;
-        border: none;
-        border-radius: 100px;
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: 500;
-        transition: transform 0.15s ease, opacity 0.15s ease;
-      }
+.upgrade-btn {
+  position: fixed;
+  top: 20px;
+  left: 61%;
+  transform: translateX(-50%);
+  font-family: 'Roboto', sans-serif;
+  background: rgba(0, 153, 255, 0.4);
+  color: white;
+  padding: 10px 10px;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+
+  /* ←←← ONLY ADD THESE TWO LINES HERE ←←← */
+  z-index: 999999 !important;
+  pointer-events: auto !important;
+}
       .upgrade-btn:active {
         transform: translate(-50%, 0);
         opacity: 0.8;
@@ -288,14 +292,6 @@
   box-shadow: 0 8px 30px rgba(139, 92, 246, 0.5);
 }
 
-
-
-      .upgrade-btn,
-#upgradeNowBtn {
-  position: relative;   /* or fixed — already is */
-  z-index: 999999 !important;   /* ← this wins over everything */
-  pointer-events: auto !important;
-}
     </style>
   </head>
   <body>
