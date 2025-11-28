@@ -1,305 +1,289 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stichsense - Chatbot</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: row;
-      align-items: flex-start;
-      justify-content: flex-start;
-      height: 100vh;
-      background-color: #333;
-      margin: 0;
-      overflow: hidden;
-    }
-    #sidebar {
-      width: 220px;
-      height: 100vh;
-      background: #222;
-      border-right: 2px solid #333;
-      display: flex;
-      flex-direction: column;
-      padding: 20px 10px;
-      box-sizing: border-box;
-      overflow-y: auto;
-    }
-    #sidebar h2 {
-      font-size: 18px;
-      margin-bottom: 10px;
-      text-align: center;
-      color: white;
-    }
-    #newChatBtn {
-      background: #222;
-      color: white;
-      border: none;
-      padding: 10px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-      margin-bottom: 15px;
-      transition: 0.2s;
-    }
-    #newChatBtn:hover {
-      background: #444;
-    }
-    .chat-item {
-      background: #333;
-      padding: 8px;
-      border-radius: 8px;
-      margin-bottom: 8px;
-      cursor: pointer;
-      border: 1px solid #ddd;
-      transition: 0.2s;
-      font-size: 14px;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    }
-    .chat-item:hover {
-      background: #eaeaea;
-    }
-    #main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      height: 100vh;
-      position: relative;
-      padding: 0 50px;
-      box-sizing: border-box;
-    }
-    .title-container {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      z-index: 10;
-    }
-    .dropdown {
-      position: relative;
-      display: inline-block;
-    }
-    .dropdown-btn {
-      background: none;
-      border: none;
-      font-size: 2em;
-      font-weight: bold;
-      color: white;
-      cursor: pointer;
-      padding: 0;
-      margin: 0;
-      text-align: left;
-      display: flex;
-      align-items: center;
-    }
-    .dropdown-arrow {
-      font-size: 0.7em;
-      margin-left: 8px;
-      transition: transform 0.2s;
-    }
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      top: 110%;
-      left: 0;
-      background-color: #fff;
-      min-width: 220px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 12px 18px 10px 18px;
-      z-index: 99;
-    }
-    .dropdown.show .dropdown-content {
-      display: block;
-      animation: fadeIn 0.25s;
-    }
-    .dropdown.show .dropdown-arrow {
-      transform: rotate(180deg);
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-5px);}
-      to   { opacity: 1; transform: translateY(0);}
-    }
-    .model-title {
-      font-size: 1.05em;
-      font-weight: bold;
-      margin-bottom: 2px;
-    }
-    .model-desc {
-      font-size: 0.9em;
-      color: #666;
-      margin: 0;
-      margin-bottom: 0;
-    }
-    #chatbox {
-      width: 100%;
-      color: white;
-      flex: 1;
-      overflow-y: auto;
-      background: #333;
-      padding: 10px;
-      border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-      margin-top: 60px;
-    }
-    .message {
-      max-width: 75%;
-      padding: 8px 12px;
-      margin: 5px;
-      border-radius: 10px;
-      word-wrap: break-word;
-      display: inline-block;
-    }
-    .user {
-      background: transparent;
-      color: white;
-      align-self: flex-end;
-    }
-    .bot {
-      background: transparent;
-      color: white;
-      align-self: flex-start;
-    }
-    #inputContainer {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: fixed;
-      bottom: 20px;
-      left: 10%;
-      color: white;
-      z-index: 1000;
-    }
-    #userInput {
-      width: 600px;
-      padding: 10px;
-      border-radius: 20px;
-      background-color: #444;
-      color: white;
-      border: none;
-      outline: none;
-      pointer-events: auto;
-      margin-right: 50px;
-    }
-    button.sendBtn {
-      padding: 10px;
-      border: none;
-      background: transparent;
-      color: white;
-      font-size: medium;
-      font-weight: bold;
-      cursor: pointer;
-      height: 40px;
-      width: 40px;
-      border-radius: 50%;
-      z-index: 1000;
-      pointer-events: auto;
-    }
-    #greeting {
-      position: absolute;
-      top: 220px;
-      left: 55%;
-      transform: translateX(-50%);
-      color: white;
-      font-size: 2.5em;
-      font-family: Arial, sans-serif;
-      opacity: 1;
-      transition: opacity 1s;
-      z-index: 20;
-      pointer-events: none;
-      user-select: none;
-      text-align: center;
-    }
-    #greeting.hide {
-      opacity: 0;
-      transition: opacity 1s;
-      pointer-events: none;
-    }
-    .copy-label {
-      font-size: 12px;
-      color: #bbb;
-      cursor: pointer;
-      margin-top: 3px;
-      display: inline-block;
-      user-select: none;
-      opacity: 0.7;
-      transition: 0.2s;
-    }
-    .copy-label:hover {
-      color: white;
-      opacity: 1;
-    }
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stichsense - Chatbot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --bg: #0d0b1e;
+        --surface: rgba(255, 255, 255, 0.04);
+        --surface2: rgba(255, 255, 255, 0.06);
+        --text: #e2e8f0;
+        --text-muted: #94a3b8;
+        --accent: #6366f1;
+        --border: rgba(255, 255, 255, 0.08);
+      }
 
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        display: flex;
+        overflow: hidden;
+      }
 
-.upgrade-btn {
-  position: fixed;
-  top: 20px;          /* distance from the top */
-  left: 61%;
-  transform: translateX(-50%);
+      #sidebar {
+        width: 260px;
+        background: rgba(15, 13, 34, 0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-right: 1px solid var(--border);
+        padding: 24px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      #sidebar h2 {
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text-muted);
+        margin: 0 0 8px 8px;
+      }
+      #newChatBtn {
+        background: var(--surface2);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.25s ease;
+      }
+      #newChatBtn:hover {
+        background: rgba(99, 102, 241, 0.15);
+        border-color: var(--accent);
+        transform: translateY(-1px);
+      }
+      .chat-item {
+        background: transparent;
+        color: var(--text-muted);
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .chat-item:hover {
+        background: var(--surface);
+        color: var(--text);
+      }
 
-  font-family: 'Roboto', sans-serif;
-  background: linear-gradient(135deg, #4b006e, #002e8a);
-  color: white;
-  padding: 10px 10px;
-  border: none;
-  border-radius: 100px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 500;
-  transition: transform 0.15s ease, opacity 0.15s ease;
-}
+      #main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        padding: 24px 40px;
+      }
+      .title-container {
+        position: absolute;
+        top: 24px;
+        left: 40px;
+        z-index: 10;
+      }
+      .dropdown-btn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 2.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .dropdown-arrow {
+        font-size: 0.7em;
+        transition: transform 0.3s ease;
+      }
+      .dropdown.show .dropdown-arrow { transform: rotate(180deg); }
+      .dropdown-content {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        margin-top: 12px;
+        background: rgba(20, 18, 40, 0.85);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 16px;
+        min-width: 240px;
+        opacity: 0;
+        transform: translateY(-8px);
+        pointer-events: none;
+        transition: all 0.25s ease;
+      }
+      .dropdown.show .dropdown-content {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+      .model-title { font-weight: 600; margin-bottom: 4px; }
+      .model-desc { font-size: 0.9em; color: var(--text-muted); }
 
-.upgrade-btn:active {
-  transform: translate(-50%, 0);
-  opacity: 0.8;
-}
+      #chatbox {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px 0;
+        margin-top: 80px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .message {
+        max-width: 78%;
+        padding: 14px 18px;
+        border-radius: 18px;
+        line-height: 1.5;
+        font-size: 15px;
+        backdrop-filter: blur(10px);
+      }
+      .user {
+        align-self: flex-end;
+        background: rgba(99, 102, 241, 0.2);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        color: white;
+      }
+      .bot {
+        align-self: flex-start;
+        background: var(--surface);
+        border: 1px solid var(--border);
+      }
 
+      #inputContainer {
+        position: fixed;
+        bottom: 28px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 800px;
+        display: flex;
+        gap: 12px;
+        z-index: 1000;
+        padding: 0 24px;
+      }
+      #userInput {
+        flex: 1;
+        padding: 16px 20px;
+        background: rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        color: white;
+        font-size: 15px;
+        outline: none;
+        transition: all 0.2s;
+      }
+      #userInput:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+      }
+      button.sendBtn {
+        width: 52px;
+        height: 52px;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        font-size: 20px;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      }
+      button.sendBtn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+      }
 
+      #greeting {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 3rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #a78bfa, #60a5fa);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        text-align: center;
+        opacity: 0.9;
+        pointer-events: none;
+        user-select: none;
+      }
 
-  </style>
-</head>
-<body>
-  <div id="sidebar">
+      /* Free Upgrade button — sacred, untouched */
+      @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
+      .upgrade-btn {
+        position: fixed;
+        top: 20px;
+        left: 61%;
+        transform: translateX(-50%);
+        font-family: 'Roboto', sans-serif;
+        background: rgba(0, 153, 255, 0.4);
+        color: white;
+        padding: 10px 10px;
+        border: none;
+        border-radius: 100px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        transition: transform 0.15s ease, opacity 0.15s ease;
+      }
+      .upgrade-btn:active {
+        transform: translate(-50%, 0);
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+  <body>
 
-<button class="upgrade-btn">✨ Upgrade for free</button>
+    <button class="upgrade-btn" onclick="window.open('https://www.mini-crafts.com', '_blank')">
+      Free Upgrade
+    </button>
 
+    <div id="sidebar">
+      <h2>Chats</h2>
+      <button id="newChatBtn" onclick="newChat()">New Chat</button>
+      <div id="chatList"></div>
+    </div>
 
-    <h2>Chats</h2>
-    <button id="newChatBtn" onclick="newChat()">New Chat</button>
-    <div id="chatList"></div>
-  </div>
-  <div id="main">
-    <div class="title-container">
-      <div class="dropdown" id="modelDropdown">
-        <button class="dropdown-btn" onclick="toggleDropdown(event)">
-          Apollo* <span class="dropdown-arrow">˅</span>
-        </button>
-        <div class="dropdown-content">
-          <div class="model-title">Model: Apollo 2.0</div>
-          <div class="model-desc">Creative Robotics Assistant For Tasks</div>
+    <div id="main">
+      <div class="title-container">
+        <div class="dropdown" id="modelDropdown">
+          <button class="dropdown-btn" onclick="toggleDropdown(event)">
+            Apollo* <span class="dropdown-arrow">V</span>
+          </button>
+          <div class="dropdown-content">
+            <div class="model-title">Model: Apollo 2.0</div>
+            <div class="model-desc">Runs on Blade 2.0, Apollo</div>
+          </div>
         </div>
       </div>
+
+      <h1 id="greeting">Hey there.</h1>
+
+      <div id="chatbox"></div>
+      <audio id="audioPlayer"></audio>
+
+      <div id="inputContainer">
+        <input type="text" id="userInput" placeholder="Message Apollo…" autocomplete="off">
+        <button class="sendBtn" onclick="sendMessage()">Send</button>
+      </div>
     </div>
-    <h1 id="greeting"></h1>
-    <div id="chatbox"></div>
-    <audio id="audioPlayer"></audio>
-    <div id="inputContainer">
-      <input type="text" id="userInput" placeholder="Type a message..." autocomplete="off" />
-      <button class="sendBtn" onclick="sendMessage()">↑</button>
-    </div>
-  </div>
   <script src="script.js"></script>
 </body>
 </html>
