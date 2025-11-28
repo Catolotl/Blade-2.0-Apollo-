@@ -287,6 +287,15 @@
   transform: translateY(-2px);
   box-shadow: 0 8px 30px rgba(139, 92, 246, 0.5);
 }
+
+
+
+      .upgrade-btn,
+#upgradeNowBtn {
+  position: relative;   /* or fixed — already is */
+  z-index: 999999 !important;   /* ← this wins over everything */
+  pointer-events: auto !important;
+}
     </style>
   </head>
   <body>
