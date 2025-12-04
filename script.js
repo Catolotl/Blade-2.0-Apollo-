@@ -23,9 +23,9 @@
     const greetings = [
       "Hello, how can I help?",
       "Are you my friend?",
+        "The Prototype will safe us all",
       "I want a friend :(",
       "Wanna yap?",
-      "Poppy Playtime Colab? 🤨",
       "Do you see my friend?",
       "Yo- i'm just kiddin', how can I help?",
       "Prey to the Prototype",
