@@ -179,11 +179,11 @@
         </div>
         <div class="settings" id="settings">
             <div class="setting-group">
-                <label>Model (DuckDuckGo AI - No login ever)</label>
+                <label>Model (DuckDuckGo AI - Anonymous & Free)</label>
                 <select id="model">
                     <option value="gpt-4o-mini">GPT-4o Mini (fast & smart - recommended)</option>
-                    <option value="claude-3-haiku">Claude 3 Haiku (great reasoning)</option>
-                    <option value="meta-llama/Meta-Llama-3.1-70B-Instruct">Llama 3.1 70B (powerful open model)</option>
+                    <option value="claude-3-haiku">Claude 3 Haiku (excellent reasoning)</option>
+                    <option value="meta-llama/Meta-Llama-3.1-70B-Instruct">Llama 3.1 70B (powerful)</option>
                     <option value="mixtral-8x7b-instruct">Mixtral 8x7B (versatile)</option>
                 </select>
             </div>
@@ -191,7 +191,7 @@
         <div class="messages" id="messages">
             <div class="welcome">
                 <h2>Apollo AI - Truly Free</h2>
-                <p>No keys, no popups, no logins — works on any network!</p>
+                <p>No keys, no popups, no logins — instant chatting!</p>
                 <p>Powered anonymously by DuckDuckGo AI Chat.</p>
             </div>
         </div>
@@ -200,17 +200,17 @@
                 <input type="text" id="input" placeholder="Type your message..." onkeypress="if(event.key==='Enter') sendMessage()">
                 <button class="send-btn" onclick="sendMessage()" id="sendBtn">Send</button>
             </div>
-            <div class="info">Unlimited daily chats • Fully client-side • No tracking</div>
+            <div class="info">Generous daily limits • Works everywhere • Client-side only</div>
         </div>
     </div>
 
     <script>
-        // Free public proxy to DuckDuckGo AI (no auth/popups)
-        const API_BASE = 'https://keyless-gpt-wrapper.onrender.com/v1';
+        // Updated reliable free proxy (community-hosted DuckDuckGo wrapper)
+        const API_BASE = 'https://ddg.chat/v1';
 
         let messages = [{
             role: 'assistant',
-            content: '🚀 Welcome to Apollo AI - Truly Free Edition!\n\nNo signups, no popups, no blocks. Chat freely with top models via DuckDuckGo.\n\nJust type a message to begin!'
+            content: '🚀 Welcome to Apollo AI - Truly Free Edition!\n\nFully anonymous access to top models via DuckDuckGo.\n\nNo restrictions, no signups — just start chatting!'
         }];
         let loading = false;
 
@@ -221,7 +221,7 @@
         function clearChat() {
             messages = [{
                 role: 'assistant',
-                content: 'Chat cleared! Send a new message to start.'
+                content: 'Chat cleared! Type a message to begin again.'
             }];
             renderMessages();
         }
@@ -286,14 +286,18 @@
                     })
                 });
 
-                if (!response.ok) throw new Error('API error');
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(`API error: ${response.status} - ${errText}`);
+                }
 
                 const data = await response.json();
-                const assistantText = data.choices[0]?.message?.content || 'No response';
+                const assistantText = data.choices[0]?.message?.content?.trim() || 'No response received.';
 
                 messages.push({ role: 'assistant', content: assistantText });
             } catch (error) {
-                messages.push({ role: 'assistant', content: `⚠️ Error: ${error.message || 'Try again in a moment'}` });
+                console.error(error);
+                messages.push({ role: 'assistant', content: `⚠️ Error: ${error.message || 'Connection failed. Try again in a few seconds.'}` });
             } finally {
                 loading = false;
                 document.getElementById('sendBtn').disabled = false;
