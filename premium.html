@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apollo AI - Free Edition</title>
+    <title>Apollo AI - Truly Free Edition</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -57,9 +57,7 @@
             color: #d1d5db;
             margin-bottom: 0.5rem;
         }
-        .setting-group select,
-        .setting-group textarea,
-        .setting-group input[type="range"] {
+        .setting-group select {
             width: 100%;
             padding: 0.5rem;
             background: #111827;
@@ -67,7 +65,6 @@
             border-radius: 0.25rem;
             color: #f3f4f6;
         }
-        .setting-group textarea { resize: vertical; font-family: inherit; }
         .messages {
             flex: 1;
             overflow-y: auto;
@@ -173,7 +170,7 @@
         <div class="header">
             <div>
                 <span class="title">Apollo AI</span>
-                <span class="beta-badge">FREE</span>
+                <span class="beta-badge">TRULY FREE</span>
             </div>
             <div>
                 <button class="btn" onclick="toggleSettings()">Settings</button>
@@ -182,50 +179,40 @@
         </div>
         <div class="settings" id="settings">
             <div class="setting-group">
-                <label>Model</label>
+                <label>Model (DuckDuckGo AI - No login ever)</label>
                 <select id="model">
-                    <option value="gpt-5-nano">GPT-5 Nano (fast & free)</option>
-                    <option value="gpt-5">GPT-5</option>
-                    <option value="claude-sonnet-4">Claude Sonnet 4</option>
-                    <option value="claude-opus-4">Claude Opus 4</option>
-                    <option value="x-ai/grok-4.1-fast">Grok 4.1 Fast</option>
-                    <option value="gemini-2.0-pro">Gemini 2.0 Pro</option>
+                    <option value="gpt-4o-mini">GPT-4o Mini (fast & smart - recommended)</option>
+                    <option value="claude-3-haiku">Claude 3 Haiku (great reasoning)</option>
+                    <option value="meta-llama/Meta-Llama-3.1-70B-Instruct">Llama 3.1 70B (powerful open model)</option>
+                    <option value="mixtral-8x7b-instruct">Mixtral 8x7B (versatile)</option>
                 </select>
             </div>
-            <div class="setting-group">
-                <label>System Prompt (optional)</label>
-                <textarea id="systemPrompt" rows="3" placeholder="You are a helpful assistant..."></textarea>
-            </div>
-            <div class="setting-group">
-                <label>Temperature: <span id="tempValue">0.7</span></label>
-                <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.7" oninput="document.getElementById('tempValue').textContent = this.value">
+        </div>
+        <div class="messages" id="messages">
+            <div class="welcome">
+                <h2>Apollo AI - Truly Free</h2>
+                <p>No keys, no popups, no logins — works on any network!</p>
+                <p>Powered anonymously by DuckDuckGo AI Chat.</p>
             </div>
         </div>
-        <div class="messages" id="messages"></div>
         <div class="input-area">
             <div class="input-container">
                 <input type="text" id="input" placeholder="Type your message..." onkeypress="if(event.key==='Enter') sendMessage()">
                 <button class="send-btn" onclick="sendMessage()" id="sendBtn">Send</button>
             </div>
-            <div class="info">Powered by Puter.js • Truly keyless • Generous free usage</div>
+            <div class="info">Unlimited daily chats • Fully client-side • No tracking</div>
         </div>
     </div>
 
-    <script src="https://js.puter.com/v2/"></script>
     <script>
-        let messages = [];
+        // Free public proxy to DuckDuckGo AI (no auth/popups)
+        const API_BASE = 'https://keyless-gpt-wrapper.onrender.com/v1';
+
+        let messages = [{
+            role: 'assistant',
+            content: '🚀 Welcome to Apollo AI - Truly Free Edition!\n\nNo signups, no popups, no blocks. Chat freely with top models via DuckDuckGo.\n\nJust type a message to begin!'
+        }];
         let loading = false;
-
-        // Initial welcome
-        function initChat() {
-            messages = [{
-                role: 'assistant',
-                content: '🚀 Welcome to Apollo AI Free Edition!\n\nPowered by Puter.js – completely keyless access to top models like GPT-5, Claude 4, Grok 4, Gemini, and more.\n\nJust type a message to start chatting!'
-            }];
-            renderMessages();
-        }
-
-        window.addEventListener('load', initChat);
 
         function toggleSettings() {
             document.getElementById('settings').classList.toggle('show');
@@ -234,7 +221,7 @@
         function clearChat() {
             messages = [{
                 role: 'assistant',
-                content: 'Chat cleared! Send a new message to begin.'
+                content: 'Chat cleared! Send a new message to start.'
             }];
             renderMessages();
         }
@@ -258,11 +245,7 @@
             if (loading) {
                 const div = document.createElement('div');
                 div.className = 'message assistant';
-                div.innerHTML = `
-                    <div class="message-content">
-                        <span class="loader"></span> Thinking...
-                    </div>
-                `;
+                div.innerHTML = `<div class="message-content"><span class="loader"></span> Thinking...</div>`;
                 container.appendChild(div);
             }
 
@@ -273,7 +256,7 @@
             try {
                 await navigator.clipboard.writeText(messages[idx].content);
             } catch (err) {
-                console.error('Copy failed:', err);
+                console.error('Copy failed');
             }
         }
 
@@ -289,44 +272,37 @@
             renderMessages();
 
             loading = true;
-            const sendBtn = document.getElementById('sendBtn');
-            sendBtn.disabled = true;
+            document.getElementById('sendBtn').disabled = true;
 
             try {
                 const model = document.getElementById('model').value;
-                const systemPrompt = document.getElementById('systemPrompt').value.trim();
-                const temperature = parseFloat(document.getElementById('temperature').value);
 
-                // Build history with optional system prompt at start
-                let history = [...messages];
-                if (systemPrompt) {
-                    history.unshift({ role: 'system', content: systemPrompt });
-                }
-
-                const response = await puter.ai.chat(history, {
-                    model: model,
-                    temperature: temperature
+                const response = await fetch(`${API_BASE}/chat/completions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: messages
+                    })
                 });
 
-                // Correctly extract text from Puter.js response format
-                const assistantText = response?.message?.content || response?.text || response || 'No response received.';
+                if (!response.ok) throw new Error('API error');
 
-                messages.push({
-                    role: 'assistant',
-                    content: assistantText
-                });
+                const data = await response.json();
+                const assistantText = data.choices[0]?.message?.content || 'No response';
+
+                messages.push({ role: 'assistant', content: assistantText });
             } catch (error) {
-                console.error(error);
-                messages.push({
-                    role: 'assistant',
-                    content: `⚠️ Error: ${error.message || 'Failed to connect. Puter.js may require a free account for continued use (it will prompt you automatically).'}`
-                });
+                messages.push({ role: 'assistant', content: `⚠️ Error: ${error.message || 'Try again in a moment'}` });
             } finally {
                 loading = false;
-                sendBtn.disabled = false;
+                document.getElementById('sendBtn').disabled = false;
                 renderMessages();
             }
         }
+
+        // Initial render
+        renderMessages();
     </script>
 </body>
 </html>
