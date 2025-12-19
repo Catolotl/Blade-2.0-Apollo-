@@ -184,9 +184,9 @@
             <div class="setting-group">
                 <label>Model</label>
                 <select id="model">
-                    <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
-                    <option value="claude-opus-4-20250514">Claude Opus 4</option>
-                    <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
+                    <option value="claude-sonnet-4-20250514">Blade 2.0</option>
+                    <option value="claude-opus-4-20250514">Blade 1.0</option>
+                    <option value="claude-3-5-sonnet-20241022">Blade Beta</option>
                 </select>
             </div>
             <div class="setting-group">
@@ -202,7 +202,7 @@
         <div class="messages" id="messages">
             <div class="welcome">
                 <h2>Apollo AI</h2>
-                <p>No filters. No safety rails. Full Claude API access.</p>
+                <p>Full Blade 2.0 - Blade Beta access.</p>
                 <p style="font-size: 0.875rem; margin-top: 0.5rem;">Customize system prompt and settings above.</p>
             </div>
         </div>
@@ -212,14 +212,14 @@
                 <input type="text" id="input" placeholder="Type your message..." onkeypress="if(event.key==='Enter') sendMessage()">
                 <button class="send-btn" onclick="sendMessage()" id="sendBtn">Send</button>
             </div>
-            <div class="info">Direct Claude API access • Wait 2-3 seconds between messages</div>
+            <div class="info">Blade Premeum • Wait 2-3 seconds between messages</div>
         </div>
     </div>
 
     <script>
         let messages = [{
             role: 'assistant',
-            content: '🚀 BETA - Welcome to Apollo AI! This is an experimental interface with full Claude API access. Features may be unstable.'
+            content: '🚀 BETA - Welcome to Apollo AI! This is an experimental interface with full Blade 2.0 - Blade Beta access. Features may be unstable.'
         }];
         let loading = false;
         let requestInProgress = false;
@@ -232,7 +232,7 @@
         function clearChat() {
             messages = [{
                 role: 'assistant',
-                content: '🚀 BETA - Welcome to Apollo AI! This is an experimental interface with full Claude API access. Features may be unstable.'
+                content: '🚀 BETA - Welcome to Apollo AI! This is an experimental interface with full Blade 2.0 - Blade Beta access. Features may be unstable.'
             }];
             renderMessages();
         }
@@ -245,7 +245,7 @@
                 container.innerHTML = `
                     <div class="welcome">
                         <h2>Apollo AI</h2>
-                        <p>No filters. No safety rails. Full Claude API access.</p>
+                        <p>Full Blade 2.0 - Blade Beta API access.</p>
                         <p style="font-size: 0.875rem; margin-top: 0.5rem;">Customize system prompt and settings above.</p>
                     </div>
                 `;
