@@ -285,10 +285,10 @@
 <script>
   let knowledge = [];
   let personality = "";
-  let countdownInterval = null; // For live countdown
+  let countdownInterval = null;
 
   // === PREMIUM / TIME LIMIT SYSTEM ===
-  const FREE_LIMIT_SECONDS = 10;
+  const FREE_LIMIT_SECONDS = 1800; // 30 minutes
   const RESET_INTERVAL_HOURS = 3;
   const MS_PER_HOUR = 3600000;
 
@@ -299,7 +299,6 @@
   function getTimeData() {
     const data = localStorage.getItem('apollo_time');
     if (!data) {
-      // No usage yet — timer hasn't started
       return { remaining: FREE_LIMIT_SECONDS, startTime: null };
     }
     return JSON.parse(data);
@@ -311,8 +310,7 @@
   }
 
   function startCountdown() {
-    if (countdownInterval) return; // Already running
-
+    if (countdownInterval) return;
     countdownInterval = setInterval(() => {
       if (isPremium()) {
         clearInterval(countdownInterval);
@@ -320,33 +318,27 @@
         updateTimeNotice();
         return;
       }
-
       const data = getTimeData();
       if (data.startTime === null) return;
-
       const elapsed = (Date.now() - data.startTime) / 1000;
       const remaining = Math.max(0, FREE_LIMIT_SECONDS - elapsed);
-
       saveTimeData(remaining, data.startTime);
       updateTimeNotice();
-
       if (remaining <= 0) {
         clearInterval(countdownInterval);
         countdownInterval = null;
         updateTimeNotice();
       }
-    }, 100); // Update every 0.1s for smooth countdown
+    }, 100);
   }
 
   function resetIfNeeded() {
     if (isPremium()) return;
-
     const data = getTimeData();
-    if (data.startTime === null) return; // Hasn't started yet
-
+    if (data.startTime === null) return;
     const elapsedHours = (Date.now() - data.startTime) / MS_PER_HOUR;
     if (elapsedHours >= RESET_INTERVAL_HOURS) {
-      localStorage.removeItem('apollo_time'); // Full reset
+      localStorage.removeItem('apollo_time');
       updateTimeNotice();
     }
   }
@@ -361,7 +353,7 @@
 
     const data = getTimeData();
     if (data.startTime === null) {
-      notice.textContent = "Free: 10 seconds available (starts on first AI query)";
+      notice.textContent = "Free: 30 minutes available (starts on first AI query)";
       notice.style.color = "#888";
       return;
     }
@@ -373,15 +365,17 @@
       notice.textContent = "Free time expired. Premium required for more.";
       notice.style.color = "#ff6b6b";
     } else {
-      notice.textContent = `Free usage: ${remaining.toFixed(1)}s remaining (resets every 3 hours)`;
-      notice.style.color = remaining < 3 ? "#ffaa00" : "#888";
+      const mins = Math.floor(remaining / 60);
+      const secs = Math.round(remaining % 60);
+      notice.textContent = `Free usage: ${mins}m ${secs}s remaining (resets every 3 hours)`;
+      notice.style.color = remaining < 180 ? "#ffaa00" : "#888"; // Orange when <3 minutes
     }
   }
 
-  // Initialize on load
+  // === INITIALIZATION (runs only once on page load) ===
   resetIfNeeded();
   updateTimeNotice();
-  setInterval(updateTimeNotice, 5000); // Fallback refresh
+  setInterval(updateTimeNotice, 5000); // Fallback refresh every 5 seconds
 
   document.getElementById('personalityPrompt').addEventListener('input', function() {
     personality = this.value.trim();
@@ -483,7 +477,6 @@
   async function getAIResponse(prompt) {
     const fullPrompt = getSystemPrompt() + prompt;
 
-    // Start the countdown on first real AI call
     if (!isPremium()) {
       const data = getTimeData();
       if (data.startTime === null) {
@@ -497,12 +490,10 @@
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
-
       const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}`, {
         signal: controller.signal
       });
       clearTimeout(timeoutId);
-
       if (res.ok) {
         const text = await res.text();
         return text.trim() || "…";
@@ -518,14 +509,13 @@
     const msg = input.value.trim();
     if (!msg) return;
 
-    // Check if time is already up
     if (!isPremium()) {
       resetIfNeeded();
       const data = getTimeData();
       if (data.startTime !== null) {
         const elapsed = (Date.now() - data.startTime) / 1000;
         if (elapsed >= FREE_LIMIT_SECONDS) {
-          addMessage('bot', "⏰ Your 10 seconds of free AI time have expired.\n\nPremium access required for more. Contact the developer!");
+          addMessage('bot', "⏰ Your 30 minutes of free AI time have expired.\n\nPremium access required for more. Contact the developer!");
           input.value = '';
           return;
         }
