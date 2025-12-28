@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Indy Sunrise AI</title>
-  <style>
+<style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -61,7 +61,7 @@
     .title {
       font-size: 26px;
       font-weight: 600;
-      background: linear-gradient(135deg, #a78bfa, #93c5fd, #e9d5ff, #fcd6c0, #fdb9a1)
+      background: linear-gradient(135deg, #a0d8ef, #e0b0ff, #ffb4b4, #ffd7a9);
       background-size: 200% 100%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -104,7 +104,7 @@
       left: -100%;
       width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(74, 144, 226, 0.15), rgba(255, 165, 0, 0.15), transparent);
+      background: linear-gradient(90deg, transparent, rgba(160, 216, 239, 0.15), rgba(255, 180, 180, 0.15), transparent);
       transition: left 0.5s ease;
     }
     .sidebar-btn:hover::before {
@@ -113,7 +113,7 @@
     .sidebar-btn:hover {
       background: #202020;
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(135, 206, 235, 0.2);
+      box-shadow: 0 4px 12px rgba(160, 216, 239, 0.2);
     }
     .sidebar-btn.danger:hover {
       background: #2a1414;
@@ -144,8 +144,8 @@
       transition: border-color 0.2s;
     }
     #personalityPrompt:focus {
-      border-color: #87ceeb;
-      box-shadow: 0 0 0 1px rgba(135, 206, 235, 0.3);
+      border-color: #a0d8ef;
+      box-shadow: 0 0 0 1px rgba(160, 216, 239, 0.3);
     }
     .main {
       flex: 1;
@@ -179,7 +179,6 @@
       word-wrap: break-word;
       max-width: 100%;
     }
-    /* User messages: solid dark bubble */
     .user .bubble {
       background: #161616;
       color: #e8e8e8;
@@ -187,7 +186,6 @@
       border-bottom-right-radius: 6px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.4);
     }
-    /* Bot messages: clean transparent text */
     .bot .bubble {
       background: transparent;
       color: #d4d4d4;
@@ -239,30 +237,27 @@
       transition: all 0.3s ease;
     }
     #userInput:focus {
-      border-color: #87ceeb;
-      box-shadow: 0 0 0 3px rgba(135, 206, 235, 0.2), 0 0 20px rgba(255, 165, 0, 0.15);
+      border-color: #a0d8ef;
+      box-shadow: 0 0 0 3px rgba(160, 216, 239, 0.2);
       transform: translateY(-1px);
     }
+    /* Send button: gray default, pastel gradient on hover only */
     .send-btn {
       padding: 16px 28px;
-      background: linear-gradient(135deg, #4a90e2, #87ceeb, #ffa500, #ff7f50);
-      background-size: 200% 200%;
+      background: #2a2a2a; /* lighter gray */
       color: white;
       border: none;
       border-radius: 30px;
       cursor: pointer;
       font-weight: 600;
-      transition: all 0.3s ease;
-      animation: gradientFlow 3s ease infinite;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    }
-    @keyframes gradientFlow {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
     }
     .send-btn:hover {
+      background: linear-gradient(135deg, #a0d8ef, #e0b0ff, #ffb4b4, #ffd7a9);
       transform: translateY(-2px) scale(1.02);
-      box-shadow: 0 8px 20px rgba(135, 206, 235, 0.4), 0 4px 12px rgba(255, 165, 0, 0.3);
+      box-shadow: 0 8px 20px rgba(160, 216, 239, 0.4), 0 4px 12px rgba(255, 212, 169, 0.3);
     }
     .send-btn:active {
       transform: translateY(0) scale(0.98);
@@ -279,7 +274,7 @@
     .typing-indicator span {
       width: 8px;
       height: 8px;
-      background: linear-gradient(135deg, #87ceeb, #ffa500);
+      background: linear-gradient(135deg, #a0d8ef, #e0b0ff, #ffb4b4);
       border-radius: 50%;
       animation: typingBounce 1.4s infinite ease-in-out;
     }
@@ -370,25 +365,25 @@
     }
     .teach-input-group input:focus,
     .teach-input-group textarea:focus {
-      border-color: #87ceeb;
+      border-color: #a0d8ef;
     }
+    /* Teach submit button: always pastel gradient */
     .teach-submit-btn {
       width: 100%;
       padding: 14px;
-      background: linear-gradient(135deg, #4a90e2, #87ceeb, #ffa500, #ff7f50);
-      color: white;
+      background: linear-gradient(135deg, #a0d8ef, #e0b0ff, #ffb4b4, #ffd7a9);
+      color: #0a0a0a; /* dark text for contrast on light pastels */
       border: none;
       border-radius: 12px;
       cursor: pointer;
       font-weight: 600;
       font-size: 16px;
-      transition: all 0.2s;
+      transition: all 0.3s ease;
       margin-top: 8px;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
     }
     .teach-submit-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(135, 206, 235, 0.4), 0 4px 12px rgba(255, 165, 0, 0.3);
+      box-shadow: 0 8px 20px rgba(160, 216, 239, 0.4), 0 4px 12px rgba(255, 212, 169, 0.3);
     }
   </style>
 </head>
