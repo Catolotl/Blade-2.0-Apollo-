@@ -237,6 +237,105 @@
       from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    .teach-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(8px);
+    }
+    .teach-modal.active {
+      display: flex;
+    }
+    .teach-content {
+      background: #161616;
+      border: 1px solid #282828;
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 500px;
+      width: 90%;
+      position: relative;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+    .close-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: #888;
+      font-size: 24px;
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+    .teach-content h2 {
+      margin-bottom: 24px;
+      font-size: 24px;
+      color: #fff;
+    }
+    .teach-input-group {
+      margin-bottom: 20px;
+    }
+    .teach-input-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #b0b0b0;
+    }
+    .teach-input-group input,
+    .teach-input-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      background: #0f0f0f;
+      border: 1px solid #282828;
+      border-radius: 12px;
+      color: white;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    .teach-input-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .teach-input-group input:focus,
+    .teach-input-group textarea:focus {
+      border-color: #4a9eff;
+    }
+    .teach-submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #6e8efb, #a777fb);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+    .teach-submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(110, 142, 251, 0.4);
+    }
   </style>
 </head>
 <body>
@@ -248,8 +347,8 @@
       </div>
     </div>
     <div class="sidebar-content">
-      <button class="sidebar-btn" onclick="newChat()">New Chat (comming soon)</button>
-      <button class="sidebar-btn" onclick="teachAI()">Teach Me (comming soon)</button>
+      <button class="sidebar-btn" onclick="newChat()">New Chat</button>
+      <button class="sidebar-btn" onclick="teachAI()">Teach Me</button>
       <button class="sidebar-btn danger" onclick="deleteChat()">Delete Everything</button>
 
       <div class="personality-section">
@@ -278,6 +377,23 @@
     </div>
   </div>
 
+  <!-- Teach Modal -->
+  <div class="teach-modal" id="teachModal">
+    <div class="teach-content">
+      <button class="close-btn" onclick="closeTeachModal()">×</button>
+      <h2>Teach Indy</h2>
+      <div class="teach-input-group">
+        <label>Trigger Phrase</label>
+        <input type="text" id="triggerInput" placeholder="e.g. What's your favorite color?">
+      </div>
+      <div class="teach-input-group">
+        <label>Response</label>
+        <textarea id="responseInput" placeholder="e.g. My favorite color is blue!"></textarea>
+      </div>
+      <button class="teach-submit-btn" onclick="submitTeaching()">Teach Indy</button>
+    </div>
+  </div>
+
   <script>
     let knowledge = [];
     let personality = "";
@@ -287,7 +403,7 @@
     });
 
     function getSystemPrompt() {
-      const hiddenPrompt = "You are Indy and are running on Sunrise 1.0., the latest and greatest AI model made by J V S T.";
+      const hiddenPrompt = "You are Indy and are running on Sunrise 1.0. ";
       const personalityPrompt = personality ? `You must roleplay exactly as this personality in every response: ${personality}\n\n` : "";
       return hiddenPrompt + personalityPrompt;
     }
@@ -309,10 +425,24 @@
     }
 
     function teachAI() {
-      const q = prompt("Trigger phrase:");
-      if (!q) return;
-      const a = prompt("Response:");
-      if (!a) return;
+      document.getElementById('teachModal').classList.add('active');
+      document.getElementById('triggerInput').value = '';
+      document.getElementById('responseInput').value = '';
+      document.getElementById('triggerInput').focus();
+    }
+
+    function closeTeachModal() {
+      document.getElementById('teachModal').classList.remove('active');
+    }
+
+    function submitTeaching() {
+      const q = document.getElementById('triggerInput').value.trim();
+      const a = document.getElementById('responseInput').value.trim();
+      
+      if (!q || !a) {
+        alert('Please fill in both fields!');
+        return;
+      }
 
       let found = false;
       for (const entry of knowledge) {
@@ -323,7 +453,9 @@
         }
       }
       if (!found) knowledge.push({ questions: [q], answer: a });
-      addMessage('bot', 'Learned.');
+      
+      addMessage('bot', 'Learned! I\'ll remember that.');
+      closeTeachModal();
     }
 
     function cosineSimilarity(a, b) {
