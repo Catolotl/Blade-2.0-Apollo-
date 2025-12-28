@@ -90,7 +90,7 @@
       transition: all 0.25s ease;
     }
     .sidebar-btn:hover {
-      background: ##8B8000;
+      background: #8B8000;
       color: #fff;
       transform: translateY(-1px);
     }
@@ -288,6 +288,12 @@
   let personality = "";
   let countdownInterval = null;
 
+    function getSystemPrompt() {
+      const hiddenPrompt = "You are Indy and are running on Sunrise 1.0., the latest and greatest AI model made by J V S T.";
+      const personalityPrompt = personality ? `You must roleplay exactly as this personality in every response: ${personality}\n\n` : "";
+      return hiddenPrompt + personalityPrompt;
+    }
+  
   // === PREMIUM / TIME LIMIT SYSTEM ===
   const FREE_LIMIT_SECONDS = 1800; // 30 minutes
   const RESET_INTERVAL_HOURS = 3;
@@ -381,10 +387,6 @@
   document.getElementById('personalityPrompt').addEventListener('input', function() {
     personality = this.value.trim();
   });
-
-  function getSystemPrompt() {
-    return personality ? `You must roleplay exactly as this personality in every response: ${personality}\n\n` : "";
-  }
 
   function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('collapsed');
