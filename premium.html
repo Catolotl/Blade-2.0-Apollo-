@@ -13,15 +13,20 @@
       min-height: 100vh;
       display: flex;
     }
+    /* Sidebar now fixed and scrolls independently */
     .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 280px;
+      height: 100vh;
       background: #0f0f0f;
       display: flex;
       flex-direction: column;
       transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
       z-index: 10;
       border-right: 1px solid #1a1a1a;
+      overflow-y: auto; /* Allows sidebar content to scroll if needed */
     }
     .sidebar.collapsed {
       width: 64px;
@@ -32,6 +37,7 @@
       align-items: center;
       gap: 16px;
       min-height: 68px;
+      flex-shrink: 0; /* Prevents header from shrinking */
     }
     .menu-btn {
       background: none;
@@ -147,11 +153,18 @@
       border-color: #a0d8ef;
       box-shadow: 0 0 0 1px rgba(160, 216, 239, 0.3);
     }
+    /* Main area now has left margin to avoid overlapping sidebar */
     .main {
       flex: 1;
+      margin-left: 280px; /* Matches sidebar width */
       display: flex;
       flex-direction: column;
       background: #0a0a0a;
+      min-height: 100vh;
+      transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .sidebar.collapsed ~ .main {
+      margin-left: 64px; /* Matches collapsed sidebar width */
     }
     .chat-container {
       flex: 1;
@@ -161,6 +174,7 @@
       flex-direction: column;
       gap: 24px;
     }
+    /* Rest of your styles unchanged below... */
     .message {
       max-width: 80%;
       animation: fadeIn 0.5s ease-out;
@@ -241,10 +255,9 @@
       box-shadow: 0 0 0 3px rgba(160, 216, 239, 0.2);
       transform: translateY(-1px);
     }
-    /* Send button: gray default, pastel gradient on hover only */
     .send-btn {
       padding: 16px 28px;
-      background: #2a2a2a; /* lighter gray */
+      background: #2a2a2a;
       color: white;
       border: none;
       border-radius: 30px;
@@ -367,12 +380,11 @@
     .teach-input-group textarea:focus {
       border-color: #a0d8ef;
     }
-    /* Teach submit button: always pastel gradient */
     .teach-submit-btn {
       width: 100%;
       padding: 14px;
       background: linear-gradient(135deg, #a0d8ef, #e0b0ff, #ffb4b4, #ffd7a9);
-      color: #0a0a0a; /* dark text for contrast on light pastels */
+      color: #0a0a0a;
       border: none;
       border-radius: 12px;
       cursor: pointer;
@@ -399,14 +411,12 @@
       <button class="sidebar-btn" onclick="newChat()">New Chat</button>
       <button class="sidebar-btn" onclick="teachAI()">Teach Me</button>
       <button class="sidebar-btn danger" onclick="deleteChat()">Delete Everything</button>
-
       <div class="personality-section">
         <label>Personality Prompt (optional)</label>
         <textarea id="personalityPrompt" placeholder="e.g. You are a friendly AI who loves to talk!"></textarea>
       </div>
     </div>
   </div>
-
   <div class="main">
     <div class="chat-container" id="chatMessages">
       <div class="message bot">
@@ -417,7 +427,6 @@
         </div>
       </div>
     </div>
-
     <div class="input-area">
       <div class="input-wrapper">
         <input type="text" id="userInput" placeholder="Send a message..." onkeypress="if(event.key==='Enter') sendMessage()">
@@ -425,8 +434,7 @@
       </div>
     </div>
   </div>
-
-  <!-- Teach Modal -->
+  <!-- Teach Modal and Script remain exactly the same -->
   <div class="teach-modal" id="teachModal">
     <div class="teach-content">
       <button class="close-btn" onclick="closeTeachModal()">×</button>
@@ -442,57 +450,48 @@
       <button class="teach-submit-btn" onclick="submitTeaching()">Teach Indy</button>
     </div>
   </div>
-
   <script>
+    // Your entire JavaScript from before (unchanged)
     let knowledge = [];
     let personality = "";
-
     document.getElementById('personalityPrompt').addEventListener('input', function() {
       personality = this.value.trim();
     });
-
     function getSystemPrompt() {
       const hiddenPrompt = "You are Indy and are running on Sunrise 1.0., the latest and greatest AI model made by J V S T.";
       const personalityPrompt = personality ? `You must roleplay exactly as this personality in every response: ${personality}\n\n` : "";
       return hiddenPrompt + personalityPrompt;
     }
-
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('collapsed');
     }
-
     function newChat() {
       document.getElementById('chatMessages').innerHTML = '';
       addMessage('bot', 'New chat started. What\'s up?');
     }
-
     function deleteChat() {
       if (confirm("Delete all learned knowledge and clear history permanently?")) {
         knowledge = [];
         newChat();
       }
     }
-
     function teachAI() {
       document.getElementById('teachModal').classList.add('active');
       document.getElementById('triggerInput').value = '';
       document.getElementById('responseInput').value = '';
       document.getElementById('triggerInput').focus();
     }
-
     function closeTeachModal() {
       document.getElementById('teachModal').classList.remove('active');
     }
-
     function submitTeaching() {
       const q = document.getElementById('triggerInput').value.trim();
       const a = document.getElementById('responseInput').value.trim();
-      
+     
       if (!q || !a) {
         alert('Please fill in both fields!');
         return;
       }
-
       let found = false;
       for (const entry of knowledge) {
         if (entry.answer.toLowerCase() === a.toLowerCase()) {
@@ -502,11 +501,10 @@
         }
       }
       if (!found) knowledge.push({ questions: [q], answer: a });
-      
+     
       addMessage('bot', 'Learned! I\'ll remember that.');
       closeTeachModal();
     }
-
     function cosineSimilarity(a, b) {
       const tokensA = a.toLowerCase().match(/\w+/g) || [];
       const tokensB = b.toLowerCase().match(/\w+/g) || [];
@@ -521,7 +519,6 @@
       }
       return normA && normB ? dot / (Math.sqrt(normA) * Math.sqrt(normB)) : 0;
     }
-
     function findInKnowledge(msg) {
       let best = null, bestScore = 0;
       for (const entry of knowledge) {
@@ -535,7 +532,6 @@
       }
       return best;
     }
-
     function handleMath(msg) {
       const expr = msg.toLowerCase().replace(/^(what is|calculate|\s)+/g, '').trim()
         .replace(/×/g,'*').replace(/÷/g,'/').replace(/\^/g,'**');
@@ -544,7 +540,6 @@
       }
       return null;
     }
-
     async function getDefinition(word) {
       try {
         const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
@@ -553,7 +548,6 @@
       } catch {}
       return null;
     }
-
     async function getWikipedia(topic) {
       try {
         const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`);
@@ -562,7 +556,6 @@
       } catch {}
       return null;
     }
-
     async function getAIResponse(prompt) {
       const fullPrompt = getSystemPrompt() + prompt;
       try {
@@ -574,21 +567,17 @@
       } catch {}
       return "Thinking took too long.";
     }
-
     async function sendMessage() {
       const input = document.getElementById('userInput');
       const msg = input.value.trim();
       if (!msg) return;
-
       addMessage('user', msg);
       input.value = '';
-
       const learned = findInKnowledge(msg);
       if (learned) {
         addMessage('bot', learned);
         return;
       }
-
       if (/^define |^meaning of /.test(msg.toLowerCase())) {
         const word = msg.replace(/^define |^meaning of /i, '').trim().split(' ')[0];
         addTypingIndicator();
@@ -596,7 +585,6 @@
         replaceLastBot(def || "Not found.");
         return;
       }
-
       if (/^tell me about |^what is /.test(msg.toLowerCase())) {
         const topic = msg.replace(/^tell me about |^what is /i, '').trim();
         addTypingIndicator();
@@ -604,23 +592,19 @@
         replaceLastBot(wiki || "No result.");
         return;
       }
-
       const math = handleMath(msg);
       if (math !== null) {
         addMessage('bot', `**${msg} = ${math}**`);
         return;
       }
-
       addTypingIndicator();
       const response = await getAIResponse(msg);
       replaceLastBot(response);
     }
-
     function addMessage(sender, text) {
       const container = document.getElementById('chatMessages');
       const msgDiv = document.createElement('div');
       msgDiv.className = `message ${sender}`;
-
       if (sender === 'bot') {
         msgDiv.innerHTML = `
           <div class="bubble">
@@ -630,11 +614,9 @@
       } else {
         msgDiv.innerHTML = `<div class="bubble">${text.replace(/\n/g, '<br>')}</div>`;
       }
-
       container.appendChild(msgDiv);
       container.scrollTop = container.scrollHeight;
     }
-
     function addTypingIndicator() {
       const container = document.getElementById('chatMessages');
       const msgDiv = document.createElement('div');
@@ -650,7 +632,6 @@
       container.appendChild(msgDiv);
       container.scrollTop = container.scrollHeight;
     }
-
     function replaceLastBot(text) {
       const lastBotBubble = document.querySelector('.message.bot:last-child .bubble');
       if (lastBotBubble) {
@@ -659,7 +640,6 @@
       }
       document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
     }
-
     function copyText(btn) {
       const bubble = btn.parentElement;
       const text = bubble.textContent.replace('Copy', '').trim();
