@@ -1,312 +1,474 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apollo AI - Truly Free Edition</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #000;
-            color: #f3f4f6;
-            height: 100vh;
-            overflow: hidden;
-        }
-        .container { display: flex; flex-direction: column; height: 100vh; }
-        .header {
-            background: #030712;
-            border-bottom: 1px solid #1f2937;
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .title { font-size: 1.25rem; font-weight: bold; color: #60a5fa; }
-        .beta-badge {
-            font-size: 0.75rem;
-            background: #1e3a8a;
-            color: #93c5fd;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            margin-left: 0.75rem;
-        }
-        .btn {
-            padding: 0.5rem 1rem;
-            border-radius: 0.25rem;
-            border: 1px solid #1f2937;
-            background: #111827;
-            color: #f3f4f6;
-            cursor: pointer;
-            margin-left: 0.5rem;
-        }
-        .btn:hover { background: #1f2937; }
-        .btn-danger { background: #450a0a; border-color: #7f1d1d; }
-        .btn-danger:hover { background: #7f1d1d; }
-        .settings {
-            background: #030712;
-            border-bottom: 1px solid #1f2937;
-            padding: 1rem;
-            display: none;
-        }
-        .settings.show { display: block; }
-        .setting-group { margin-bottom: 1rem; }
-        .setting-group label {
-            display: block;
-            font-size: 0.875rem;
-            color: #d1d5db;
-            margin-bottom: 0.5rem;
-        }
-        .setting-group select {
-            width: 100%;
-            padding: 0.5rem;
-            background: #111827;
-            border: 1px solid #1f2937;
-            border-radius: 0.25rem;
-            color: #f3f4f6;
-        }
-        .messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1rem;
-        }
-        .message {
-            margin-bottom: 0.5rem;
-            display: flex;
-        }
-        .message.user { justify-content: flex-end; }
-        .message.assistant { justify-content: flex-start; }
-        .message-content {
-            max-width: 48rem;
-            padding: 0.4rem 0.6rem;
-            border-radius: 0.5rem;
-            white-space: pre-wrap;
-            position: relative;
-            line-height: 1.4;
-        }
-        .message.user .message-content {
-            background: #172554;
-            border: 1px solid #1e3a8a;
-            color: #dbeafe;
-        }
-        .message.assistant .message-content {
-            background: #030712;
-            border: 1px solid #1f2937;
-            color: #f3f4f6;
-        }
-        .message.error .message-content {
-            background: #450a0a;
-            border: 1px solid #7f1d1d;
-            color: #fecaca;
-        }
-        .copy-btn {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            padding: 0.375rem;
-            background: #111827;
-            border: 1px solid #374151;
-            border-radius: 0.25rem;
-            cursor: pointer;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        .message-content:hover .copy-btn { opacity: 1; }
-        .input-area {
-            border-top: 1px solid #1f2937;
-            padding: 1rem;
-            background: #030712;
-        }
-        .input-container { display: flex; gap: 0.5rem; }
-        .input-container input {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            background: #111827;
-            border: 1px solid #1f2937;
-            border-radius: 0.5rem;
-            color: #f3f4f6;
-            outline: none;
-        }
-        .input-container input:focus { border-color: #1e40af; }
-        .send-btn {
-            padding: 0.75rem 1.5rem;
-            background: #172554;
-            border: 1px solid #1e3a8a;
-            border-radius: 0.5rem;
-            color: #f3f4f6;
-            cursor: pointer;
-        }
-        .send-btn:hover { background: #1e3a8a; }
-        .send-btn:disabled {
-            background: #111827;
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-        .loader {
-            border: 2px solid #1f2937;
-            border-top: 2px solid #60a5fa;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            margin-right: 0.5rem;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .welcome {
-            text-align: center;
-            color: #6b7280;
-            margin-top: 2rem;
-        }
-        .welcome h2 { color: #60a5fa; font-size: 1.5rem; margin-bottom: 0.5rem; }
-        .info { font-size: 0.75rem; color: #4b5563; margin-top: 0.5rem; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apollo AI</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0a0a0a;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+    .sidebar {
+      width: 280px;
+      background: #0f0f0f;
+      display: flex;
+      flex-direction: column;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      z-index: 10;
+      border-right: 1px solid #1a1a1a;
+    }
+    .sidebar.collapsed {
+      width: 64px;
+    }
+    .header {
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-height: 68px;
+    }
+    .menu-btn {
+      background: none;
+      border: none;
+      color: #888;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 8px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .menu-btn:hover {
+      background: #1f1f1f;
+      color: white;
+    }
+    .title-wrapper {
+      overflow: hidden;
+      white-space: nowrap;
+      opacity: 1;
+      transition: opacity 0.35s ease 0.05s;
+    }
+    .sidebar.collapsed .title-wrapper {
+      opacity: 0;
+      width: 0;
+    }
+    .title {
+      font-size: 26px;
+      font-weight: 600;
+      background: linear-gradient(90deg, #ffffff, #bbbbbb);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .sidebar-content {
+      flex: 1;
+      padding: 0 20px 20px;
+      overflow-y: auto;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+    .sidebar.collapsed .sidebar-content {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .sidebar-btn {
+      width: 100%;
+      padding: 14px 16px;
+      background: #151515;
+      border: none;
+      border-radius: 10px;
+      color: #d0d0d0;
+      font-size: 15px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      text-align: left;
+      transition: all 0.25s ease;
+    }
+    .sidebar-btn:hover {
+      background: #202020;
+      transform: translateY(-1px);
+    }
+    .sidebar-btn.danger:hover {
+      background: #2a1414;
+    }
+    .personality-section {
+      margin-top: 28px;
+    }
+    .personality-section label {
+      font-size: 13.5px;
+      margin-bottom: 10px;
+      display: block;
+      opacity: 0.75;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+    #personalityPrompt {
+      width: 100%;
+      height: 110px;
+      padding: 12px;
+      background: #121212;
+      border: 1px solid #282828;
+      border-radius: 12px;
+      color: white;
+      font-size: 14px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #personalityPrompt:focus {
+      border-color: #4a9eff;
+      box-shadow: 0 0 0 1px rgba(74, 158, 255, 0.2);
+    }
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #0a0a0a;
+    }
+    .chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 40px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .message {
+      max-width: 80%;
+      animation: fadeIn 0.5s ease-out;
+    }
+    .message.user {
+      align-self: flex-end;
+    }
+    .message.bot {
+      align-self: flex-start;
+    }
+    .bubble {
+      padding: 16px 20px;
+      border-radius: 20px;
+      line-height: 1.65;
+      position: relative;
+      word-wrap: break-word;
+      max-width: 100%;
+    }
+    /* User messages: solid dark bubble */
+    .user .bubble {
+      background: #161616;
+      color: #e8e8e8;
+      border: 1px solid #242424;
+      border-bottom-right-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+    /* Bot messages: clean transparent text */
+    .bot .bubble {
+      background: transparent;
+      color: #d4d4d4;
+      border: none;
+      box-shadow: none;
+      padding-left: 0;
+      padding-right: 0;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255,255,255,0.07);
+      border: none;
+      color: #888;
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      opacity: 0;
+      transition: all 0.3s;
+      backdrop-filter: blur(6px);
+    }
+    .bot:hover .copy-btn {
+      opacity: 1;
+    }
+    .copy-btn:hover {
+      background: rgba(255,255,255,0.15);
+      color: white;
+    }
+    .input-area {
+      padding: 20px 28px;
+      background: #0a0a0a;
+    }
+    .input-wrapper {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+    #userInput {
+      flex: 1;
+      padding: 16px 20px;
+      background: #161616;
+      border: 1px solid #282828;
+      border-radius: 30px;
+      color: white;
+      font-size: 16px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    #userInput:focus {
+      border-color: #4a9eff;
+      box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.15);
+    }
+    .send-btn {
+      padding: 16px 28px;
+      background: linear-gradient(135deg, #6e8efb, #a777fb);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .send-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(110, 142, 251, 0.3);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div>
-                <span class="title">Apollo AI</span>
-                <span class="beta-badge">TRULY FREE</span>
-            </div>
-            <div>
-                <button class="btn" onclick="toggleSettings()">Settings</button>
-                <button class="btn btn-danger" onclick="clearChat()">Clear</button>
-            </div>
+  <div class="sidebar" id="sidebar">
+    <div class="header">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="title-wrapper">
+        <div class="title">A/</div>
+      </div>
+    </div>
+    <div class="sidebar-content">
+      <button class="sidebar-btn" onclick="newChat()">New Chat</button>
+      <button class="sidebar-btn" onclick="teachAI()">Teach Me</button>
+      <button class="sidebar-btn danger" onclick="deleteChat()">Delete Everything</button>
+
+      <div class="personality-section">
+        <label>Personality Prompt (optional)</label>
+        <textarea id="personalityPrompt" placeholder="e.g. You are John, a friendly AI who loves to talk!"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="chat-container" id="chatMessages">
+      <div class="message bot">
+        <div class="bubble">
+          Hello! I'm Apollo.<br><br>
+          Ask anything · Set a personality · Teach me new responses<br><br>
+          Ready when you are.
         </div>
-        <div class="settings" id="settings">
-            <div class="setting-group">
-                <label>Model (DuckDuckGo AI - Anonymous & Free)</label>
-                <select id="model">
-                    <option value="gpt-4o-mini">GPT-4o Mini (fast & smart - recommended)</option>
-                    <option value="claude-3-haiku">Claude 3 Haiku (excellent reasoning)</option>
-                    <option value="meta-llama/Meta-Llama-3.1-70B-Instruct">Llama 3.1 70B (powerful)</option>
-                    <option value="mixtral-8x7b-instruct">Mixtral 8x7B (versatile)</option>
-                </select>
-            </div>
-        </div>
-        <div class="messages" id="messages">
-            <div class="welcome">
-                <h2>Apollo AI - Truly Free</h2>
-                <p>No keys, no popups, no logins — instant chatting!</p>
-                <p>Powered anonymously by DuckDuckGo AI Chat.</p>
-            </div>
-        </div>
-        <div class="input-area">
-            <div class="input-container">
-                <input type="text" id="input" placeholder="Type your message..." onkeypress="if(event.key==='Enter') sendMessage()">
-                <button class="send-btn" onclick="sendMessage()" id="sendBtn">Send</button>
-            </div>
-            <div class="info">Generous daily limits • Works everywhere • Client-side only</div>
-        </div>
+      </div>
     </div>
 
-    <script>
-        // Updated reliable free proxy (community-hosted DuckDuckGo wrapper)
-        const API_BASE = 'https://ddg.chat/v1';
+    <div class="input-area">
+      <div class="input-wrapper">
+        <input type="text" id="userInput" placeholder="Send a message..." onkeypress="if(event.key==='Enter') sendMessage()">
+        <button class="send-btn" onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+  </div>
 
-        let messages = [{
-            role: 'assistant',
-            content: '🚀 Welcome to Apollo AI - Truly Free Edition!\n\nFully anonymous access to top models via DuckDuckGo.\n\nNo restrictions, no signups — just start chatting!'
-        }];
-        let loading = false;
+  <script>
+    let knowledge = [];
+    let personality = "";
 
-        function toggleSettings() {
-            document.getElementById('settings').classList.toggle('show');
+    document.getElementById('personalityPrompt').addEventListener('input', function() {
+      personality = this.value.trim();
+    });
+
+    function getSystemPrompt() {
+      return personality ? `You must roleplay exactly as this personality in every response: ${personality}\n\n` : "";
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    }
+
+    function newChat() {
+      document.getElementById('chatMessages').innerHTML = '';
+      addMessage('bot', 'New chat started. What\'s up?');
+    }
+
+    function deleteChat() {
+      if (confirm("Delete all learned knowledge and clear history permanently?")) {
+        knowledge = [];
+        newChat();
+      }
+    }
+
+    function teachAI() {
+      const q = prompt("Trigger phrase:");
+      if (!q) return;
+      const a = prompt("Response:");
+      if (!a) return;
+
+      let found = false;
+      for (const entry of knowledge) {
+        if (entry.answer.toLowerCase() === a.toLowerCase()) {
+          entry.questions.push(q);
+          found = true;
+          break;
         }
+      }
+      if (!found) knowledge.push({ questions: [q], answer: a });
+      addMessage('bot', 'Learned.');
+    }
 
-        function clearChat() {
-            messages = [{
-                role: 'assistant',
-                content: 'Chat cleared! Type a message to begin again.'
-            }];
-            renderMessages();
+    function cosineSimilarity(a, b) {
+      const tokensA = a.toLowerCase().match(/\w+/g) || [];
+      const tokensB = b.toLowerCase().match(/\w+/g) || [];
+      const set = [...new Set([...tokensA, ...tokensB])];
+      const vecA = set.map(t => tokensA.filter(w => w === t).length);
+      const vecB = set.map(t => tokensB.filter(w => w === t).length);
+      let dot = 0, normA = 0, normB = 0;
+      for (let i = 0; i < set.length; i++) {
+        dot += vecA[i] * vecB[i];
+        normA += vecA[i] ** 2;
+        normB += vecB[i] ** 2;
+      }
+      return normA && normB ? dot / (Math.sqrt(normA) * Math.sqrt(normB)) : 0;
+    }
+
+    function findInKnowledge(msg) {
+      let best = null, bestScore = 0;
+      for (const entry of knowledge) {
+        for (const q of entry.questions) {
+          const score = cosineSimilarity(msg, q);
+          if (score > bestScore && score > 0.5) {
+            bestScore = score;
+            best = entry.answer;
+          }
         }
+      }
+      return best;
+    }
 
-        function renderMessages() {
-            const container = document.getElementById('messages');
-            container.innerHTML = '';
+    function handleMath(msg) {
+      const expr = msg.toLowerCase().replace(/^(what is|calculate|\s)+/g, '').trim()
+        .replace(/×/g,'*').replace(/÷/g,'/').replace(/\^/g,'**');
+      if (/^[0-9+\-*/().\s**]+$/.test(expr)) {
+        try { return Function('"use strict"; return (' + expr + ')')(); } catch(e) {}
+      }
+      return null;
+    }
 
-            messages.forEach((msg, idx) => {
-                const div = document.createElement('div');
-                div.className = `message ${msg.role}${msg.content.startsWith('⚠️') ? ' error' : ''}`;
-                div.innerHTML = `
-                    <div class="message-content">
-                        ${msg.content.replace(/\n/g, '<br>')}
-                        <button class="copy-btn" onclick="copyMessage(${idx})" title="Copy">📋</button>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
+    async function getDefinition(word) {
+      try {
+        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+        const data = await res.json();
+        if (!data.title) return `**${word}:** ${data[0].meanings[0].definitions[0].definition}`;
+      } catch {}
+      return null;
+    }
 
-            if (loading) {
-                const div = document.createElement('div');
-                div.className = 'message assistant';
-                div.innerHTML = `<div class="message-content"><span class="loader"></span> Thinking...</div>`;
-                container.appendChild(div);
-            }
+    async function getWikipedia(topic) {
+      try {
+        const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`);
+        const data = await res.json();
+        if (data.extract) return `**${data.title}:** ${data.extract}`;
+      } catch {}
+      return null;
+    }
 
-            container.scrollTop = container.scrollHeight;
+    async function getAIResponse(prompt) {
+      const fullPrompt = getSystemPrompt() + prompt;
+      try {
+        const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}`);
+        if (res.ok) {
+          const text = await res.text();
+          return text.trim() || "…";
         }
+      } catch {}
+      return "Thinking took too long.";
+    }
 
-        async function copyMessage(idx) {
-            try {
-                await navigator.clipboard.writeText(messages[idx].content);
-            } catch (err) {
-                console.error('Copy failed');
-            }
-        }
+    async function sendMessage() {
+      const input = document.getElementById('userInput');
+      const msg = input.value.trim();
+      if (!msg) return;
 
-        async function sendMessage() {
-            if (loading) return;
+      addMessage('user', msg);
+      input.value = '';
 
-            const input = document.getElementById('input');
-            const text = input.value.trim();
-            if (!text) return;
+      const learned = findInKnowledge(msg);
+      if (learned) {
+        addMessage('bot', learned);
+        return;
+      }
 
-            messages.push({ role: 'user', content: text });
-            input.value = '';
-            renderMessages();
+      if (/^define |^meaning of /.test(msg.toLowerCase())) {
+        const word = msg.replace(/^define |^meaning of /i, '').trim().split(' ')[0];
+        addMessage('bot', 'Searching...');
+        const def = await getDefinition(word);
+        replaceLastBot(def || "Not found.");
+        return;
+      }
 
-            loading = true;
-            document.getElementById('sendBtn').disabled = true;
+      if (/^tell me about |^what is /.test(msg.toLowerCase())) {
+        const topic = msg.replace(/^tell me about |^what is /i, '').trim();
+        addMessage('bot', 'Searching Wikipedia...');
+        const wiki = await getWikipedia(topic);
+        replaceLastBot(wiki || "No result.");
+        return;
+      }
 
-            try {
-                const model = document.getElementById('model').value;
+      const math = handleMath(msg);
+      if (math !== null) {
+        addMessage('bot', `**${msg} = ${math}**`);
+        return;
+      }
 
-                const response = await fetch(`${API_BASE}/chat/completions`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: model,
-                        messages: messages
-                    })
-                });
+      addMessage('bot', 'Thinking...');
+      const response = await getAIResponse(msg);
+      replaceLastBot(response);
+    }
 
-                if (!response.ok) {
-                    const errText = await response.text();
-                    throw new Error(`API error: ${response.status} - ${errText}`);
-                }
+    function addMessage(sender, text) {
+      const container = document.getElementById('chatMessages');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `message ${sender}`;
 
-                const data = await response.json();
-                const assistantText = data.choices[0]?.message?.content?.trim() || 'No response received.';
+      if (sender === 'bot') {
+        msgDiv.innerHTML = `
+          <div class="bubble">
+            ${text.replace(/\n/g, '<br>')}
+            <button class="copy-btn" onclick="copyText(this)">Copy</button>
+          </div>`;
+      } else {
+        msgDiv.innerHTML = `<div class="bubble">${text.replace(/\n/g, '<br>')}</div>`;
+      }
 
-                messages.push({ role: 'assistant', content: assistantText });
-            } catch (error) {
-                console.error(error);
-                messages.push({ role: 'assistant', content: `⚠️ Error: ${error.message || 'Connection failed. Try again in a few seconds.'}` });
-            } finally {
-                loading = false;
-                document.getElementById('sendBtn').disabled = false;
-                renderMessages();
-            }
-        }
+      container.appendChild(msgDiv);
+      container.scrollTop = container.scrollHeight;
+    }
 
-        // Initial render
-        renderMessages();
-    </script>
+    function replaceLastBot(text) {
+      const lastBotBubble = document.querySelector('.message.bot:last-child .bubble');
+      if (lastBotBubble) {
+        lastBotBubble.innerHTML = text.replace(/\n/g, '<br>') +
+          '<button class="copy-btn" onclick="copyText(this)">Copy</button>';
+      }
+      document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+    }
+
+    function copyText(btn) {
+      const bubble = btn.parentElement;
+      const text = bubble.textContent.replace('Copy', '').trim();
+      navigator.clipboard.writeText(text);
+      btn.textContent = 'Copied';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    }
+  </script>
 </body>
 </html>
