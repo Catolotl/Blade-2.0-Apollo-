@@ -61,9 +61,15 @@
     .title {
       font-size: 26px;
       font-weight: 600;
-      background: linear-gradient(90deg, #ffffff, #bbbbbb);
+      background: linear-gradient(90deg, #4a90e2, #87ceeb, #ffffff, #ffa500, #ff6b47);
+      background-size: 200% 100%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      animation: shimmer 8s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
     }
     .sidebar-content {
       flex: 1;
@@ -88,13 +94,30 @@
       margin-bottom: 10px;
       text-align: left;
       transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .sidebar-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(74, 144, 226, 0.15), rgba(255, 165, 0, 0.15), transparent);
+      transition: left 0.5s ease;
+    }
+    .sidebar-btn:hover::before {
+      left: 100%;
     }
     .sidebar-btn:hover {
       background: #202020;
       transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(135, 206, 235, 0.2);
     }
     .sidebar-btn.danger:hover {
       background: #2a1414;
+      box-shadow: 0 4px 12px rgba(251, 110, 110, 0.15);
     }
     .personality-section {
       margin-top: 28px;
@@ -121,8 +144,8 @@
       transition: border-color 0.2s;
     }
     #personalityPrompt:focus {
-      border-color: #4a9eff;
-      box-shadow: 0 0 0 1px rgba(74, 158, 255, 0.2);
+      border-color: #87ceeb;
+      box-shadow: 0 0 0 1px rgba(135, 206, 235, 0.3);
     }
     .main {
       flex: 1;
@@ -213,29 +236,59 @@
       color: white;
       font-size: 16px;
       outline: none;
-      transition: all 0.2s;
+      transition: all 0.3s ease;
     }
     #userInput:focus {
-      border-color: #4a9eff;
-      box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.15);
+      border-color: #87ceeb;
+      box-shadow: 0 0 0 3px rgba(135, 206, 235, 0.2), 0 0 20px rgba(255, 165, 0, 0.15);
+      transform: translateY(-1px);
     }
     .send-btn {
       padding: 16px 28px;
-      background: linear-gradient(135deg, #6e8efb, #a777fb);
+      background: linear-gradient(135deg, #4a90e2, #87ceeb, #ffa500, #ff7f50);
+      background-size: 200% 200%;
       color: white;
       border: none;
       border-radius: 30px;
       cursor: pointer;
       font-weight: 600;
-      transition: all 0.2s;
+      transition: all 0.3s ease;
+      animation: gradientFlow 3s ease infinite;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    @keyframes gradientFlow {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
     }
     .send-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(110, 142, 251, 0.3);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 20px rgba(135, 206, 235, 0.4), 0 4px 12px rgba(255, 165, 0, 0.3);
+    }
+    .send-btn:active {
+      transform: translateY(0) scale(0.98);
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+    .typing-indicator {
+      display: inline-flex;
+      gap: 6px;
+      padding: 4px 0;
+    }
+    .typing-indicator span {
+      width: 8px;
+      height: 8px;
+      background: linear-gradient(135deg, #87ceeb, #ffa500);
+      border-radius: 50%;
+      animation: typingBounce 1.4s infinite ease-in-out;
+    }
+    .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingBounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+      30% { transform: translateY(-10px); opacity: 1; }
     }
     .teach-modal {
       position: fixed;
@@ -317,12 +370,12 @@
     }
     .teach-input-group input:focus,
     .teach-input-group textarea:focus {
-      border-color: #4a9eff;
+      border-color: #87ceeb;
     }
     .teach-submit-btn {
       width: 100%;
       padding: 14px;
-      background: linear-gradient(135deg, #6e8efb, #a777fb);
+      background: linear-gradient(135deg, #4a90e2, #87ceeb, #ffa500, #ff7f50);
       color: white;
       border: none;
       border-radius: 12px;
@@ -331,10 +384,11 @@
       font-size: 16px;
       transition: all 0.2s;
       margin-top: 8px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
     }
     .teach-submit-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(110, 142, 251, 0.4);
+      box-shadow: 0 8px 20px rgba(135, 206, 235, 0.4), 0 4px 12px rgba(255, 165, 0, 0.3);
     }
   </style>
 </head>
@@ -542,7 +596,7 @@
 
       if (/^define |^meaning of /.test(msg.toLowerCase())) {
         const word = msg.replace(/^define |^meaning of /i, '').trim().split(' ')[0];
-        addMessage('bot', 'Searching...');
+        addTypingIndicator();
         const def = await getDefinition(word);
         replaceLastBot(def || "Not found.");
         return;
@@ -550,7 +604,7 @@
 
       if (/^tell me about |^what is /.test(msg.toLowerCase())) {
         const topic = msg.replace(/^tell me about |^what is /i, '').trim();
-        addMessage('bot', 'Searching Wikipedia...');
+        addTypingIndicator();
         const wiki = await getWikipedia(topic);
         replaceLastBot(wiki || "No result.");
         return;
@@ -562,7 +616,7 @@
         return;
       }
 
-      addMessage('bot', 'Thinking...');
+      addTypingIndicator();
       const response = await getAIResponse(msg);
       replaceLastBot(response);
     }
@@ -582,6 +636,22 @@
         msgDiv.innerHTML = `<div class="bubble">${text.replace(/\n/g, '<br>')}</div>`;
       }
 
+      container.appendChild(msgDiv);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function addTypingIndicator() {
+      const container = document.getElementById('chatMessages');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message bot';
+      msgDiv.innerHTML = `
+        <div class="bubble">
+          <div class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>`;
       container.appendChild(msgDiv);
       container.scrollTop = container.scrollHeight;
     }
