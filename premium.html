@@ -287,7 +287,9 @@
     });
 
     function getSystemPrompt() {
-      return personality ? `You must roleplay exactly as this personality in every response: ${personality}\n\n` : "";
+      const hiddenPrompt = "You are Indy and are running on Sunrise 1.0. ";
+      const personalityPrompt = personality ? `You must roleplay exactly as this personality in every response: ${personality}\n\n` : "";
+      return hiddenPrompt + personalityPrompt;
     }
 
     function toggleSidebar() {
