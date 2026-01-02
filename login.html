@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blade Card - Premium Access</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #ffffff;
+            color: #000000;
+            min-height: 100vh;
+        }
+
+        .header {
+            padding: 24px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .auth-btn {
+            padding: 10px 24px;
+            background: #000;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .auth-btn:hover {
+            background: #333;
+            transform: translateY(-1px);
+        }
+
+        .user-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .profile-pic-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #000;
+        }
+
+        .profile-initial {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #000;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 60px 30px;
+        }
+
+        .welcome {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .welcome h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -1px;
+        }
+
+        .welcome p {
+            font-size: 1.2rem;
+            color: #666;
+            font-weight: 400;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #f9f9f9 0%, #fff 100%);
+            padding: 50px 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 40px;
+            border: 1px solid #e5e5e5;
+        }
+
+        .hero-section h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .hero-section p {
+            font-size: 1.1rem;
+            color: #666;
+            line-height: 1.6;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .feature-card {
+            background: #f9f9f9;
+            padding: 30px 24px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid #e5e5e5;
+            transition: all 0.2s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .feature-card p {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .stats-section {
+            background: linear-gradient(135deg, #f0f0f0 0%, #f9f9f9 100%);
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .stat-item h4 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .stat-item p {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 50px;
+            border-radius: 20px;
+            max-width: 480px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .modal-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .modal-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .profile-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-pic-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid #000;
+            object-fit: cover;
+            margin-bottom: 16px;
+        }
+
+        .profile-placeholder {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #ccc;
+            margin-bottom: 16px;
+            background: #f9f9f9;
+        }
+
+        .upload-btn {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .upload-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e5e5e5;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #000;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: #000;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #333;
+            transform: translateY(-2px);
+        }
+
+        .section {
+            margin-bottom: 50px;
+            padding: 30px;
+            background: #f9f9f9;
+            border-radius: 16px;
+            border: 1px solid #e5e5e5;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #666;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .locked-content {
+            filter: blur(3px);
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .lock-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.95);
+            color: #fff;
+            padding: 30px 40px;
+            border-radius: 16px;
+            text-align: center;
+            z-index: 10;
+            max-width: 90%;
+        }
+
+        .lock-overlay .lock-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        .lock-overlay h3 {
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .lock-overlay p {
+            font-size: 0.95rem;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .contact-link {
+            color: #4da6ff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .contact-link:hover {
+            text-decoration: underline;
+        }
+
+        .premium-card {
+            background: linear-gradient(135deg, #000 0%, #333 100%);
+            color: #fff;
+            padding: 40px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .premium-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .premium-card .price {
+            font-size: 4rem;
+            font-weight: 700;
+            margin: 20px 0;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .premium-card .price .dollar {
+            font-size: 2.5rem;
+            margin-right: 4px;
+            margin-top: 8px;
+        }
+
+        .premium-card .price .cents {
+            font-size: 2rem;
+            margin-left: 4px;
+            margin-top: 8px;
+        }
+
+        .premium-card .period {
+            color: #999;
+            font-size: 1rem;
+            margin-bottom: 30px;
+        }
+
+        .premium-btn {
+            background: #fff;
+            color: #000;
+            padding: 16px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .premium-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255,255,255,0.3);
+        }
+
+        .premium-badge {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #000;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .plus-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 40px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .plus-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .plus-card p {
+            font-size: 1rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .code {
+            font-family: 'Courier New', monospace;
+            font-size: 3.5rem;
+            letter-spacing: 12px;
+            text-align: center;
+            margin: 30px 0;
+            user-select: none;
+            transition: filter 0.3s;
+        }
+
+        .code.blur {
+            filter: blur(12px);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            margin: 8px 0;
+            background: #000;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .btn:hover {
+            background: #333;
+            transform: translateY(-1px);
+        }
+
+        .btn.secondary {
+            background: #f0f0f0;
+            color: #000;
+        }
+
+        .btn.secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .access-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 80px;
+            color: #999;
+            font-size: 0.85rem;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">Blade Card</div>
+        <div id="headerAuth"></div>
+    </div>
+
+    <div class="container">
+        <div class="welcome">
+            <h1 id="welcomeTitle">Welcome</h1>
+            <p id="welcomeSubtitle">Premium digital access</p>
+        </div>
+
+        <div class="hero-section">
+            <h2>Experience Premium Access</h2>
+            <p>Join thousands of members enjoying exclusive content, premium features, and seamless access to all your favorite services.</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎵</div>
+                <h3>Music & Audio</h3>
+                <p>Stream unlimited music and podcasts</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📺</div>
+                <h3>TV & Video</h3>
+                <p>Watch exclusive shows and movies</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>Indy</h3>
+                <p>Access state of the art AI models</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Fast Access</h3>
+                <p>Quick login and instant verification</p>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <h2 style="margin-bottom: 10px;">Trusted by Members</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h4>100+</h4>
+                    <p>Past Log In's</p>
+                </div>
+                <div class="stat-item">
+                    <h4>99.9%</h4>
+                    <p>Uptime</p>
+                </div>
+                <div class="stat-item">
+                    <h4>24/7</h4>
+                    <p>Support</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="premiumSection" class="hidden">
+            <div class="premium-card">
+                <h3>Unlock Premium Access</h3>
+                <div class="price">
+                    <span class="dollar">$</span>
+                    <span>3</span>
+                    <span class="cents">00</span>
+                </div>
+                <div class="period">per year</div>
+                <button class="premium-btn" onclick="showCardScan()">Sign Up for Quicker Log In</button>
+            </div>
+        </div>
+
+        <div class="modal" id="cardScanModal">
+            <div class="modal-content" style="max-width: 500px;">
+                <div id="scanStage">
+                    <div style="text-align: center;">
+                        <h2 style="font-size: 2rem; margin-bottom: 8px;">Blade Card</h2>
+                        <p style="color: #666; margin-bottom: 40px;">Secure access</p>
+                        
+                        <div style="width: 280px; height: 176px; background: linear-gradient(135deg, #ffffff 0%, #f5f5f7 100%); border-radius: 20px; margin: 0 auto 40px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); position: relative; overflow: hidden; transition: all 0.4s;">
+                            <div style="position: absolute; top: 28px; left: 28px; width: 48px; height: 48px; background: linear-gradient(135deg, #ffd60a 0%, #f7b500 100%); border-radius: 8px;"></div>
+                            <div id="scanWave" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom, transparent 0%, rgba(52,199,89,0.1) 50%, transparent 100%); transform: translateY(-100%); opacity: 0;"></div>
+                        </div>
+                        
+                        <p style="color: #666; margin-bottom: 30px;">Position your card near the device</p>
+                        
+                        <div id="scanStatus" style="min-height: 24px; margin-bottom: 30px; font-weight: 500; opacity: 0; transition: all 0.3s;"></div>
+                        
+                        <button class="premium-btn" id="scanBtn" onclick="attemptScan()">Scan Card</button>
+                    </div>
+                </div>
+
+                <div id="codeStage" class="hidden">
+                    <div style="text-align: center;">
+                        <h2 style="font-size: 1.75rem; margin-bottom: 8px;">Enter Code</h2>
+                        <p style="color: #666; margin-bottom: 40px;">Enter the verification code from your card</p>
+                        <input type="text" id="cardCodeInput" maxlength="20" placeholder="••••••" autocomplete="off" style="padding: 16px 32px; font-size: 1.5rem; letter-spacing: 4px; text-align: center; width: 100%; max-width: 300px; border: 2px solid #e5e5e5; border-radius: 12px; font-family: 'Outfit', sans-serif;">
+                        <p id="codeError" style="color: #ff3b30; margin-top: 16px; font-size: 0.9rem; opacity: 0; transition: opacity 0.3s;"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="plusSection" class="hidden">
+            <div class="plus-card">
+                <h3>🌟 Join Plus for More</h3>
+                <p>Get access to exclusive Plus features including Indy+ and mini-crafts.com</p>
+                <button class="premium-btn" onclick="upgradePlus()">Activate Plus Features</button>
+            </div>
+        </div>
+
+        <div id="contentSections" class="hidden">
+            
+            <div id="premiumBadgeSection" class="hidden section" style="text-align: center; background: linear-gradient(135deg, #f9f9f9 0%, #fff 100%);">
+                <span class="premium-badge">✨ PREMIUM MEMBER</span>
+                <p style="margin-top: 12px; color: #666;">You have access to premium features</p>
+            </div>
+
+            <div id="plusBadgeSection" class="hidden section" style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff;">
+                <span style="background: rgba(255,255,255,0.2); color: #fff; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block; margin-bottom: 20px;">⭐ PLUS MEMBER</span>
+                <p style="margin-top: 12px; opacity: 0.9;">You have full access to all Plus features</p>
+            </div>
+
+            <div class="section" id="codeSection">
+                <div id="codeContent">
+                    <div class="section-title">Master TV Code</div>
+                    <div class="code blur" id="code">3p#q</div>
+                    <button class="btn" id="toggleBtn" onclick="toggleCode()">Show Code</button>
+                </div>
+            </div>
+
+            <div class="section" id="accessSection">
+                <div id="accessContent">
+                    <div class="section-title">Quick Access</div>
+                    <div class="access-grid">
+                        <button class="btn" id="tunesBtn">Tunes</button>
+                        <button class="btn" id="tvBtn">TV</button>
+                        <button class="btn disabled" id="indyBtn">Indy+ (Plus)</button>
+                        <button class="btn disabled" id="miniBtn">mini-crafts (Plus)</button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn secondary" onclick="logout()">Log Out</button>
+        </div>
+    </div>
+
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Sign Up/Sign In</h2>
+                <p>Create your Blade Card account</p>
+            </div>
+
+            <form id="authForm" onsubmit="handleAuth(event)">
+                <div class="profile-upload">
+                    <img id="profilePreview" class="profile-pic-preview hidden" alt="Profile">
+                    <div id="profilePlaceholder" class="profile-placeholder">📷</div>
+                    <input type="file" id="profilePicInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                    <button type="button" class="upload-btn" onclick="document.getElementById('profilePicInput').click()">
+                        Upload Photo
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" required placeholder="Enter your name">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required placeholder="your@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required placeholder="Create a password">
+                </div>
+
+                <button type="submit" class="submit-btn">Sign Up for Blade Card</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        © 2026 J V S T • Blade Card • Remember sharing Blade Cards and codes is strictly prohibited
+    </footer>
+
+    <script>
+        var userData = {
+            isLoggedIn: false,
+            name: '',
+            email: '',
+            profilePic: null,
+            isPremium: false,
+            isPlus: false,
+            codeVisible: false
+        };
+
+        var VALID_CODES = ["cutedrunkraccoons","blade","card5","golds","tv482","ai4me","trash","panda","rocket","nebul","qubit","zorp9","kryp7","fluxx","vortex","spark", "3p#q", "goldpass"];
+        var scanAnimationId = null;
+
+        function initApp() {
+            updateUI();
+        }
+
+        function updateUI() {
+            var headerAuth = document.getElementById('headerAuth');
+            var welcomeTitle = document.getElementById('welcomeTitle');
+            var welcomeSubtitle = document.getElementById('welcomeSubtitle');
+            var contentSections = document.getElementById('contentSections');
+            var premiumSection = document.getElementById('premiumSection');
+            var plusSection = document.getElementById('plusSection');
+            var premiumBadgeSection = document.getElementById('premiumBadgeSection');
+            var plusBadgeSection = document.getElementById('plusBadgeSection');
+
+            if (userData.isLoggedIn) {
+                var initial = userData.name.charAt(0).toUpperCase();
+                if (userData.profilePic) {
+                    headerAuth.innerHTML = '<div class="user-header"><img src="' + userData.profilePic + '" class="profile-pic-small" alt="Profile"><span style="font-weight: 500;">' + userData.name + '</span></div>';
+                } else {
+                    headerAuth.innerHTML = '<div class="user-header"><div class="profile-initial">' + initial + '</div><span style="font-weight: 500;">' + userData.name + '</span></div>';
+                }
+
+                welcomeTitle.textContent = 'Hi, ' + userData.name.split(' ')[0];
+                welcomeSubtitle.textContent = 'Welcome to your premium access';
+
+                contentSections.classList.remove('hidden');
+
+                updateLocks();
+
+                if (userData.isPremium) {
+                    premiumSection.classList.add('hidden');
+                    premiumBadgeSection.classList.remove('hidden');
+                    
+                    if (!userData.isPlus) {
+                        plusSection.classList.remove('hidden');
+                        plusBadgeSection.classList.add('hidden');
+                    } else {
+                        plusSection.classList.add('hidden');
+                        plusBadgeSection.classList.remove('hidden');
+                    }
+                } else {
+                    premiumSection.classList.remove('hidden');
+                    premiumBadgeSection.classList.add('hidden');
+                    plusSection.classList.add('hidden');
+                }
+
+                var codeEl = document.getElementById('code');
+                var toggleBtn = document.getElementById('toggleBtn');
+                if (userData.codeVisible) {
+                    codeEl.classList.remove('blur');
+                    toggleBtn.textContent = 'Hide Code';
+                } else {
+                    codeEl.classList.add('blur');
+                    toggleBtn.textContent = 'Show Code';
+                }
+            } else {
+                headerAuth.innerHTML = '<button class="auth-btn" onclick="showAuthModal()">Sign Up/Sign In</button>';
+                welcomeTitle.textContent = 'Welcome';
+                welcomeSubtitle.textContent = 'Premium digital access';
+                contentSections.classList.add('hidden');
+                premiumSection.classList.add('hidden');
+                plusSection.classList.add('hidden');
+            }
+        }
+
+        function updateLocks() {
+            var codeSection = document.getElementById('codeSection');
+            var accessSection = document.getElementById('accessSection');
+            var codeContent = document.getElementById('codeContent');
+            var accessContent = document.getElementById('accessContent');
+            var tunesBtn = document.getElementById('tunesBtn');
+            var tvBtn = document.getElementById('tvBtn');
+            var indyBtn = document.getElementById('indyBtn');
+            var miniBtn = document.getElementById('miniBtn');
+
+            var codeLockExists = document.getElementById('codeLock');
+            var accessLockExists = document.getElementById('accessLock');
+
+            if (!userData.isPremium) {
+                codeContent.classList.add('locked-content');
+                accessContent.classList.add('locked-content');
+                
+                if (!codeLockExists) {
+                    var codeLock = document.createElement('div');
+                    codeLock.id = 'codeLock';
+                    codeLock.className = 'lock-overlay';
+                    codeLock.innerHTML = '<div class="lock-icon">🔒</div><h3>Blade Card Required</h3><p>Upgrade to Blade Card membership to access TV codes</p><a href="mailto:developer@bladecard.com" class="contact-link">Contact developer for more info</a>';
+                    codeSection.appendChild(codeLock);
+                }
+
+                if (!accessLockExists) {
+                    var accessLock = document.createElement('div');
+                    accessLock.id = 'accessLock';
+                    accessLock.className = 'lock-overlay';
+                    accessLock.innerHTML = '<div class="lock-icon">🔒</div><h3>Blade Card Required</h3><p>Upgrade to Blade Card membership to access these services</p><a href="mailto:developer@bladecard.com" class="contact-link">Contact developer for more info</a>';
+                    accessSection.appendChild(accessLock);
+                }
+            } else {
+                codeContent.classList.remove('locked-content');
+                accessContent.classList.remove('locked-content');
+                
+                if (codeLockExists) codeLockExists.remove();
+                if (accessLockExists) accessLockExists.remove();
+
+                tunesBtn.classList.remove('disabled');
+                tvBtn.classList.remove('disabled');
+                tunesBtn.onclick = function() { window.open('https://www.shopjust.store/apps/tunes','_blank'); };
+                tvBtn.onclick = function() { window.open('https://www.shopjust.store/apps/tv','_blank'); };
+
+                if (userData.isPlus) {
+                    indyBtn.classList.remove('disabled');
+                    miniBtn.classList.remove('disabled');
+                    indyBtn.onclick = function() { window.open('https://www.shopjust.store/indyplus','_blank'); };
+                    miniBtn.onclick = function() { window.open('https://www.mini-crafts.com','_blank'); };
+                    indyBtn.textContent = 'Indy+';
+                    miniBtn.textContent = 'mini-crafts';
+                } else {
+                    indyBtn.classList.add('disabled');
+                    miniBtn.classList.add('disabled');
+                }
+            }
+        }
+
+        function showAuthModal() {
+            document.getElementById('authModal').classList.add('active');
+        }
+
+        function hideAuthModal() {
+            document.getElementById('authModal').classList.remove('active');
+        }
+
+        function handleImageUpload(event) {
+            var file = event.target.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profilePreview').src = e.target.result;
+                    document.getElementById('profilePreview').classList.remove('hidden');
+                    document.getElementById('profilePlaceholder').classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function handleAuth(event) {
+            event.preventDefault();
+            
+            var name = document.getElementById('name').value;
+            var email = document.getElementById('email').value;
+            var profilePic = document.getElementById('profilePreview').src;
+
+            userData = {
+                isLoggedIn: true,
+                name: name,
+                email: email,
+                profilePic: profilePic && profilePic.indexOf('data:') === 0 ? profilePic : null,
+                isPremium: false,
+                isPlus: false,
+                codeVisible: false
+            };
+
+            hideAuthModal();
+            updateUI();
+
+            document.getElementById('authForm').reset();
+            document.getElementById('profilePreview').classList.add('hidden');
+            document.getElementById('profilePlaceholder').classList.remove('hidden');
+        }
+
+        function upgradePremium() {
+            userData.isPremium = true;
+            updateUI();
+        }
+
+        function showCardScan() {
+            document.getElementById('cardScanModal').classList.add('active');
+            document.getElementById('scanStage').classList.remove('hidden');
+            document.getElementById('codeStage').classList.add('hidden');
+            document.getElementById('scanStatus').style.opacity = '0';
+            document.getElementById('scanBtn').disabled = false;
+        }
+
+        function hideCardScan() {
+            document.getElementById('cardScanModal').classList.remove('active');
+            if (scanAnimationId) {
+                clearInterval(scanAnimationId);
+                scanAnimationId = null;
+            }
+        }
+
+        function attemptScan() {
+            var scanWave = document.getElementById('scanWave');
+            var scanStatus = document.getElementById('scanStatus');
+            var scanBtn = document.getElementById('scanBtn');
+            
+            scanBtn.disabled = true;
+            scanStatus.textContent = "Scanning...";
+            scanStatus.style.color = "#007aff";
+            scanStatus.style.opacity = "1";
+
+            var animCount = 0;
+            scanAnimationId = setInterval(function() {
+                scanWave.style.animation = 'scanWave 2s ease-in-out';
+                animCount++;
+            }, 2000);
+
+            setTimeout(function() {
+                if (scanAnimationId) {
+                    clearInterval(scanAnimationId);
+                    scanAnimationId = null;
+                }
+                scanWave.style.animation = 'none';
+
+                if (Math.random() < 0.70) {
+                    scanStatus.textContent = "Card Verified";
+                    scanStatus.style.color = "#34c759";
+                    
+                    setTimeout(function() {
+                        document.getElementById('scanStage').classList.add('hidden');
+                        document.getElementById('codeStage').classList.remove('hidden');
+                        document.getElementById('cardCodeInput').focus();
+                    }, 1200);
+                } else {
+                    scanStatus.textContent = "Card not detected";
+                    scanStatus.style.color = "#ff3b30";
+                    scanBtn.disabled = false;
+                    setTimeout(function() {
+                        scanStatus.style.opacity = "0";
+                    }, 2500);
+                }
+            }, 1800);
+        }
+
+        document.getElementById('cardCodeInput').addEventListener('input', function() {
+            var code = this.value.trim().toLowerCase();
+            var codeError = document.getElementById('codeError');
+            
+            if (code.length > 3) {
+                if (VALID_CODES.indexOf(code) !== -1) {
+                    codeError.style.opacity = '0';
+                    setTimeout(function() {
+                        userData.isPremium = true;
+                        hideCardScan();
+                        updateUI();
+                        document.getElementById('cardCodeInput').value = '';
+                    }, 350);
+                } else if (code.length >= 4) {
+                    codeError.textContent = 'Invalid code. Please try again.';
+                    codeError.style.opacity = '1';
+                }
+            }
+        });
+
+        function upgradePlus() {
+            userData.isPlus = true;
+            updateUI();
+        }
+
+        function toggleCode() {
+            userData.codeVisible = !userData.codeVisible;
+            updateUI();
+        }
+
+        function logout() {
+            userData = {
+                isLoggedIn: false,
+                name: '',
+                email: '',
+                profilePic: null,
+                isPremium: false,
+                isPlus: false,
+                codeVisible: false
+            };
+            updateUI();
+        }
+
+        document.getElementById('authModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideAuthModal();
+            }
+        });
+
+        document.getElementById('cardScanModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideCardScan();
+            }
+        });
+
+        initApp();
+    </script>
+
+    <style>
+        @keyframes scanWave {
+            0% {transform: translateY(-100%); opacity: 0;}
+            50% {opacity: 1;}
+            100% {transform: translateY(100%); opacity: 0;}
+        }
+    </style>
+
+</body>
+</html>
