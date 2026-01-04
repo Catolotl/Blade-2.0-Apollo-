@@ -656,6 +656,11 @@ function getSystemPrompt() {
       btn.textContent = 'Copied';
       setTimeout(() => btn.textContent = 'Copy', 2000);
     }
+
+    window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('sidebar').classList.add('collapsed');
+});
+
   </script>
 </body>
 </html>
