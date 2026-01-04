@@ -240,7 +240,7 @@
       align-items: center;
     }
     #userInput {
-      flex: 1;
+      flex: 0.85;
       padding: 16px 20px;
       background: #161616;
       border: 1px solid #282828;
@@ -255,18 +255,24 @@
       box-shadow: 0 0 0 3px rgba(160, 216, 239, 0.2);
       transform: translateY(-1px);
     }
-    .send-btn {
-      padding: 16px 28px;
-      background: #fff;
-      color: black;
-      border: none;
-      border-radius: 500px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.4s ease;
-      position: relative;
-      overflow: hidden;
-    }
+.send-btn {
+  width: 56px;
+  height: 56px;
+  background: #fff;
+  color: black;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
     .send-btn:hover {
       background: #fff;
     }
@@ -426,7 +432,7 @@
     </div>
     <div class="input-area">
       <div class="input-wrapper">
-        <input type="text" id="userInput" placeholder="Send a message..." onkeypress="if(event.key==='Enter') sendMessage()">
+        <input type="text" id="userInput" placeholder="Ask Anything" onkeypress="if(event.key==='Enter') sendMessage()">
         <button class="send-btn" onclick="sendMessage()">🡅</button>
       </div>
     </div>
