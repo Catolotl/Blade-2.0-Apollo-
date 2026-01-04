@@ -722,7 +722,7 @@
 
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" required placeholder="Create a password">
+                    <input type="password" id="password" required placeholder="password">
                 </div>
 
                 <button type="submit" class="submit-btn">Sign Up for Blade Card</button>
@@ -834,7 +834,7 @@
                     var codeLock = document.createElement('div');
                     codeLock.id = 'codeLock';
                     codeLock.className = 'lock-overlay';
-                    codeLock.innerHTML = '<div class="lock-icon">🔒</div><h3>Blade Card Required</h3><p>Upgrade to Blade Card membership to access TV codes</p><a href="mailto:developer@bladecard.com" class="contact-link">Contact developer for more info</a>';
+                    codeLock.innerHTML = '<div class="lock-icon">🔒</div><h3>Blade Card Required</h3><p>Upgrade to Blade Card membership to access TV codes</p><a href="#" class="contact-link">Contact developer for more info</a>';
                     codeSection.appendChild(codeLock);
                 }
 
@@ -860,7 +860,7 @@
                 if (userData.isPlus) {
                     indyBtn.classList.remove('disabled');
                     miniBtn.classList.remove('disabled');
-                    indyBtn.onclick = function() { window.open('https://www.shopjust.store/indyplus','_blank'); };
+                    indyBtn.onclick = function() { window.open('https://www.shopjust.store/indyplus.html','_blank'); };
                     miniBtn.onclick = function() { window.open('https://www.mini-crafts.com','_blank'); };
                     indyBtn.textContent = 'Indy+';
                     miniBtn.textContent = 'mini-crafts';
