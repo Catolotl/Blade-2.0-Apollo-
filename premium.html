@@ -257,8 +257,8 @@
     }
     .send-btn {
       padding: 16px 28px;
-      background: #2a2a2a;
-      color: white;
+      background: #fff;
+      color: black;
       border: none;
       border-radius: 500px;
       cursor: pointer;
@@ -268,7 +268,7 @@
       overflow: hidden;
     }
     .send-btn:hover {
-      background: #303030;
+      background: #fff;
     }
     .send-btn:active {
       transform: translateY(0) scale(0.98);
@@ -407,7 +407,7 @@
     </div>
     <div class="sidebar-content">
       <button class="sidebar-btn" onclick="newChat()">New Chat</button>
-      <button class="sidebar-btn" onclick="teachAI()">Teach Me</button>
+      <button class="sidebar-btn" onclick="teachAI()">Teach Indy</button>
       <button class="sidebar-btn danger" onclick="deleteChat()">Delete Everything</button>
       <div class="personality-section">
         <label>Personality Prompt (optional)</label>
@@ -427,7 +427,7 @@
     <div class="input-area">
       <div class="input-wrapper">
         <input type="text" id="userInput" placeholder="Send a message..." onkeypress="if(event.key==='Enter') sendMessage()">
-        <button class="send-btn" onclick="sendMessage()">Send</button>
+        <button class="send-btn" onclick="sendMessage()">🡅</button>
       </div>
     </div>
   </div>
