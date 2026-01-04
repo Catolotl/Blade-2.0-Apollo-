@@ -426,7 +426,10 @@
         <label>Personality Prompt (optional)</label>
         <textarea id="personalityPrompt" placeholder="e.g. You are a friendly AI who loves to talk!"></textarea>
       </div>
-    </div>
+
+        <hr style="margin:16px 0; border-color:#222;">
+  <div id="chatList"></div> <!-- Saved chat buttons appear here -->
+</div>
   </div>
   <div class="main">
     <div class="chat-container" id="chatMessages">
@@ -668,9 +671,87 @@ function getSystemPrompt() {
       setTimeout(() => btn.textContent = 'Copy', 2000);
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
+
+    // Load saved chats from localStorage on page load
+function loadSavedChats() {
+  const chatList = document.getElementById('chatList');
+  chatList.innerHTML = '';
+  const chats = JSON.parse(localStorage.getItem('savedChats') || '[]');
+  chats.forEach(name => createChatButton(name));
+}
+
+// Create a button for a saved chat
+function createChatButton(name) {
+  const chatList = document.getElementById('chatList');
+  const btn = document.createElement('button');
+  btn.className = 'sidebar-btn';
+  btn.style.display = 'flex';
+  btn.style.justifyContent = 'space-between';
+  btn.style.alignItems = 'center';
+  btn.textContent = name;
+
+  // Load chat on click
+  btn.onclick = () => {
+    newChat(name); // optional: use name for loading chat data
+  };
+
+  // Delete chat button
+  const delBtn = document.createElement('span');
+  delBtn.textContent = '✕';
+  delBtn.style.marginLeft = '8px';
+  delBtn.style.cursor = 'pointer';
+  delBtn.style.color = '#ff6e6e';
+  delBtn.onclick = (e) => {
+    e.stopPropagation();
+    deleteChat(name);
+  };
+
+  btn.appendChild(delBtn);
+  chatList.appendChild(btn);
+}
+
+// Override newChat to save chat name
+function newChat(name) {
+  const chatName = name || prompt("Enter a name for this chat:", "New Chat")?.trim();
+  if (!chatName) return;
+
+  // Add to saved chats
+  const chats = JSON.parse(localStorage.getItem('savedChats') || '[]');
+  if (!chats.includes(chatName)) {
+    chats.push(chatName);
+    localStorage.setItem('savedChats', JSON.stringify(chats));
+    createChatButton(chatName);
+  }
+
+  // Clear chat messages
+  document.getElementById('chatMessages').innerHTML = '';
+  addMessage('bot', `Chat "${chatName}" started. What's up?`);
+}
+
+// Delete a specific chat from localStorage
+function deleteChat(name) {
+  let chats = JSON.parse(localStorage.getItem('savedChats') || '[]');
+  chats = chats.filter(c => c !== name);
+  localStorage.setItem('savedChats', JSON.stringify(chats));
+  loadSavedChats();
+}
+
+// Delete everything (all chats)
+function deleteAllChats() {
+  if (confirm("Delete all saved chats and history permanently?")) {
+    localStorage.removeItem('savedChats');
+    knowledge = [];
+    newChat();
+    loadSavedChats();
+  }
+}
+
+// Initialize
+window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('sidebar').classList.add('collapsed');
+  loadSavedChats();
 });
+
 
   </script>
 </body>
