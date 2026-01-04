@@ -241,12 +241,12 @@
   gap: 14px;
   align-items: center;
 
-  justify-content: center; /* centers horizontally */
+  width: 100%;           /* Make it stretch across the input area */
+  max-width: 800px;      /* Optional: prevent it from getting too huge */
 }
 
 #userInput {
-  flex: 0.95;
-  max-width: 760px;
+  flex: 0.95;               /* Fill remaining space next to button */
   padding: 16px 20px;
   background: #161616;
   border: 1px solid #282828;
