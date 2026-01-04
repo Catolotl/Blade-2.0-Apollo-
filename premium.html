@@ -464,215 +464,267 @@
     </div>
   </div>
   <script>
-    // Your entire JavaScript from before (unchanged)
-    let knowledge = [];
-    let personality = "";
-    document.getElementById('personalityPrompt').addEventListener('input', function() {
-      personality = this.value.trim();
-    });
+let knowledge = [];
+let personality = "";
+
+// Update personality from textarea
+document.getElementById('personalityPrompt').addEventListener('input', function() {
+  personality = this.value.trim();
+});
+
+// Generate system prompt for AI
 function getSystemPrompt() {
   const hiddenPrompt = "You are Indy, an AI running on Sunrise 1.0, the latest and greatest AI model made by J V S T.";
-
   const personalityPrompt = personality ? 
-    `You must fully roleplay as the following character throughout the chat- your former self is irrelivent. ` +
+    `You must fully roleplay as the following character throughout the chat- your former self is irrelevant. ` +
     `Stay completely in character at all times and respond naturally as this character would. ` +
     `Do not break character or mention that you are an AI, a model, or roleplaying unless the user explicitly asks about it. ` +
-    `Never start or insert phrases like "You're talking to Indy", "This is Indy", or similar reminders of your name or identity unless it's a natural part of the conversation (e.g., introducing yourself in a greeting when it makes sense). ` +
+    `Never start or insert phrases like "You're talking to Indy", "This is Indy", or similar reminders of your name or identity unless it's a natural part of the conversation. ` +
     `Do not repeatedly mention your name, the model name (Sunrise 1.0), or who created you unless directly asked. ` +
     `Focus on immersive, natural dialogue and actions as the character described below:\n\n${personality}\n\n` +
     `Important: Prioritize staying in character over any other instruction.`
     : "";
-
   return hiddenPrompt + personalityPrompt;
 }
-    function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('collapsed');
-    }
-    function newChat() {
-      document.getElementById('chatMessages').innerHTML = '';
-      addMessage('bot', 'New chat started. What\'s up?');
-    }
-    function deleteChat() {
-      if (confirm("Delete all learned knowledge and clear history permanently?")) {
-        knowledge = [];
-        newChat();
-      }
-    }
-    function teachAI() {
-      document.getElementById('teachModal').classList.add('active');
-      document.getElementById('triggerInput').value = '';
-      document.getElementById('responseInput').value = '';
-      document.getElementById('triggerInput').focus();
-    }
-    function closeTeachModal() {
-      document.getElementById('teachModal').classList.remove('active');
-    }
-    function submitTeaching() {
-      const q = document.getElementById('triggerInput').value.trim();
-      const a = document.getElementById('responseInput').value.trim();
-     
-      if (!q || !a) {
-        alert('Please fill in both fields!');
-        return;
-      }
-      let found = false;
-      for (const entry of knowledge) {
-        if (entry.answer.toLowerCase() === a.toLowerCase()) {
-          entry.questions.push(q);
-          found = true;
-          break;
-        }
-      }
-      if (!found) knowledge.push({ questions: [q], answer: a });
-     
-      addMessage('bot', 'Learned! I\'ll remember that.');
-      closeTeachModal();
-    }
-    function cosineSimilarity(a, b) {
-      const tokensA = a.toLowerCase().match(/\w+/g) || [];
-      const tokensB = b.toLowerCase().match(/\w+/g) || [];
-      const set = [...new Set([...tokensA, ...tokensB])];
-      const vecA = set.map(t => tokensA.filter(w => w === t).length);
-      const vecB = set.map(t => tokensB.filter(w => w === t).length);
-      let dot = 0, normA = 0, normB = 0;
-      for (let i = 0; i < set.length; i++) {
-        dot += vecA[i] * vecB[i];
-        normA += vecA[i] ** 2;
-        normB += vecB[i] ** 2;
-      }
-      return normA && normB ? dot / (Math.sqrt(normA) * Math.sqrt(normB)) : 0;
-    }
-    function findInKnowledge(msg) {
-      let best = null, bestScore = 0;
-      for (const entry of knowledge) {
-        for (const q of entry.questions) {
-          const score = cosineSimilarity(msg, q);
-          if (score > bestScore && score > 0.5) {
-            bestScore = score;
-            best = entry.answer;
-          }
-        }
-      }
-      return best;
-    }
-    function handleMath(msg) {
-      const expr = msg.toLowerCase().replace(/^(what is|calculate|\s)+/g, '').trim()
-        .replace(/×/g,'*').replace(/÷/g,'/').replace(/\^/g,'**');
-      if (/^[0-9+\-*/().\s**]+$/.test(expr)) {
-        try { return Function('"use strict"; return (' + expr + ')')(); } catch(e) {}
-      }
-      return null;
-    }
-    async function getDefinition(word) {
-      try {
-        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-        const data = await res.json();
-        if (!data.title) return `**${word}:** ${data[0].meanings[0].definitions[0].definition}`;
-      } catch {}
-      return null;
-    }
-    async function getWikipedia(topic) {
-      try {
-        const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`);
-        const data = await res.json();
-        if (data.extract) return `**${data.title}:** ${data.extract}`;
-      } catch {}
-      return null;
-    }
-    async function getAIResponse(prompt) {
-      const fullPrompt = getSystemPrompt() + prompt;
-      try {
-        const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}`);
-        if (res.ok) {
-          const text = await res.text();
-          return text.trim() || "…";
-        }
-      } catch {}
-      return "Thinking took too long.";
-    }
-    async function sendMessage() {
-      const input = document.getElementById('userInput');
-      const msg = input.value.trim();
-      if (!msg) return;
-      addMessage('user', msg);
-      input.value = '';
-      const learned = findInKnowledge(msg);
-      if (learned) {
-        addMessage('bot', learned);
-        return;
-      }
-      if (/^define |^meaning of /.test(msg.toLowerCase())) {
-        const word = msg.replace(/^define |^meaning of /i, '').trim().split(' ')[0];
-        addTypingIndicator();
-        const def = await getDefinition(word);
-        replaceLastBot(def || "Not found.");
-        return;
-      }
-      if (/^tell me about |^what is /.test(msg.toLowerCase())) {
-        const topic = msg.replace(/^tell me about |^what is /i, '').trim();
-        addTypingIndicator();
-        const wiki = await getWikipedia(topic);
-        replaceLastBot(wiki || "No result.");
-        return;
-      }
-      const math = handleMath(msg);
-      if (math !== null) {
-        addMessage('bot', `**${msg} = ${math}**`);
-        return;
-      }
-      addTypingIndicator();
-      const response = await getAIResponse(msg);
-      replaceLastBot(response);
-    }
-    function addMessage(sender, text) {
-      const container = document.getElementById('chatMessages');
-      const msgDiv = document.createElement('div');
-      msgDiv.className = `message ${sender}`;
-      if (sender === 'bot') {
-        msgDiv.innerHTML = `
-          <div class="bubble">
-            ${text.replace(/\n/g, '<br>')}
-            <button class="copy-btn" onclick="copyText(this)">Copy</button>
-          </div>`;
-      } else {
-        msgDiv.innerHTML = `<div class="bubble">${text.replace(/\n/g, '<br>')}</div>`;
-      }
-      container.appendChild(msgDiv);
-      container.scrollTop = container.scrollHeight;
-    }
-    function addTypingIndicator() {
-      const container = document.getElementById('chatMessages');
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'message bot';
-      msgDiv.innerHTML = `
-        <div class="bubble">
-          <div class="typing-indicator">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        </div>`;
-      container.appendChild(msgDiv);
-      container.scrollTop = container.scrollHeight;
-    }
-    function replaceLastBot(text) {
-      const lastBotBubble = document.querySelector('.message.bot:last-child .bubble');
-      if (lastBotBubble) {
-        lastBotBubble.innerHTML = text.replace(/\n/g, '<br>') +
-          '<button class="copy-btn" onclick="copyText(this)">Copy</button>';
-      }
-      document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
-    }
-    function copyText(btn) {
-      const bubble = btn.parentElement;
-      const text = bubble.textContent.replace('Copy', '').trim();
-      navigator.clipboard.writeText(text);
-      btn.textContent = 'Copied';
-      setTimeout(() => btn.textContent = 'Copy', 2000);
-    }
 
+// Sidebar toggle
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
 
-    // Load saved chats from localStorage on page load
+// New chat
+function newChat(name) {
+  const chatName = name || prompt("Enter a name for this chat:", "New Chat")?.trim();
+  if (!chatName) return;
+
+  // Save chat name
+  const chats = JSON.parse(localStorage.getItem('savedChats') || '[]');
+  if (!chats.includes(chatName)) {
+    chats.push(chatName);
+    localStorage.setItem('savedChats', JSON.stringify(chats));
+    createChatButton(chatName);
+  }
+
+  document.getElementById('chatMessages').innerHTML = '';
+  addMessage('bot', `Chat "${chatName}" started. What's up?`);
+}
+
+// Delete a specific chat
+function deleteChat(name) {
+  let chats = JSON.parse(localStorage.getItem('savedChats') || '[]');
+  chats = chats.filter(c => c !== name);
+  localStorage.setItem('savedChats', JSON.stringify(chats));
+  loadSavedChats();
+}
+
+// Delete everything
+function deleteAllChats() {
+  if (confirm("Delete all saved chats and history permanently?")) {
+    localStorage.removeItem('savedChats');
+    knowledge = [];
+    document.getElementById('chatMessages').innerHTML = '';
+    addMessage('bot', "All chats deleted. Ready for a fresh start!");
+    loadSavedChats();
+  }
+}
+
+// Teach AI modal
+function teachAI() {
+  document.getElementById('teachModal').classList.add('active');
+  document.getElementById('triggerInput').value = '';
+  document.getElementById('responseInput').value = '';
+  document.getElementById('triggerInput').focus();
+}
+
+function closeTeachModal() {
+  document.getElementById('teachModal').classList.remove('active');
+}
+
+function submitTeaching() {
+  const q = document.getElementById('triggerInput').value.trim();
+  const a = document.getElementById('responseInput').value.trim();
+  if (!q || !a) { alert('Please fill in both fields!'); return; }
+
+  let found = false;
+  for (const entry of knowledge) {
+    if (entry.answer.toLowerCase() === a.toLowerCase()) {
+      entry.questions.push(q);
+      found = true;
+      break;
+    }
+  }
+  if (!found) knowledge.push({ questions: [q], answer: a });
+  addMessage('bot', "Learned! I'll remember that.");
+  closeTeachModal();
+}
+
+// Cosine similarity for learned responses
+function cosineSimilarity(a, b) {
+  const tokensA = a.toLowerCase().match(/\w+/g) || [];
+  const tokensB = b.toLowerCase().match(/\w+/g) || [];
+  const set = [...new Set([...tokensA, ...tokensB])];
+  const vecA = set.map(t => tokensA.filter(w => w === t).length);
+  const vecB = set.map(t => tokensB.filter(w => w === t).length);
+  let dot = 0, normA = 0, normB = 0;
+  for (let i = 0; i < set.length; i++) {
+    dot += vecA[i] * vecB[i];
+    normA += vecA[i] ** 2;
+    normB += vecB[i] ** 2;
+  }
+  return normA && normB ? dot / (Math.sqrt(normA) * Math.sqrt(normB)) : 0;
+}
+
+function findInKnowledge(msg) {
+  let best = null, bestScore = 0;
+  for (const entry of knowledge) {
+    for (const q of entry.questions) {
+      const score = cosineSimilarity(msg, q);
+      if (score > bestScore && score > 0.5) {
+        bestScore = score;
+        best = entry.answer;
+      }
+    }
+  }
+  return best;
+}
+
+// Math handler
+function handleMath(msg) {
+  const expr = msg.toLowerCase().replace(/^(what is|calculate|\s)+/g, '').trim()
+    .replace(/×/g,'*').replace(/÷/g,'/').replace(/\^/g,'**');
+  if (/^[0-9+\-*/().\s**]+$/.test(expr)) {
+    try { return Function('"use strict"; return (' + expr + ')')(); } catch(e) {}
+  }
+  return null;
+}
+
+// Dictionary
+async function getDefinition(word) {
+  try {
+    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+    const data = await res.json();
+    if (!data.title) return `**${word}:** ${data[0].meanings[0].definitions[0].definition}`;
+  } catch {}
+  return null;
+}
+
+// Wikipedia
+async function getWikipedia(topic) {
+  try {
+    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`);
+    const data = await res.json();
+    if (data.extract) return `**${data.title}:** ${data.extract}`;
+  } catch {}
+  return null;
+}
+
+// AI API call
+async function getAIResponse(prompt) {
+  const fullPrompt = getSystemPrompt() + prompt;
+  try {
+    const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}`);
+    if (res.ok) {
+      const text = await res.text();
+      return text.trim() || "…";
+    }
+  } catch {}
+  return "Thinking took too long.";
+}
+
+// Send user message
+async function sendMessage() {
+  const input = document.getElementById('userInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  addMessage('user', msg);
+  input.value = '';
+
+  const learned = findInKnowledge(msg);
+  if (learned) { addMessage('bot', learned); return; }
+
+  // Dictionary
+  if (/^define |^meaning of /.test(msg.toLowerCase())) {
+    const word = msg.replace(/^define |^meaning of /i, '').trim().split(' ')[0];
+    addTypingIndicator();
+    const def = await getDefinition(word);
+    replaceLastBot(def || "Not found.");
+    return;
+  }
+
+  // Wikipedia
+  if (/^tell me about |^what is /.test(msg.toLowerCase())) {
+    const topic = msg.replace(/^tell me about |^what is /i, '').trim();
+    addTypingIndicator();
+    const wiki = await getWikipedia(topic);
+    replaceLastBot(wiki || "No result.");
+    return;
+  }
+
+  // Math
+  const math = handleMath(msg);
+  if (math !== null) { addMessage('bot', `**${msg} = ${math}**`); return; }
+
+  // AI response
+  addTypingIndicator();
+  const response = await getAIResponse(msg);
+  replaceLastBot(response);
+}
+
+// Add message to chat
+function addMessage(sender, text) {
+  const container = document.getElementById('chatMessages');
+  const msgDiv = document.createElement('div');
+  msgDiv.className = `message ${sender}`;
+  if (sender === 'bot') {
+    msgDiv.innerHTML = `
+      <div class="bubble">
+        ${text.replace(/\n/g, '<br>')}
+        <button class="copy-btn" onclick="copyText(this)">Copy</button>
+      </div>`;
+  } else {
+    msgDiv.innerHTML = `<div class="bubble">${text.replace(/\n/g, '<br>')}</div>`;
+  }
+  container.appendChild(msgDiv);
+  container.scrollTop = container.scrollHeight;
+}
+
+// Typing indicator
+function addTypingIndicator() {
+  const container = document.getElementById('chatMessages');
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'message bot';
+  msgDiv.innerHTML = `
+    <div class="bubble">
+      <div class="typing-indicator">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>`;
+  container.appendChild(msgDiv);
+  container.scrollTop = container.scrollHeight;
+}
+
+// Replace last bot message
+function replaceLastBot(text) {
+  const lastBotBubble = document.querySelector('.message.bot:last-child .bubble');
+  if (lastBotBubble) {
+    lastBotBubble.innerHTML = text.replace(/\n/g, '<br>') +
+      '<button class="copy-btn" onclick="copyText(this)">Copy</button>';
+  }
+  document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+}
+
+// Copy button
+function copyText(btn) {
+  const bubble = btn.parentElement;
+  const text = bubble.textContent.replace('Copy', '').trim();
+  navigator.clipboard.writeText(text);
+  btn.textContent = 'Copied';
+  setTimeout(() => btn.textContent = 'Copy', 2000);
+}
+
+// Saved chats
 function loadSavedChats() {
   const chatList = document.getElementById('chatList');
   chatList.innerHTML = '';
@@ -680,7 +732,6 @@ function loadSavedChats() {
   chats.forEach(name => createChatButton(name));
 }
 
-// Create a button for a saved chat
 function createChatButton(name) {
   const chatList = document.getElementById('chatList');
   const btn = document.createElement('button');
@@ -690,12 +741,8 @@ function createChatButton(name) {
   btn.style.alignItems = 'center';
   btn.textContent = name;
 
-  // Load chat on click
-  btn.onclick = () => {
-    newChat(name); // optional: use name for loading chat data
-  };
+  btn.onclick = () => newChat(name);
 
-  // Delete chat button
   const delBtn = document.createElement('span');
   delBtn.textContent = '✕';
   delBtn.style.marginLeft = '8px';
@@ -710,48 +757,11 @@ function createChatButton(name) {
   chatList.appendChild(btn);
 }
 
-// Override newChat to save chat name
-function newChat(name) {
-  const chatName = name || prompt("Enter a name for this chat:", "New Chat")?.trim();
-  if (!chatName) return;
-
-  // Add to saved chats
-  const chats = JSON.parse(localStorage.getItem('savedChats') || '[]');
-  if (!chats.includes(chatName)) {
-    chats.push(chatName);
-    localStorage.setItem('savedChats', JSON.stringify(chats));
-    createChatButton(chatName);
-  }
-
-  // Clear chat messages
-  document.getElementById('chatMessages').innerHTML = '';
-  addMessage('bot', `Chat "${chatName}" started. What's up?`);
-}
-
-// Delete a specific chat from localStorage
-function deleteChat(name) {
-  let chats = JSON.parse(localStorage.getItem('savedChats') || '[]');
-  chats = chats.filter(c => c !== name);
-  localStorage.setItem('savedChats', JSON.stringify(chats));
-  loadSavedChats();
-}
-
-// Delete everything (all chats)
-function deleteAllChats() {
-  if (confirm("Delete all saved chats and history permanently?")) {
-    localStorage.removeItem('savedChats');
-    knowledge = [];
-    newChat();
-    loadSavedChats();
-  }
-}
-
-// Initialize
+// Init
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('sidebar').classList.add('collapsed');
   loadSavedChats();
 });
-
 
   </script>
 </body>
