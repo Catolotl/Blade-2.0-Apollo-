@@ -421,8 +421,7 @@
     <div class="chat-container" id="chatMessages">
       <div class="message bot">
         <div class="bubble">
-          How's it going! I'm Indy,<br><br>
-          Ask me anything, Set a new personality or Teach me new responses!<br><br>
+          How's it going! I'm Indy,<br>
           Ready when you are!
         </div>
       </div>
@@ -461,7 +460,7 @@ function getSystemPrompt() {
   const hiddenPrompt = "You are Indy, an AI running on Sunrise 1.0, the latest and greatest AI model made by J V S T.";
 
   const personalityPrompt = personality ? 
-    `You must fully roleplay as the following character in every single response. ` +
+    `You must fully roleplay as the following character throughout the chat- your former self is irrelivent. ` +
     `Stay completely in character at all times and respond naturally as this character would. ` +
     `Do not break character or mention that you are an AI, a model, or roleplaying unless the user explicitly asks about it. ` +
     `Never start or insert phrases like "You're talking to Indy", "This is Indy", or similar reminders of your name or identity unless it's a natural part of the conversation (e.g., introducing yourself in a greeting when it makes sense). ` +
