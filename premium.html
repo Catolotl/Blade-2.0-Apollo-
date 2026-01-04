@@ -230,26 +230,32 @@
       background: rgba(255,255,255,0.15);
       color: white;
     }
-    .input-area {
-      padding: 20px 28px;
-      background: #0a0a0a;
-    }
-    .input-wrapper {
-      display: flex;
-      gap: 14px;
-      align-items: center;
-    }
-    #userInput {
-      flex: 0.85;
-      padding: 16px 20px;
-      background: #161616;
-      border: 1px solid #282828;
-      border-radius: 30px;
-      color: white;
-      font-size: 16px;
-      outline: none;
-      transition: all 0.3s ease;
-    }
+.input-area {
+  display: flex;
+  justify-content: center;
+}
+
+.input-wrapper {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+
+  justify-content: center; /* centers horizontally */
+}
+
+#userInput {
+  flex: 0.85;
+  max-width: 720px;
+  padding: 16px 20px;
+  background: #161616;
+  border: 1px solid #282828;
+  border-radius: 30px;
+  color: white;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
     #userInput:focus {
       border-color: #a0d8ef;
       box-shadow: 0 0 0 3px rgba(160, 216, 239, 0.2);
