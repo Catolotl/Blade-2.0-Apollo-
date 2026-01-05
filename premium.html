@@ -489,7 +489,7 @@
     </div>
   </div>
 
-  <script>
+ <script>
 let knowledge = [];
 let personality = "";
 let currentChatId = null;
@@ -503,7 +503,7 @@ document.getElementById('personalityPrompt').addEventListener('input', function(
 // Generate system prompt for AI
 function getSystemPrompt() {
   const userName = userProfile.name || "User";
-  const hiddenPrompt = `You are Indy, an AI running on Sunrise 1.0, the latest and greatest AI model made by J V S T. You are speaking with ${userName}.`;
+  const hiddenPrompt = `You are Indy, an AI running on Sunrise 1.0, the latest and greatest AI model made by J V S T. You are speaking with ${userName}. Only use their name when it feels natural in conversation, not in every response.`;
   const personalityPrompt = personality ? 
     `You must fully roleplay as the following character throughout the chat- your former self is irrelevant. ` +
     `Stay completely in character at all times and respond naturally as this character would. ` +
@@ -578,8 +578,7 @@ async function newChat(chatId = null) {
   // Create new chat
   currentChatId = `chat_${Date.now()}`;
   document.getElementById('chatMessages').innerHTML = '';
-  const userName = userProfile.name || "User";
-  addMessage('bot', `Hey ${userName}! Ready when you are!`, false);
+  addMessage('bot', `Ready when you are!`, false);
   
   // Save to chat list
   const chatList = JSON.parse(localStorage.getItem('chatList') || '[]');
@@ -619,8 +618,6 @@ function getChatName(chatId) {
 
 // Delete a specific chat
 function deleteChat(chatId) {
-  if (!confirm('Delete this chat?')) return;
-  
   localStorage.removeItem(`chat_${chatId}`);
   
   let chatList = JSON.parse(localStorage.getItem('chatList') || '[]');
@@ -630,8 +627,7 @@ function deleteChat(chatId) {
   if (currentChatId === chatId) {
     currentChatId = null;
     document.getElementById('chatMessages').innerHTML = '';
-    const userName = userProfile.name || "User";
-    addMessage('bot', `Hey ${userName}! Ready when you are!`, false);
+    addMessage('bot', `Ready when you are!`, false);
   }
   
   loadSavedChats();
@@ -647,8 +643,7 @@ function deleteAllChats() {
     knowledge = [];
     currentChatId = null;
     document.getElementById('chatMessages').innerHTML = '';
-    const userName = userProfile.name || "User";
-    addMessage('bot', `All chats deleted, ${userName}! Ready for a fresh start!`, false);
+    addMessage('bot', `All chats deleted! Ready for a fresh start!`, false);
     loadSavedChats();
   }
 }
@@ -713,13 +708,7 @@ function submitProfile() {
   localStorage.setItem('userProfile', JSON.stringify(userProfile));
   closeProfileModal();
   
-  // Update greeting if in a new chat
-  const messages = document.querySelectorAll('#chatMessages .message');
-  if (messages.length === 1) {
-    const userName = userProfile.name || "User";
-    document.querySelector('.message.bot .bubble').innerHTML = 
-      `Hey ${userName}! Ready when you are!<button class="copy-btn" onclick="copyText(this)">Copy</button>`;
-  }
+  // No need to update greeting - let AI use name naturally
 }
 
 // Cosine similarity for learned responses
@@ -960,8 +949,7 @@ window.addEventListener('DOMContentLoaded', () => {
   if (chatList.length > 0) {
     loadChat(chatList[0].id);
   } else {
-    const userName = userProfile.name || "User";
-    addMessage('bot', `Hey ${userName}! Ready when you are!`, false);
+    addMessage('bot', `Ready when you are!`, false);
   }
 });
   </script>
