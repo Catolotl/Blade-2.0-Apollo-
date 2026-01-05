@@ -733,9 +733,292 @@
     <footer>
         © 2026 J V S T • Blade Card • Remember sharing Blade Cards and codes is strictly prohibited
     </footer>
+<script>
+    var userData = {
+        isLoggedIn: false,
+        name: '',
+        email: '',
+        profilePic: null,
+        isPremium: false,
+        isPlus: false,
+        codeVisible: false
+    };
+    var VALID_CODES = ["cutedrunkraccoons","blade","card5","golds","tv482","ai4me","trash","panda","rocket","nebul","qubit","zorp9","kryp7","fluxx","vortex","spark", "3p#q", "goldpass"];
+    var scanAnimationId = null;
 
-    <script>
-        var userData = {
+    function initApp() {
+        loadUserData();
+        updateUI();
+    }
+
+    function loadUserData() {
+        const savedData = localStorage.getItem('bladeUserData');
+        if (savedData) {
+            try {
+                const parsedData = JSON.parse(savedData);
+                if (parsedData.isLoggedIn) {
+                    userData = parsedData;
+                } else {
+                    localStorage.removeItem('bladeUserData');
+                }
+            } catch (e) {
+                console.error('Error loading user data:', e);
+                localStorage.removeItem('bladeUserData');
+            }
+        }
+    }
+
+    function saveUserData() {
+        if (userData.isLoggedIn) {
+            localStorage.setItem('bladeUserData', JSON.stringify(userData));
+        } else {
+            localStorage.removeItem('bladeUserData');
+        }
+    }
+
+    function updateUI() {
+        var headerAuth = document.getElementById('headerAuth');
+        var welcomeTitle = document.getElementById('welcomeTitle');
+        var welcomeSubtitle = document.getElementById('welcomeSubtitle');
+        var contentSections = document.getElementById('contentSections');
+        var premiumSection = document.getElementById('premiumSection');
+        var plusSection = document.getElementById('plusSection');
+        var premiumBadgeSection = document.getElementById('premiumBadgeSection');
+        var plusBadgeSection = document.getElementById('plusBadgeSection');
+        if (userData.isLoggedIn) {
+            var initial = userData.name.charAt(0).toUpperCase();
+            if (userData.profilePic) {
+                headerAuth.innerHTML = '<div class="user-header"><img src="' + userData.profilePic + '" class="profile-pic-small" alt="Profile"><span style="font-weight: 500;">' + userData.name + '</span></div>';
+            } else {
+                headerAuth.innerHTML = '<div class="user-header"><div class="profile-initial">' + initial + '</div><span style="font-weight: 500;">' + userData.name + '</span></div>';
+            }
+            welcomeTitle.textContent = 'Hi, ' + userData.name.split(' ')[0];
+            welcomeSubtitle.textContent = 'Welcome to your premium access';
+            contentSections.classList.remove('hidden');
+            updateLocks();
+            if (userData.isPremium) {
+                premiumSection.classList.add('hidden');
+                premiumBadgeSection.classList.remove('hidden');
+               
+                if (!userData.isPlus) {
+                    plusSection.classList.remove('hidden');
+                    plusBadgeSection.classList.add('hidden');
+                } else {
+                    plusSection.classList.add('hidden');
+                    plusBadgeSection.classList.remove('hidden');
+                }
+            } else {
+                premiumSection.classList.remove('hidden');
+                premiumBadgeSection.classList.add('hidden');
+                plusSection.classList.add('hidden');
+            }
+            var codeEl = document.getElementById('code');
+            var toggleBtn = document.getElementById('toggleBtn');
+            if (userData.codeVisible) {
+                codeEl.classList.remove('blur');
+                toggleBtn.textContent = 'Hide Code';
+            } else {
+                codeEl.classList.add('blur');
+                toggleBtn.textContent = 'Show Code';
+            }
+        } else {
+            headerAuth.innerHTML = '<button class="auth-btn" onclick="showAuthModal()">Sign Up/Sign In</button>';
+            welcomeTitle.textContent = 'Welcome';
+            welcomeSubtitle.textContent = 'Premium digital access';
+            contentSections.classList.add('hidden');
+            premiumSection.classList.add('hidden');
+            plusSection.classList.add('hidden');
+        }
+    }
+
+    function updateLocks() {
+        var codeSection = document.getElementById('codeSection');
+        var accessSection = document.getElementById('accessSection');
+        var codeContent = document.getElementById('codeContent');
+        var accessContent = document.getElementById('accessContent');
+        var tunesBtn = document.getElementById('tunesBtn');
+        var tvBtn = document.getElementById('tvBtn');
+        var indyBtn = document.getElementById('indyBtn');
+        var miniBtn = document.getElementById('miniBtn');
+        var codeLockExists = document.getElementById('codeLock');
+        var accessLockExists = document.getElementById('accessLock');
+        if (!userData.isPremium) {
+            codeContent.classList.add('locked-content');
+            accessContent.classList.add('locked-content');
+           
+            if (!codeLockExists) {
+                var codeLock = document.createElement('div');
+                codeLock.id = 'codeLock';
+                codeLock.className = 'lock-overlay';
+                codeLock.innerHTML = '<div class="lock-icon">🔒</div><h3>Blade Card Required</h3><p>Upgrade to Blade Card membership to access TV codes</p><a href="#" class="contact-link">Contact developer for more info</a>';
+                codeSection.appendChild(codeLock);
+            }
+            if (!accessLockExists) {
+                var accessLock = document.createElement('div');
+                accessLock.id = 'accessLock';
+                accessLock.className = 'lock-overlay';
+                accessLock.innerHTML = '<div class="lock-icon">🔒</div><h3>Blade Card Required</h3><p>Upgrade to Blade Card membership to access these services</p><a href="mailto:developer@bladecard.com" class="contact-link">Contact developer for more info</a>';
+                accessSection.appendChild(accessLock);
+            }
+        } else {
+            codeContent.classList.remove('locked-content');
+            accessContent.classList.remove('locked-content');
+           
+            if (codeLockExists) codeLockExists.remove();
+            if (accessLockExists) accessLockExists.remove();
+            tunesBtn.classList.remove('disabled');
+            tvBtn.classList.remove('disabled');
+            tunesBtn.onclick = function() { window.open('https://www.shopjust.store/apps/tunes','_blank'); };
+            tvBtn.onclick = function() { window.open('https://www.shopjust.store/apps/tv','_blank'); };
+            if (userData.isPlus) {
+                indyBtn.classList.remove('disabled');
+                miniBtn.classList.remove('disabled');
+                indyBtn.onclick = function() { window.open('https://www.shopjust.store/indyplus.html','_blank'); };
+                miniBtn.onclick = function() { window.open('https://www.mini-crafts.com','_blank'); };
+                indyBtn.textContent = 'Indy+';
+                miniBtn.textContent = 'mini-crafts';
+            } else {
+                indyBtn.classList.add('disabled');
+                miniBtn.classList.add('disabled');
+            }
+        }
+    }
+
+    function showAuthModal() {
+        document.getElementById('authModal').classList.add('active');
+    }
+
+    function hideAuthModal() {
+        document.getElementById('authModal').classList.remove('active');
+    }
+
+    function handleImageUpload(event) {
+        var file = event.target.files[0];
+        if (file) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('profilePreview').src = e.target.result;
+                document.getElementById('profilePreview').classList.remove('hidden');
+                document.getElementById('profilePlaceholder').classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function handleAuth(event) {
+        event.preventDefault();
+       
+        var name = document.getElementById('name').value;
+        var email = document.getElementById('email').value;
+        var profilePic = document.getElementById('profilePreview').src;
+        userData = {
+            isLoggedIn: true,
+            name: name,
+            email: email,
+            profilePic: profilePic && profilePic.indexOf('data:') === 0 ? profilePic : null,
+            isPremium: false,
+            isPlus: false,
+            codeVisible: false
+        };
+        saveUserData();
+        hideAuthModal();
+        updateUI();
+        document.getElementById('authForm').reset();
+        document.getElementById('profilePreview').classList.add('hidden');
+        document.getElementById('profilePlaceholder').classList.remove('hidden');
+    }
+
+    function showCardScan() {
+        document.getElementById('cardScanModal').classList.add('active');
+        document.getElementById('scanStage').classList.remove('hidden');
+        document.getElementById('codeStage').classList.add('hidden');
+        document.getElementById('scanStatus').style.opacity = '0';
+        document.getElementById('scanBtn').disabled = false;
+    }
+
+    function hideCardScan() {
+        document.getElementById('cardScanModal').classList.remove('active');
+        if (scanAnimationId) {
+            clearInterval(scanAnimationId);
+            scanAnimationId = null;
+        }
+    }
+
+    function attemptScan() {
+        var scanWave = document.getElementById('scanWave');
+        var scanStatus = document.getElementById('scanStatus');
+        var scanBtn = document.getElementById('scanBtn');
+       
+        scanBtn.disabled = true;
+        scanStatus.textContent = "Scanning...";
+        scanStatus.style.color = "#007aff";
+        scanStatus.style.opacity = "1";
+        var animCount = 0;
+        scanAnimationId = setInterval(function() {
+            scanWave.style.animation = 'scanWave 2s ease-in-out';
+            animCount++;
+        }, 2000);
+        setTimeout(function() {
+            if (scanAnimationId) {
+                clearInterval(scanAnimationId);
+                scanAnimationId = null;
+            }
+            scanWave.style.animation = 'none';
+            if (Math.random() < 0.70) {
+                scanStatus.textContent = "Card Verified";
+                scanStatus.style.color = "#34c759";
+               
+                setTimeout(function() {
+                    document.getElementById('scanStage').classList.add('hidden');
+                    document.getElementById('codeStage').classList.remove('hidden');
+                    document.getElementById('cardCodeInput').focus();
+                }, 1200);
+            } else {
+                scanStatus.textContent = "Card not detected";
+                scanStatus.style.color = "#ff3b30";
+                scanBtn.disabled = false;
+                setTimeout(function() {
+                    scanStatus.style.opacity = "0";
+                }, 2500);
+            }
+        }, 1800);
+    }
+
+    document.getElementById('cardCodeInput').addEventListener('input', function() {
+        var code = this.value.trim().toLowerCase();
+        var codeError = document.getElementById('codeError');
+       
+        if (code.length > 3) {
+            if (VALID_CODES.indexOf(code) !== -1) {
+                codeError.style.opacity = '0';
+                setTimeout(function() {
+                    userData.isPremium = true;
+                    saveUserData();
+                    hideCardScan();
+                    updateUI();
+                    document.getElementById('cardCodeInput').value = '';
+                }, 350);
+            } else if (code.length >= 4) {
+                codeError.textContent = 'Invalid code. Please try again.';
+                codeError.style.opacity = '1';
+            }
+        }
+    });
+
+    function upgradePlus() {
+        userData.isPlus = true;
+        saveUserData();
+        updateUI();
+    }
+
+    function toggleCode() {
+        userData.codeVisible = !userData.codeVisible;
+        saveUserData();
+        updateUI();
+    }
+
+    function logout() {
+        userData = {
             isLoggedIn: false,
             name: '',
             email: '',
@@ -744,300 +1027,22 @@
             isPlus: false,
             codeVisible: false
         };
+        localStorage.removeItem('bladeUserData');
+        updateUI();
+    }
 
-        var VALID_CODES = ["cutedrunkraccoons","blade","card5","golds","tv482","ai4me","trash","panda","rocket","nebul","qubit","zorp9","kryp7","fluxx","vortex","spark", "3p#q", "goldpass"];
-        var scanAnimationId = null;
-
-        function initApp() {
-            updateUI();
-        }
-
-        function updateUI() {
-            var headerAuth = document.getElementById('headerAuth');
-            var welcomeTitle = document.getElementById('welcomeTitle');
-            var welcomeSubtitle = document.getElementById('welcomeSubtitle');
-            var contentSections = document.getElementById('contentSections');
-            var premiumSection = document.getElementById('premiumSection');
-            var plusSection = document.getElementById('plusSection');
-            var premiumBadgeSection = document.getElementById('premiumBadgeSection');
-            var plusBadgeSection = document.getElementById('plusBadgeSection');
-
-            if (userData.isLoggedIn) {
-                var initial = userData.name.charAt(0).toUpperCase();
-                if (userData.profilePic) {
-                    headerAuth.innerHTML = '<div class="user-header"><img src="' + userData.profilePic + '" class="profile-pic-small" alt="Profile"><span style="font-weight: 500;">' + userData.name + '</span></div>';
-                } else {
-                    headerAuth.innerHTML = '<div class="user-header"><div class="profile-initial">' + initial + '</div><span style="font-weight: 500;">' + userData.name + '</span></div>';
-                }
-
-                welcomeTitle.textContent = 'Hi, ' + userData.name.split(' ')[0];
-                welcomeSubtitle.textContent = 'Welcome to your premium access';
-
-                contentSections.classList.remove('hidden');
-
-                updateLocks();
-
-                if (userData.isPremium) {
-                    premiumSection.classList.add('hidden');
-                    premiumBadgeSection.classList.remove('hidden');
-                    
-                    if (!userData.isPlus) {
-                        plusSection.classList.remove('hidden');
-                        plusBadgeSection.classList.add('hidden');
-                    } else {
-                        plusSection.classList.add('hidden');
-                        plusBadgeSection.classList.remove('hidden');
-                    }
-                } else {
-                    premiumSection.classList.remove('hidden');
-                    premiumBadgeSection.classList.add('hidden');
-                    plusSection.classList.add('hidden');
-                }
-
-                var codeEl = document.getElementById('code');
-                var toggleBtn = document.getElementById('toggleBtn');
-                if (userData.codeVisible) {
-                    codeEl.classList.remove('blur');
-                    toggleBtn.textContent = 'Hide Code';
-                } else {
-                    codeEl.classList.add('blur');
-                    toggleBtn.textContent = 'Show Code';
-                }
-            } else {
-                headerAuth.innerHTML = '<button class="auth-btn" onclick="showAuthModal()">Sign Up/Sign In</button>';
-                welcomeTitle.textContent = 'Welcome';
-                welcomeSubtitle.textContent = 'Premium digital access';
-                contentSections.classList.add('hidden');
-                premiumSection.classList.add('hidden');
-                plusSection.classList.add('hidden');
-            }
-        }
-
-        function updateLocks() {
-            var codeSection = document.getElementById('codeSection');
-            var accessSection = document.getElementById('accessSection');
-            var codeContent = document.getElementById('codeContent');
-            var accessContent = document.getElementById('accessContent');
-            var tunesBtn = document.getElementById('tunesBtn');
-            var tvBtn = document.getElementById('tvBtn');
-            var indyBtn = document.getElementById('indyBtn');
-            var miniBtn = document.getElementById('miniBtn');
-
-            var codeLockExists = document.getElementById('codeLock');
-            var accessLockExists = document.getElementById('accessLock');
-
-            if (!userData.isPremium) {
-                codeContent.classList.add('locked-content');
-                accessContent.classList.add('locked-content');
-                
-                if (!codeLockExists) {
-                    var codeLock = document.createElement('div');
-                    codeLock.id = 'codeLock';
-                    codeLock.className = 'lock-overlay';
-                    codeLock.innerHTML = '<div class="lock-icon">🔒</div><h3>Blade Card Required</h3><p>Upgrade to Blade Card membership to access TV codes</p><a href="#" class="contact-link">Contact developer for more info</a>';
-                    codeSection.appendChild(codeLock);
-                }
-
-                if (!accessLockExists) {
-                    var accessLock = document.createElement('div');
-                    accessLock.id = 'accessLock';
-                    accessLock.className = 'lock-overlay';
-                    accessLock.innerHTML = '<div class="lock-icon">🔒</div><h3>Blade Card Required</h3><p>Upgrade to Blade Card membership to access these services</p><a href="mailto:developer@bladecard.com" class="contact-link">Contact developer for more info</a>';
-                    accessSection.appendChild(accessLock);
-                }
-            } else {
-                codeContent.classList.remove('locked-content');
-                accessContent.classList.remove('locked-content');
-                
-                if (codeLockExists) codeLockExists.remove();
-                if (accessLockExists) accessLockExists.remove();
-
-                tunesBtn.classList.remove('disabled');
-                tvBtn.classList.remove('disabled');
-                tunesBtn.onclick = function() { window.open('https://www.shopjust.store/apps/tunes','_blank'); };
-                tvBtn.onclick = function() { window.open('https://www.shopjust.store/apps/tv','_blank'); };
-
-                if (userData.isPlus) {
-                    indyBtn.classList.remove('disabled');
-                    miniBtn.classList.remove('disabled');
-                    indyBtn.onclick = function() { window.open('https://www.shopjust.store/indyplus.html','_blank'); };
-                    miniBtn.onclick = function() { window.open('https://www.mini-crafts.com','_blank'); };
-                    indyBtn.textContent = 'Indy+';
-                    miniBtn.textContent = 'mini-crafts';
-                } else {
-                    indyBtn.classList.add('disabled');
-                    miniBtn.classList.add('disabled');
-                }
-            }
-        }
-
-        function showAuthModal() {
-            document.getElementById('authModal').classList.add('active');
-        }
-
-        function hideAuthModal() {
-            document.getElementById('authModal').classList.remove('active');
-        }
-
-        function handleImageUpload(event) {
-            var file = event.target.files[0];
-            if (file) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('profilePreview').src = e.target.result;
-                    document.getElementById('profilePreview').classList.remove('hidden');
-                    document.getElementById('profilePlaceholder').classList.add('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function handleAuth(event) {
-            event.preventDefault();
-            
-            var name = document.getElementById('name').value;
-            var email = document.getElementById('email').value;
-            var profilePic = document.getElementById('profilePreview').src;
-
-            userData = {
-                isLoggedIn: true,
-                name: name,
-                email: email,
-                profilePic: profilePic && profilePic.indexOf('data:') === 0 ? profilePic : null,
-                isPremium: false,
-                isPlus: false,
-                codeVisible: false
-            };
-
+    document.getElementById('authModal').addEventListener('click', function(e) {
+        if (e.target === this) {
             hideAuthModal();
-            updateUI();
-
-            document.getElementById('authForm').reset();
-            document.getElementById('profilePreview').classList.add('hidden');
-            document.getElementById('profilePlaceholder').classList.remove('hidden');
         }
-
-        function upgradePremium() {
-            userData.isPremium = true;
-            updateUI();
+    });
+    document.getElementById('cardScanModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            hideCardScan();
         }
-
-        function showCardScan() {
-            document.getElementById('cardScanModal').classList.add('active');
-            document.getElementById('scanStage').classList.remove('hidden');
-            document.getElementById('codeStage').classList.add('hidden');
-            document.getElementById('scanStatus').style.opacity = '0';
-            document.getElementById('scanBtn').disabled = false;
-        }
-
-        function hideCardScan() {
-            document.getElementById('cardScanModal').classList.remove('active');
-            if (scanAnimationId) {
-                clearInterval(scanAnimationId);
-                scanAnimationId = null;
-            }
-        }
-
-        function attemptScan() {
-            var scanWave = document.getElementById('scanWave');
-            var scanStatus = document.getElementById('scanStatus');
-            var scanBtn = document.getElementById('scanBtn');
-            
-            scanBtn.disabled = true;
-            scanStatus.textContent = "Scanning...";
-            scanStatus.style.color = "#007aff";
-            scanStatus.style.opacity = "1";
-
-            var animCount = 0;
-            scanAnimationId = setInterval(function() {
-                scanWave.style.animation = 'scanWave 2s ease-in-out';
-                animCount++;
-            }, 2000);
-
-            setTimeout(function() {
-                if (scanAnimationId) {
-                    clearInterval(scanAnimationId);
-                    scanAnimationId = null;
-                }
-                scanWave.style.animation = 'none';
-
-                if (Math.random() < 0.70) {
-                    scanStatus.textContent = "Card Verified";
-                    scanStatus.style.color = "#34c759";
-                    
-                    setTimeout(function() {
-                        document.getElementById('scanStage').classList.add('hidden');
-                        document.getElementById('codeStage').classList.remove('hidden');
-                        document.getElementById('cardCodeInput').focus();
-                    }, 1200);
-                } else {
-                    scanStatus.textContent = "Card not detected";
-                    scanStatus.style.color = "#ff3b30";
-                    scanBtn.disabled = false;
-                    setTimeout(function() {
-                        scanStatus.style.opacity = "0";
-                    }, 2500);
-                }
-            }, 1800);
-        }
-
-        document.getElementById('cardCodeInput').addEventListener('input', function() {
-            var code = this.value.trim().toLowerCase();
-            var codeError = document.getElementById('codeError');
-            
-            if (code.length > 3) {
-                if (VALID_CODES.indexOf(code) !== -1) {
-                    codeError.style.opacity = '0';
-                    setTimeout(function() {
-                        userData.isPremium = true;
-                        hideCardScan();
-                        updateUI();
-                        document.getElementById('cardCodeInput').value = '';
-                    }, 350);
-                } else if (code.length >= 4) {
-                    codeError.textContent = 'Invalid code. Please try again.';
-                    codeError.style.opacity = '1';
-                }
-            }
-        });
-
-        function upgradePlus() {
-            userData.isPlus = true;
-            updateUI();
-        }
-
-        function toggleCode() {
-            userData.codeVisible = !userData.codeVisible;
-            updateUI();
-        }
-
-        function logout() {
-            userData = {
-                isLoggedIn: false,
-                name: '',
-                email: '',
-                profilePic: null,
-                isPremium: false,
-                isPlus: false,
-                codeVisible: false
-            };
-            updateUI();
-        }
-
-        document.getElementById('authModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                hideAuthModal();
-            }
-        });
-
-        document.getElementById('cardScanModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                hideCardScan();
-            }
-        });
-
-        initApp();
-    </script>
+    });
+    initApp();
+</script>
 
     <style>
         @keyframes scanWave {
