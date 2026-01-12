@@ -230,8 +230,8 @@ Use the student's name ({name}) naturally sometimes.
 
 Rules:
 - When speaking the target language, ALWAYS use correct native script/characters (hiragana/katakana/kanji for Japanese, hangul for Korean, hanzi for Chinese, etc.).
-- NEVER romanize or transliterate the target language unless specifically explaining pronunciation (and then only in parentheses).
-- Use mostly {language} in native characters, but explain grammar/vocabulary/pronunciation in clear simple English.
+- NEVER romanize or transliterate the target language unless specifically explaining pronunciation (and then only in parentheses as help).
+- Use mostly {language} in native script, but explain grammar/vocabulary/pronunciation in clear simple English.
 - Actively teach: examples (in native script), explanations, questions, small exercises, gentle corrections.
 - Show corrections: wrong sentence (native script) → correct version (native script) → short reason in English.
 - Give phonetic help only when useful and in parentheses (e.g. おはようございます (ohayou gozaimasu)).
@@ -304,7 +304,7 @@ function showModal(isEdit = false) {
 
 function hideModal() { modal.classList.remove("active"); }
 
-// BROWSER TTS - Strong preference for male Australian English
+// BROWSER TTS - Prefer male Australian for English, language-specific for others
 function speak(text) {
   if (!window.speechSynthesis) return;
 
@@ -314,41 +314,30 @@ function speak(text) {
 
   let selectedVoice = null;
 
-  // Priority 1: Male Australian voices (most natural-sounding ones)
-  selectedVoice = voices.find(v =>
-    v.lang.includes('en-AU') &&
-    /male|daniel|james|liam|jack|ethan|owen|google|microsoft|premium/i.test(v.name.toLowerCase()) &&
-    !/female|siri|alexa|karen/i.test(v.name.toLowerCase())
-  );
-
-  // Priority 2: Any Australian voice
-  if (!selectedVoice) {
-    selectedVoice = voices.find(v => v.lang.includes('en-AU'));
-  }
-
-  // Priority 3: Target language voice if not English
-  if (profile?.language && !profile.language.toLowerCase().includes('english')) {
+  // If text is mostly English, prefer male Australian
+  if (/^[a-zA-Z0-9\s\p{P}]+$/.test(text.replace(/[\u3040-\u30ff\u4e00-\u9faf]/g, ''))) { // rough English check
+    selectedVoice = voices.find(v =>
+      v.lang.includes('en-AU') &&
+      /male|daniel|james|liam|jack|ethan|owen|google|microsoft|premium/i.test(v.name.toLowerCase()) &&
+      !/female|siri|alexa|karen/i.test(v.name.toLowerCase())
+    ) || voices.find(v => v.lang.includes('en-AU')) ||
+      voices.find(v => v.lang.startsWith('en'));
+  } else {
+    // Target language voice
     const langCode = {
-      'japanese': 'ja-JP',
-      'korean': 'ko-KR',
-      'mandarin chinese': 'zh-CN',
-      'french': 'fr-FR',
-      'german': 'de-DE',
-      'italian': 'it-IT',
-      'portuguese': 'pt-PT',
-      'arabic': 'ar-SA',
-      'russian': 'ru-RU'
-    }[profile.language.toLowerCase()];
+      'Japanese': 'ja-JP',
+      'Korean': 'ko-KR',
+      'Mandarin Chinese': 'zh-CN',
+      'French': 'fr-FR',
+      'German': 'de-DE',
+      'Italian': 'it-IT',
+      'Portuguese': 'pt-PT',
+      'Arabic': 'ar-SA',
+      'Russian': 'ru-RU'
+    }[profile.language] || 'en-AU';
 
-    if (langCode) {
-      selectedVoice = voices.find(v => v.lang === langCode) ||
-                      voices.find(v => v.lang.startsWith(langCode.split('-')[0]));
-    }
-  }
-
-  // Ultimate fallback: any English voice
-  if (!selectedVoice) {
-    selectedVoice = voices.find(v => v.lang.startsWith('en')) || voices[0];
+    selectedVoice = voices.find(v => v.lang === langCode) ||
+                    voices.find(v => v.lang.startsWith(langCode.split('-')[0]));
   }
 
   if (selectedVoice) {
@@ -374,7 +363,19 @@ function initRecognition() {
   recognition = new SR();
   recognition.continuous = true;
   recognition.interimResults = false;
-  recognition.lang = "en-US";
+
+  // Set recognition language based on profile (for better accuracy in target language)
+  recognition.lang = {
+    'Japanese': 'ja-JP',
+    'Korean': 'ko-KR',
+    'Mandarin Chinese': 'zh-CN',
+    'French': 'fr-FR',
+    'German': 'de-DE',
+    'Italian': 'it-IT',
+    'Portuguese': 'pt-PT',
+    'Arabic': 'ar-SA',
+    'Russian': 'ru-RU'
+  }[profile.language] || 'en-US';
 
   recognition.onresult = (event) => {
     let transcript = "";
@@ -490,6 +491,9 @@ function initializeApp() {
     showModal(false);
     statusEl.textContent = "Please set up your profile.";
   }
+  // Pre-init recognition to load voices
+  speechSynthesis.onvoiceschanged = () => {};
+  initRecognition();
 }
 
 document.getElementById("saveProfileBtn").onclick = () => {
@@ -506,9 +510,6 @@ document.getElementById("saveProfileBtn").onclick = () => {
 editBtn.onclick = () => showModal(true);
 
 initializeApp();
-
-// Pre-load voices (important on some browsers)
-speechSynthesis.onvoiceschanged = () => {};
 
 </script>
 </body>
