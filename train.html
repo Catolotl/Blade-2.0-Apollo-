@@ -6,186 +6,187 @@
   <title>Indy — Language Coach</title>
   <style>
     :root {
-      --bg: #ffffff;
-      --text: #111111;
-      --subtext: #444444;
-      --accent: #0066cc;
-      --light: #f8f9fa;
-      --border: #e0e0e0;
-      --modal-bg: rgba(0,0,0,0.55);
+      --bg:        #000000;
+      --text:      #ffffff;
+      --text-dim:  #cccccc;
+      --border:    #333333;
+      --accent:    #ffffff;
+      --accent-dim:#888888;
+      --modal-bg:  rgba(0,0,0,0.75);
     }
 
     * { margin:0; padding:0; box-sizing:border-box; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding: 24px;
+      padding: 1.5rem;
       line-height: 1.5;
     }
 
-    .container { max-width: 900px; margin: 0 auto; }
+    .container { max-width: 920px; margin: 0 auto; }
 
-    header { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      margin-bottom: 1.5rem; 
-    }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
 
-    h1 { 
-      font-size: 2.2rem; 
-      color: var(--accent); 
-      font-weight: 600; 
-    }
+    h1 { font-size: 2.1rem; font-weight: 500; letter-spacing: -0.02em; }
 
     .btn-small {
-      padding: 8px 16px;
-      background: #6c757d;
+      padding: 0.5rem 1rem;
+      background: #111;
       color: white;
-      border: none;
+      border: 1px solid #444;
       border-radius: 6px;
       cursor: pointer;
       font-size: 0.9rem;
+      transition: all 0.18s ease;
     }
-    .btn-small:hover { background: #5a6268; }
+    .btn-small:hover { background: #222; border-color: #666; }
 
     #chat {
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      height: 480px;
+      background: #0a0a0a;
+      border: 1px solid #222;
+      border-radius: 8px;
+      height: 520px;
       overflow-y: auto;
-      padding: 1.5rem;
-      background: white;
+      padding: 1.4rem;
       margin-bottom: 1rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
     }
 
     .message {
       margin: 1rem 0;
-      padding: 12px 16px;
-      border-radius: 10px;
-      max-width: 82%;
+      padding: 0.9rem 1.3rem;
+      border-radius: 8px;
+      max-width: 80%;
       line-height: 1.45;
+      font-size: 1.05rem;
     }
-    .user   { background: #e3f2fd; margin-left: auto; }
-    .ai     { background: #f5f5f5; border-left: 4px solid var(--accent); }
 
-    .input-area { display: flex; gap: 12px; }
+    .user { background: #1a1a1a; margin-left: auto; border: 1px solid #333; }
+
+    .ai { background: transparent; border-left: 3px solid #888; padding-left: 1.1rem; }
+
+    .input-area { display: flex; gap: 0.8rem; }
 
     #userInput {
       flex: 1;
-      padding: 14px 18px;
-      border: 1px solid var(--border);
+      padding: 0.9rem 1.3rem;
+      background: #111;
+      color: white;
+      border: 1px solid #333;
       border-radius: 8px;
       font-size: 1.05rem;
     }
 
-    #userInput:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(0,102,204,0.15);
-    }
+    #userInput:focus { outline: none; border-color: #777; }
 
     .mic-btn {
-      width: 54px;
-      height: 54px;
+      width: 52px; height: 52px;
       border-radius: 50%;
-      background: var(--accent);
+      background: #111;
       color: white;
-      border: none;
-      font-size: 1.3rem;
+      border: 1px solid #444;
+      font-size: 1.4rem;
       cursor: pointer;
+      transition: all 0.2s;
     }
-    .mic-btn.listening {
-      background: #dc3545;
-      animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
 
-    .status { margin-top: 0.8rem; color: var(--subtext); font-size: 0.9rem; }
+    .mic-btn:hover { background: #1a1a1a; }
+
+    .mic-btn.listening {
+      background: #300000;
+      border-color: #800000;
+      animation: softPulse 2s infinite ease-in-out;
+    }
+
+    @keyframes softPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(255,0,0,0.12); }
+      50%     { box-shadow: 0 0 0 14px rgba(255,0,0,0.08); }
+    }
+
+    .status { margin-top: 0.7rem; color: #888; font-size: 0.9rem; }
 
     .modal {
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background: var(--modal-bg);
       display: none;
-      align-items: center;
-      justify-content: center;
+      place-items: center;
       z-index: 1000;
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(6px);
     }
-    .modal.active { display: flex; }
+
+    .modal.active { display: grid; }
 
     .modal-content {
-      background: white;
-      border-radius: 12px;
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 10px;
       width: 90%;
-      max-width: 480px;
-      padding: 2rem;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      max-width: 460px;
+      padding: 1.8rem;
     }
 
-    .modal h2 { margin-bottom: 1.5rem; color: var(--accent); }
+    .modal h2 { margin-bottom: 1.4rem; font-weight: 500; }
 
-    .form-group { margin-bottom: 1.3rem; }
-    label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--subtext); }
+    .form-group { margin-bottom: 1.2rem; }
+
+    label { display: block; margin-bottom: 0.4rem; color: #aaa; font-size: 0.9rem; }
+
     input[type="text"], select {
       width: 100%;
-      padding: 10px 14px;
-      border: 1px solid var(--border);
+      padding: 0.8rem 1rem;
+      background: #0a0a0a;
+      color: white;
+      border: 1px solid #333;
       border-radius: 6px;
       font-size: 1rem;
-    }
-    select:focus, input:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(0,102,204,0.15);
     }
 
-    .modal-buttons { margin-top: 1.8rem; text-align: right; }
+    .modal-buttons { margin-top: 1.6rem; text-align: right; }
+
     .btn-primary {
-      padding: 10px 20px;
-      background: var(--accent);
+      padding: 0.8rem 1.4rem;
+      background: #222;
       color: white;
-      border: none;
+      border: 1px solid #555;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 1rem;
     }
-    .btn-primary:hover { background: #0055aa; }
+
+    .btn-primary:hover { background: #333; }
   </style>
 </head>
 <body>
 
 <div class="container">
   <header>
-    <h1>Indy — Language Coach</h1>
+    <h1>Indy</h1>
     <button class="btn-small" id="editProfileBtn" style="display:none;">Change Profile</button>
   </header>
 
   <div id="chat"></div>
 
   <div class="input-area" id="inputArea" style="display:none;">
-    <input type="text" id="userInput" placeholder="Type your message..." autocomplete="off"/>
-    <button class="mic-btn" id="micBtn" title="Click or say 'Hey Indy'">🎤</button>
+    <input type="text" id="userInput" placeholder="Type here..." autocomplete="off"/>
+    <button class="mic-btn" id="micBtn" title="Voice • Say Hey Indy">🎤</button>
   </div>
 
   <div class="status" id="status">Loading...</div>
 </div>
 
-<!-- Profile Modal (no cancel button) -->
+<!-- Profile Modal -->
 <div class="modal" id="profileModal">
   <div class="modal-content">
-    <h2 id="modalTitle">Welcome! Let's get started</h2>
+    <h2 id="modalTitle">Welcome — Let's begin</h2>
+
     <div class="form-group">
       <label>Your Name</label>
       <input type="text" id="name" placeholder="e.g. Alex" autocomplete="off"/>
     </div>
+
     <div class="form-group">
-      <label>Language you want to learn</label>
+      <label>Language to learn</label>
       <select id="language">
         <option value="">— select —</option>
         <option value="French">French</option>
@@ -199,13 +200,14 @@
         <option value="Russian">Russian</option>
       </select>
     </div>
+
     <div class="form-group">
-      <label>Your current level</label>
+      <label>Your level</label>
       <select id="level">
         <option value="">— select —</option>
-        <option value="Beginner">Beginner (A1–A2)</option>
-        <option value="Intermediate">Intermediate (B1–B2)</option>
-        <option value="Advanced">Advanced (C1–C2)</option>
+        <option value="Beginner">Beginner</option>
+        <option value="Intermediate">Intermediate</option>
+        <option value="Advanced">Advanced</option>
       </select>
     </div>
 
@@ -216,40 +218,33 @@
 </div>
 
 <script>
-// ──────────────────────────────────────────────
 // CONFIG
-// ──────────────────────────────────────────────
-
-const API_URL = "https://text.pollinations.ai/";
-const STORAGE_KEY = "indyLanguageCoach_v1";
+const POLLINATIONS_API = "https://text.pollinations.ai/";
+const STORAGE_KEY = "indyCoach_v2026";
 
 const SYSTEM_PROMPT_TEMPLATE = `
-You are Indy, a professional, patient, encouraging language teacher running on Sunshine 1.0.
+You are Indy, a calm, patient, encouraging language tutor on Sunshine 1.0.
 
-Your ONLY job is to actively TEACH the user {language} at {level} level.
-Use the student's name ({name}) naturally from time to time.
+Your only purpose is to actively teach {language} at {level} level.
+Use the student's name ({name}) naturally sometimes.
 
-Teaching style rules:
-- Use MOSTLY the target language ({language}), but ALWAYS explain new grammar, vocabulary, and difficult structures IN CLEAR ENGLISH.
-- Actively teach: give examples, explain rules, ask questions, give small exercises, correct mistakes gently with explanations.
-- When correcting, show: wrong sentence → correct version → short explanation why.
-- Include pronunciation help (use simple phonetic spelling when useful, e.g. "konnichiwa" = "kon-nee-chee-wah").
-- Keep each reply focused, clear, and 4–10 sentences maximum.
-- Never flood with only target language — always support learning.
-- Never teach or use Spanish under any circumstances.
-- Be warm, motivating, and structured like an excellent private tutor.
+Rules:
+- Use mostly {language}, but explain grammar/vocabulary/pronunciation in clear simple English.
+- Actively teach: examples, explanations, questions, small exercises, gentle corrections.
+- Show corrections: wrong → correct → short reason.
+- Give phonetic help when useful (e.g. "konnichiwa" → "kon-nee-chee-wah")
+- Replies 4–10 sentences max, focused and clear.
+- Never teach or use Spanish.
+- Warm, structured, motivating tutor style.
 `;
 
-// ──────────────────────────────────────────────
-// STATE & DOM
-// ──────────────────────────────────────────────
-
+// STATE
 let profile = null;
 let recognition = null;
 let isListening = false;
 
 const chat = document.getElementById("chat");
-const status = document.getElementById("status");
+const statusEl = document.getElementById("status");
 const inputArea = document.getElementById("inputArea");
 const editBtn = document.getElementById("editProfileBtn");
 const modal = document.getElementById("profileModal");
@@ -258,17 +253,12 @@ const nameInput = document.getElementById("name");
 const langSelect = document.getElementById("language");
 const levelSelect = document.getElementById("level");
 
-// ──────────────────────────────────────────────
-// LOCAL STORAGE
-// ──────────────────────────────────────────────
-
+// PROFILE STORAGE
 function loadProfile() {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
     return data ? JSON.parse(data) : null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 function saveProfile() {
@@ -277,7 +267,7 @@ function saveProfile() {
   const level = levelSelect.value;
 
   if (!name || !language || !level) {
-    alert("Please complete all fields to continue.");
+    alert("Please fill all fields.");
     return false;
   }
 
@@ -286,10 +276,7 @@ function saveProfile() {
   return true;
 }
 
-// ──────────────────────────────────────────────
-// UI HELPERS
-// ──────────────────────────────────────────────
-
+// UI
 function addMessage(sender, text) {
   const div = document.createElement("div");
   div.className = `message ${sender}`;
@@ -305,7 +292,7 @@ function showModal(isEdit = false) {
     langSelect.value = profile.language;
     levelSelect.value = profile.level;
   } else {
-    modalTitle.textContent = "Welcome! Let's get started";
+    modalTitle.textContent = "Welcome — Let's begin";
     nameInput.value = "";
     langSelect.value = "";
     levelSelect.value = "";
@@ -313,168 +300,95 @@ function showModal(isEdit = false) {
   modal.classList.add("active");
 }
 
-function hideModal() {
-  modal.classList.remove("active");
-}
+function hideModal() { modal.classList.remove("active"); }
 
-// ──────────────────────────────────────────────
-// TEXT CLEANING FOR TTS
-// ──────────────────────────────────────────────
-
-function cleanForTTS(text) {
-  return text
-    .replace(/\*\*([^*]+)\*\*/g, '$1')
-    .replace(/\*([^*]+)\*/g, '$1')
-    .replace(/`([^`]+)`/g, '$1')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/[-*•]/g, '')
-    .replace(/[.,!?;:]\s*/g, '$& ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-// ──────────────────────────────────────────────
-// AUTO-DETECT LANGUAGE & SMART VOICE SELECTION
-// ──────────────────────────────────────────────
-
-function detectLanguage(text) {
-  // Simple char-based detection for common languages
-  if (/[\u3040-\u30ff\u4e00-\u9faf]/.test(text)) return 'ja-JP'; // Japanese
-  if (/[\uac00-\ud7af]/.test(text)) return 'ko-KR'; // Korean
-  if (/[\u4e00-\u9fff]/.test(text)) return 'zh-CN'; // Chinese (Mandarin)
-  if (/[\u0600-\u06ff]/.test(text)) return 'ar-SA'; // Arabic
-  if (/[а-яА-Я]/.test(text)) return 'ru-RU'; // Russian
-  if (/[à-ÿ]/.test(text)) return 'fr-FR'; // French (basic)
-  if (/[äöüß]/.test(text)) return 'de-DE'; // German
-  if (/[àèìòù]/.test(text)) return 'it-IT'; // Italian
-  if (/[áéíóúç]/.test(text)) return 'pt-PT'; // Portuguese
-  return 'en-AU'; // Default to English/AU
-}
-
-function getBestVoice(text) {
-  const voices = speechSynthesis.getVoices();
-  if (voices.length === 0) return null;
-
-  const lang = detectLanguage(text);
-
-  if (lang === 'en-AU' || lang.startsWith('en')) {
-    // Prefer less robotic male English voices (e.g., Google/Microsoft premium)
-    return voices.find(v =>
-      v.lang.includes('en') &&
-      /male|guy|daniel|james|liam|jack|ethan|owen|google|microsoft/i.test(v.name.toLowerCase()) &&
-      !/female|siri|alexa|karen/i.test(v.name.toLowerCase())
-    ) || voices.find(v => v.lang.includes('en-AU')) ||
-      voices.find(v => v.lang.startsWith('en'));
-  } else {
-    // Target language voice (natural, system default)
-    return voices.find(v => v.lang === lang) ||
-           voices.find(v => v.lang.startsWith(lang.split('-')[0]));
-  }
-}
-
+// BROWSER TTS (keyless, multilingual fallback)
 function speak(text) {
   if (!window.speechSynthesis) return;
 
-  const cleanText = cleanForTTS(text);
-  if (!cleanText) return;
+  const utterance = new SpeechSynthesisUtterance(text);
 
-  const utterance = new SpeechSynthesisUtterance(cleanText);
-  const voice = getBestVoice(cleanText);
+  const voices = speechSynthesis.getVoices();
+  let selectedVoice;
 
-  if (voice) {
-    utterance.voice = voice;
-    utterance.lang = voice.lang;
+  // Try to match language being learned
+  if (profile?.language.includes("Japanese")) {
+    selectedVoice = voices.find(v => v.lang === 'ja-JP') || voices.find(v => v.lang.startsWith('ja'));
+  } else if (profile?.language.includes("Korean")) {
+    selectedVoice = voices.find(v => v.lang === 'ko-KR') || voices.find(v => v.lang.startsWith('ko'));
+  } else if (profile?.language.includes("Chinese")) {
+    selectedVoice = voices.find(v => v.lang === 'zh-CN' || v.lang === 'zh-TW') || voices.find(v => v.lang.startsWith('zh'));
+  } else {
+    // English fallback → prefer male/en-AU if possible
+    selectedVoice = voices.find(v =>
+      v.lang.includes('en-AU') &&
+      /male|daniel|james|liam|jack|ethan|owen/i.test(v.name.toLowerCase())
+    ) || voices.find(v => v.lang.includes('en-AU')) ||
+      voices.find(v => v.lang.startsWith('en'));
   }
 
-  utterance.rate = 0.95; // Slightly slower for clarity
+  if (selectedVoice) {
+    utterance.voice = selectedVoice;
+    utterance.lang = selectedVoice.lang;
+  }
+
+  utterance.rate = 0.94;
   utterance.pitch = 1.0;
   utterance.volume = 1.0;
 
   speechSynthesis.speak(utterance);
 }
 
-// Load voices early
-speechSynthesis.onvoiceschanged = () => {};
-
-// ──────────────────────────────────────────────
-// INITIALIZATION
-// ──────────────────────────────────────────────
-
-function initializeApp() {
-  profile = loadProfile();
-
-  if (profile) {
-    editBtn.style.display = "block";
-    inputArea.style.display = "flex";
-    addMessage("ai", `Welcome back ${profile.name}! Ready to continue with ${profile.language} today? 😊`);
-    speak(`Welcome back ${profile.name}. Ready to continue with ${profile.language} today?`);
-    status.textContent = "Ready when you are.";
-  } else {
-    editBtn.style.display = "none";
-    inputArea.style.display = "none";
-    showModal(false);
-    status.textContent = "Please set up your profile to begin.";
-  }
-}
-
-// ──────────────────────────────────────────────
-// VOICE RECOGNITION (continuous, trigger-based, send on pause)
-// ──────────────────────────────────────────────
-
+// VOICE RECOGNITION (continuous hotword)
 function initRecognition() {
-  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRec) {
-    status.textContent = "Voice recognition not supported in this browser.";
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    statusEl.textContent = "Voice not supported";
     return;
   }
 
-  recognition = new SpeechRec();
+  recognition = new SR();
   recognition.continuous = true;
-  recognition.interimResults = false; // Final on pause
+  recognition.interimResults = false;
   recognition.lang = "en-US";
 
-  recognition.onresult = (e) => {
-    let transcript = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      transcript += e.results[i][0].transcript;
+  recognition.onresult = (event) => {
+    let transcript = "";
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      transcript += event.results[i][0].transcript;
     }
     transcript = transcript.trim().toLowerCase();
 
     const triggers = ["hey indy", "hi indy", "hello indy", "indy"];
 
-    for (const trigger of triggers) {
-      if (transcript.startsWith(trigger)) {
-        const message = transcript.slice(trigger.length).trim();
-        if (message) {
-          addMessage("user", message);
-          processUserMessage(message);
+    for (const t of triggers) {
+      if (transcript.startsWith(t)) {
+        const msg = transcript.slice(t.length).trim();
+        if (msg) {
+          addMessage("user", msg);
+          processUserMessage(msg);
         } else {
-          status.textContent = "Listening for your message...";
+          statusEl.textContent = "Listening...";
         }
         return;
       }
     }
 
-    // If in listening mode, treat as full message on pause
     if (isListening && transcript) {
       addMessage("user", transcript);
       processUserMessage(transcript);
     }
   };
 
-  recognition.onerror = (e) => {
-    console.error(e);
+  recognition.onerror = () => {
     document.getElementById("micBtn").classList.remove("listening");
     isListening = false;
-    status.textContent = "Voice error. Try again.";
+    statusEl.textContent = "Voice error";
   };
 
   recognition.onend = () => {
-    if (isListening) {
-      recognition.start(); // Restart for continuous listening
-    } else {
-      document.getElementById("micBtn").classList.remove("listening");
-    }
+    if (isListening) recognition.start();
+    else document.getElementById("micBtn").classList.remove("listening");
   };
 }
 
@@ -486,15 +400,16 @@ document.getElementById("micBtn").onclick = () => {
     recognition.stop();
     isListening = false;
     document.getElementById("micBtn").classList.remove("listening");
-    status.textContent = "Voice stopped.";
+    statusEl.textContent = "Voice off";
   } else {
     recognition.start();
     isListening = true;
     document.getElementById("micBtn").classList.add("listening");
-    status.textContent = "Listening continuously... say 'Hey Indy' to start a message";
+    statusEl.textContent = "Listening… say 'Hey Indy' + your message";
   }
 };
 
+// TEXT INPUT
 document.getElementById("userInput").addEventListener("keypress", e => {
   if (e.key === "Enter") {
     e.preventDefault();
@@ -507,10 +422,7 @@ document.getElementById("userInput").addEventListener("keypress", e => {
   }
 });
 
-// ──────────────────────────────────────────────
-// AI COMMUNICATION
-// ──────────────────────────────────────────────
-
+// AI CALL
 async function processUserMessage(message) {
   if (!profile) {
     addMessage("ai", "Please set up your profile first.");
@@ -524,42 +436,51 @@ async function processUserMessage(message) {
 
   const fullPrompt = system + "\n\nUser: " + message + "\n\nIndy:";
 
-  status.textContent = "Indy is thinking...";
+  statusEl.textContent = "Indy is thinking...";
 
   try {
-    const res = await fetch(API_URL + encodeURIComponent(fullPrompt));
+    const res = await fetch(POLLINATIONS_API + encodeURIComponent(fullPrompt));
     let reply = (await res.text()).trim();
-
-    // Light cleaning for display
     reply = reply.replace(/\*\*|\*/g, '');
 
     addMessage("ai", reply);
     speak(reply);
-    status.textContent = "Ready for your next message.";
+    statusEl.textContent = "Ready for your next message.";
   } catch (err) {
-    addMessage("ai", "Sorry… something went wrong. Try again?");
-    status.textContent = "Connection issue.";
+    addMessage("ai", "Sorry… something went wrong.");
+    statusEl.textContent = "Connection issue.";
   }
 }
 
-// ──────────────────────────────────────────────
-// EVENT LISTENERS
-// ──────────────────────────────────────────────
+// INIT
+function initializeApp() {
+  profile = loadProfile();
+
+  if (profile) {
+    editBtn.style.display = "block";
+    inputArea.style.display = "flex";
+    addMessage("ai", `Welcome back ${profile.name}. Ready to continue ${profile.language}?`);
+    speak(`Welcome back ${profile.name}. Ready to continue ${profile.language}?`);
+    statusEl.textContent = "Ready when you are.";
+  } else {
+    showModal(false);
+    statusEl.textContent = "Please set up your profile.";
+  }
+}
 
 document.getElementById("saveProfileBtn").onclick = () => {
   if (saveProfile()) {
     hideModal();
     editBtn.style.display = "block";
     inputArea.style.display = "flex";
-    addMessage("ai", `Great! Hi ${profile.name} — let's start learning ${profile.language}! What would you like to practice today?`);
-    speak(`Great! Hi ${profile.name}. Let's start learning ${profile.language}!`);
-    status.textContent = "Ready when you are.";
+    addMessage("ai", `Hi ${profile.name} — let's start ${profile.language}! What would you like to practice?`);
+    speak(`Hi ${profile.name}. Let's start ${profile.language}!`);
+    statusEl.textContent = "Ready when you are.";
   }
 };
 
 editBtn.onclick = () => showModal(true);
 
-// Start the app
 initializeApp();
 
 </script>
