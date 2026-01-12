@@ -334,33 +334,41 @@ function cleanForTTS(text) {
 }
 
 // ──────────────────────────────────────────────
-// SMART VOICE SELECTION (Japanese priority)
+// AUTO-DETECT LANGUAGE & SMART VOICE SELECTION
 // ──────────────────────────────────────────────
+
+function detectLanguage(text) {
+  // Simple char-based detection for common languages
+  if (/[\u3040-\u30ff\u4e00-\u9faf]/.test(text)) return 'ja-JP'; // Japanese
+  if (/[\uac00-\ud7af]/.test(text)) return 'ko-KR'; // Korean
+  if (/[\u4e00-\u9fff]/.test(text)) return 'zh-CN'; // Chinese (Mandarin)
+  if (/[\u0600-\u06ff]/.test(text)) return 'ar-SA'; // Arabic
+  if (/[а-яА-Я]/.test(text)) return 'ru-RU'; // Russian
+  if (/[à-ÿ]/.test(text)) return 'fr-FR'; // French (basic)
+  if (/[äöüß]/.test(text)) return 'de-DE'; // German
+  if (/[àèìòù]/.test(text)) return 'it-IT'; // Italian
+  if (/[áéíóúç]/.test(text)) return 'pt-PT'; // Portuguese
+  return 'en-AU'; // Default to English/AU
+}
 
 function getBestVoice(text) {
   const voices = speechSynthesis.getVoices();
   if (voices.length === 0) return null;
 
-  // Japanese characters detection
-  const hasJapanese = /[\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf]/.test(text);
+  const lang = detectLanguage(text);
 
-  if (hasJapanese) {
-    // Prefer good Japanese voices (usually Kyoko or similar)
-    return (
-      voices.find(v => v.lang === 'ja-JP') ||
-      voices.find(v => v.name.toLowerCase().includes('kyoko')) ||
-      voices.find(v => v.lang.startsWith('ja'))
-    );
+  if (lang === 'en-AU' || lang.startsWith('en')) {
+    // Prefer less robotic male English voices (e.g., Google/Microsoft premium)
+    return voices.find(v =>
+      v.lang.includes('en') &&
+      /male|guy|daniel|james|liam|jack|ethan|owen|google|microsoft/i.test(v.name.toLowerCase()) &&
+      !/female|siri|alexa|karen/i.test(v.name.toLowerCase())
+    ) || voices.find(v => v.lang.includes('en-AU')) ||
+      voices.find(v => v.lang.startsWith('en'));
   } else {
-    // English → try Australian male
-    return (
-      voices.find(v => 
-        v.lang.includes('en-AU') && 
-        /male|daniel|james|liam|jack|ethan|owen/i.test(v.name.toLowerCase())
-      ) ||
-      voices.find(v => v.lang.includes('en-AU')) ||
-      voices.find(v => v.lang.startsWith('en'))
-    );
+    // Target language voice (natural, system default)
+    return voices.find(v => v.lang === lang) ||
+           voices.find(v => v.lang.startsWith(lang.split('-')[0]));
   }
 }
 
@@ -378,14 +386,14 @@ function speak(text) {
     utterance.lang = voice.lang;
   }
 
-  utterance.rate = 0.92;
+  utterance.rate = 0.95; // Slightly slower for clarity
   utterance.pitch = 1.0;
-  utterance.volume = 0.95;
+  utterance.volume = 1.0;
 
   speechSynthesis.speak(utterance);
 }
 
-// Load voices
+// Load voices early
 speechSynthesis.onvoiceschanged = () => {};
 
 // ──────────────────────────────────────────────
@@ -410,7 +418,7 @@ function initializeApp() {
 }
 
 // ──────────────────────────────────────────────
-// VOICE RECOGNITION
+// VOICE RECOGNITION (continuous, trigger-based, send on pause)
 // ──────────────────────────────────────────────
 
 function initRecognition() {
@@ -422,41 +430,51 @@ function initRecognition() {
 
   recognition = new SpeechRec();
   recognition.continuous = true;
-  recognition.interimResults = false;
+  recognition.interimResults = false; // Final on pause
   recognition.lang = "en-US";
 
   recognition.onresult = (e) => {
-    const text = e.results[e.resultIndex][0].transcript.trim().toLowerCase();
+    let transcript = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      transcript += e.results[i][0].transcript;
+    }
+    transcript = transcript.trim().toLowerCase();
+
     const triggers = ["hey indy", "hi indy", "hello indy", "indy"];
 
     for (const trigger of triggers) {
-      if (text.startsWith(trigger)) {
-        const message = text.slice(trigger.length).trim();
+      if (transcript.startsWith(trigger)) {
+        const message = transcript.slice(trigger.length).trim();
         if (message) {
           addMessage("user", message);
           processUserMessage(message);
         } else {
-          status.textContent = "Listening...";
+          status.textContent = "Listening for your message...";
         }
         return;
       }
     }
 
-    if (isListening) {
-      addMessage("user", text);
-      processUserMessage(text);
+    // If in listening mode, treat as full message on pause
+    if (isListening && transcript) {
+      addMessage("user", transcript);
+      processUserMessage(transcript);
     }
   };
 
-  recognition.onerror = () => {
+  recognition.onerror = (e) => {
+    console.error(e);
     document.getElementById("micBtn").classList.remove("listening");
     isListening = false;
     status.textContent = "Voice error. Try again.";
   };
 
   recognition.onend = () => {
-    if (isListening) recognition.start();
-    else document.getElementById("micBtn").classList.remove("listening");
+    if (isListening) {
+      recognition.start(); // Restart for continuous listening
+    } else {
+      document.getElementById("micBtn").classList.remove("listening");
+    }
   };
 }
 
@@ -473,7 +491,7 @@ document.getElementById("micBtn").onclick = () => {
     recognition.start();
     isListening = true;
     document.getElementById("micBtn").classList.add("listening");
-    status.textContent = "Listening... say 'Hey Indy' + your message";
+    status.textContent = "Listening continuously... say 'Hey Indy' to start a message";
   }
 };
 
@@ -512,7 +530,7 @@ async function processUserMessage(message) {
     const res = await fetch(API_URL + encodeURIComponent(fullPrompt));
     let reply = (await res.text()).trim();
 
-    // Light cleaning for display too
+    // Light cleaning for display
     reply = reply.replace(/\*\*|\*/g, '');
 
     addMessage("ai", reply);
