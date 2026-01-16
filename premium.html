@@ -790,7 +790,7 @@ async function sendMessage() {
   const input = document.getElementById('userInput');
   const msg = input.value.trim();
   if (!msg) return;
-  
+
   // Create new chat if none exists
   if (!currentChatId) {
     currentChatId = `chat_${Date.now()}`;
@@ -798,21 +798,22 @@ async function sendMessage() {
     chatList.unshift({ id: currentChatId, name: 'New Chat' });
     localStorage.setItem('chatList', JSON.stringify(chatList));
   }
-  
+
   addMessage('user', msg);
   input.value = '';
-  
+
   // Generate chat name from first user message
   const messageCount = document.querySelectorAll('#chatMessages .message.user').length;
   if (messageCount === 1) {
     updateChatName(currentChatId, msg);
   }
 
+  // Check learned knowledge first
   const learned = findInKnowledge(msg);
-  if (learned) { 
-    addMessage('bot', learned); 
+  if (learned) {
+    addMessage('bot', learned);
     saveCurrentChat();
-    return; 
+    return;
   }
 
   // Dictionary
@@ -843,15 +844,42 @@ async function sendMessage() {
     return;
   }
 
-  // ← Paste the image trigger block HERE
+  // ── IMAGE GENERATION TRIGGER (DeepAI) ─────────────────────────────────────
+  if (msg.toLowerCase().startsWith('!img ') ||
+      msg.toLowerCase().startsWith('generate image ') ||
+      msg.toLowerCase().startsWith('draw ')) {
 
-  // AI response
-  addTypingIndicator();
-  const response = await getAIResponse(msg);
-  replaceLastBot(response);
-  saveCurrentChat();
+    const imagePrompt = msg
+      .replace(/^!img /i, '')
+      .replace(/^generate image /i, '')
+      .replace(/^draw /i, '')
+      .trim();
 
-  // AI response
+    if (!imagePrompt) {
+      addMessage('bot', "Please provide a description after the command.\nExample: `!img cyberpunk samurai in rain`");
+      saveCurrentChat();
+      return;
+    }
+
+    addTypingIndicator();
+
+    const imageUrlOrError = await generateImageWithDeepAI(imagePrompt);
+
+    if (imageUrlOrError.startsWith('http')) {
+      replaceLastBot(
+        `Here’s your generated image:\n\n` +
+        `<img src="${imageUrlOrError}" alt="${imagePrompt}" ` +
+        `style="max-width:100%; border-radius:12px; margin:12px 0; box-shadow:0 4px 20px rgba(0,0,0,0.6);">` +
+        `\n\n**Prompt:** ${imagePrompt}`
+      );
+    } else {
+      replaceLastBot(imageUrlOrError);
+    }
+    saveCurrentChat();
+    return;
+  }
+
+  // ── DEFAULT: Text AI response ─────────────────────────────────────────────
   addTypingIndicator();
   const response = await getAIResponse(msg);
   replaceLastBot(response);
