@@ -8,27 +8,32 @@
   
 <style>
     :root {
-      --bg:            #000000;
-      --bg-dark:       #0a0a0a;
-      --bg-darker:     #111111;
-      --text:          #e8e8e8;
-      --text-dim:      #a0a0a0;
-      --text-ghost:    #606060;
-      --border:        1px solid #1a1a1a;
-      --glass:         rgba(20,20,20,0.45);
-      --blur:          blur(16px);
-      --radius:        16px;
-      --spacing:       24px;
+      --bg: #000000;
+      --bg-elevated: #0f0f0f;
+      --bg-card: #1a1a1a;
+      --text: #f5f5f5;
+      --text-secondary: #9ca3af;
+      --text-tertiary: #6b7280;
+      --border: rgba(255, 255, 255, 0.06);
+      --glass-bg: rgba(26, 26, 26, 0.5);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --hover-bg: rgba(255, 255, 255, 0.05);
+      --active-bg: rgba(255, 255, 255, 0.08);
     }
 
-    * { margin:0; padding:0; box-sizing:border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
       min-height: 100vh;
       display: flex;
+      overflow: hidden;
     }
 
     /* ── Sidebar ──────────────────────────────────────────────── */
@@ -36,83 +41,192 @@
       position: fixed;
       inset: 0 auto 0 0;
       width: 280px;
-      background: var(--bg-dark);
-      border-right: var(--border);
+      background: var(--bg-elevated);
+      border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
-      transition: width 0.4s cubic-bezier(0.25,0.1,0.25,1);
+      transition: width 0.35s cubic-bezier(0.32, 0.72, 0, 1);
       z-index: 100;
       overflow: hidden;
     }
-    .sidebar.collapsed { width: 72px; }
+    
+    .sidebar.collapsed {
+      width: 72px;
+    }
 
     .header {
-      padding: 20px 24px;
+      padding: 20px 20px;
       display: flex;
       align-items: center;
-      gap: 16px;
-      min-height: 68px;
+      gap: 14px;
+      min-height: 72px;
       flex-shrink: 0;
+      border-bottom: 1px solid var(--border);
     }
 
     .menu-btn {
-      background: none;
+      background: transparent;
       border: none;
-      color: var(--text-dim);
-      font-size: 24px;
+      color: var(--text-secondary);
+      font-size: 22px;
       cursor: pointer;
-      padding: 8px;
-      border-radius: 12px;
-      transition: all 0.2s;
+      padding: 10px;
+      border-radius: 10px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
-    .menu-btn:hover { background: var(--bg-darker); color: var(--text); }
+    
+    .menu-btn:hover {
+      background: var(--hover-bg);
+      color: var(--text);
+      transform: scale(1.05);
+    }
+    
+    .menu-btn:active {
+      transform: scale(0.95);
+    }
 
     .title {
-      font-size: 26px;
-      font-weight: 700;
+      font-size: 22px;
+      font-weight: 600;
       letter-spacing: -0.02em;
       color: var(--text);
       white-space: nowrap;
+      opacity: 1;
+      transition: opacity 0.25s ease;
     }
-    .sidebar.collapsed .title { font-size: 32px; }
+    
+    .sidebar.collapsed .title {
+      opacity: 0;
+      pointer-events: none;
+    }
 
     .sidebar-content {
       flex: 1;
-      padding: 16px;
+      padding: 12px;
       overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .sidebar-content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .sidebar-content::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 10px;
     }
 
     .sidebar-btn {
       width: 100%;
-      height: 52px;
+      height: 44px;
       background: transparent;
       border: none;
-      border-radius: 14px;
-      color: var(--text-dim);
-      font-size: 0; /* hide text when collapsed */
+      border-radius: 10px;
+      color: var(--text-secondary);
+      font-size: 15px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
+      padding: 0 14px;
+      gap: 12px;
+      margin-bottom: 4px;
       position: relative;
+      overflow: hidden;
     }
-    .sidebar-btn:not(.collapsed-visible) span { display: none; }
-    .sidebar.collapsed .sidebar-btn span { display: none; }
-    .sidebar-btn:hover { background: var(--glass); backdrop-filter: var(--blur); color: var(--text); }
 
     .sidebar-btn::before {
       content: attr(data-icon);
-      font-size: 22px;
+      font-size: 18px;
+      opacity: 0.8;
+      flex-shrink: 0;
+      transition: opacity 0.2s;
+    }
+
+    .sidebar-btn span {
+      white-space: nowrap;
+      opacity: 1;
+      transition: opacity 0.25s ease;
+      font-weight: 500;
+    }
+
+    .sidebar.collapsed .sidebar-btn span {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .sidebar.collapsed .sidebar-btn {
+      justify-content: center;
+    }
+
+    .sidebar-btn:hover {
+      background: var(--hover-bg);
+      color: var(--text);
+    }
+
+    .sidebar-btn:hover::before {
+      opacity: 1;
+    }
+
+    .sidebar-btn:active {
+      background: var(--active-bg);
+      transform: scale(0.98);
+    }
+
+    .sidebar-btn.danger {
+      color: #ff453a;
+    }
+
+    .sidebar-btn.danger:hover {
+      background: rgba(255, 69, 58, 0.1);
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 12px 0;
+    }
+
+    /* Chat List Items */
+    #chatList .sidebar-btn {
+      justify-content: space-between;
+      padding-right: 8px;
+    }
+
+    #chatList .sidebar-btn span:first-of-type {
+      flex: 1;
+      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    #chatList .sidebar-btn span:last-of-type {
+      opacity: 0;
+      color: #ff453a;
+      font-size: 16px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    #chatList .sidebar-btn:hover span:last-of-type {
       opacity: 0.7;
     }
-    .sidebar-btn:hover::before { opacity: 1; }
 
-    /* Add icons via data-attribute */
-    [data-action="new"]::before    { content: "✦"; }
-    [data-action="projects"]::before { content: "🗂"; }
-    [data-action="profile"]::before  { content: "👤"; }
-    [data-action="delete"]::before   { content: "🗑"; }
+    #chatList .sidebar-btn span:last-of-type:hover {
+      opacity: 1;
+      background: rgba(255, 69, 58, 0.15);
+    }
 
     /* ── Main ─────────────────────────────────────────────────── */
     .main {
@@ -120,195 +234,417 @@
       margin-left: 280px;
       display: flex;
       flex-direction: column;
-      transition: margin-left 0.4s cubic-bezier(0.25,0.1,0.25,1);
+      transition: margin-left 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+      height: 100vh;
     }
-    .sidebar.collapsed ~ .main { margin-left: 72px; }
+    
+    .sidebar.collapsed ~ .main {
+      margin-left: 72px;
+    }
 
     .chat-container {
       flex: 1;
       overflow-y: auto;
-      padding: var(--spacing) var(--spacing) 120px;
+      padding: 32px 24px 140px;
       display: flex;
       flex-direction: column;
-      gap: 32px;
+      gap: 24px;
     }
 
-    /* Messages ── user tiny, AI invisible */
-    .message {
-      max-width: 78%;
-      margin: 2px 0;
+    .chat-container::-webkit-scrollbar {
+      width: 8px;
     }
+
+    .chat-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .chat-container::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 10px;
+    }
+
+    /* Messages */
+    .message {
+      max-width: 80%;
+      animation: messageSlide 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    @keyframes messageSlide {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     .user {
       align-self: flex-end;
-      text-align: right;
     }
+
     .bot {
       align-self: flex-start;
     }
 
     .bubble {
-      padding: 10px 16px;
-      border-radius: 16px;
+      padding: 12px 16px;
+      border-radius: 18px;
       line-height: 1.5;
-      font-size: 16px;
+      font-size: 15px;
       position: relative;
     }
 
     .user .bubble {
-      background: var(--glass);
-      backdrop-filter: var(--blur);
-      border: 1px solid rgba(255,255,255,0.08);
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
       color: var(--text);
       border-bottom-right-radius: 4px;
-      max-width: 420px;
-      display: inline-block;
+      max-width: 100%;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
 
     .bot .bubble {
       background: transparent;
       border: none;
-      box-shadow: none;
       padding: 0;
       color: var(--text);
-      font-size: 17px;
-      line-height: 1.65;
+      font-size: 15px;
+      line-height: 1.6;
     }
 
-    /* Copy button – only on bot */
+    .bot .bubble img {
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      margin: 12px 0;
+    }
+
+    /* Copy button */
     .copy-btn {
       position: absolute;
-      top: 8px; right: 8px;
-      background: rgba(255,255,255,0.06);
-      border: none;
-      color: var(--text-dim);
+      top: 8px;
+      right: 8px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      color: var(--text-secondary);
       font-size: 12px;
-      padding: 4px 8px;
+      padding: 6px 10px;
       border-radius: 8px;
       cursor: pointer;
       opacity: 0;
-      transition: opacity 0.2s;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      font-weight: 500;
     }
-    .bot:hover .copy-btn { opacity: 0.7; }
-    .copy-btn:hover { opacity: 1; background: rgba(255,255,255,0.12); }
 
-    /* Input ── floating glass pill */
-    .input-area {
-      padding: 24px var(--spacing);
-      background: var(--bg);
-      border-top: var(--border);
-      position: sticky;
-      bottom: 0;
-      z-index: 10;
+    .bot:hover .copy-btn {
+      opacity: 1;
     }
+
+    .copy-btn:hover {
+      background: var(--hover-bg);
+      color: var(--text);
+      transform: scale(1.05);
+    }
+
+    .copy-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Input Area */
+    .input-area {
+      padding: 20px 24px 24px;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      position: fixed;
+      bottom: 0;
+      left: 280px;
+      right: 0;
+      z-index: 10;
+      transition: left 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .sidebar.collapsed ~ .main .input-area {
+      left: 72px;
+    }
+
     .input-wrapper {
       max-width: 900px;
       margin: 0 auto;
       display: flex;
       gap: 12px;
       align-items: center;
-      background: var(--glass);
-      backdrop-filter: var(--blur);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 999px;
-      padding: 8px 16px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 6px 6px 6px 20px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
+
+    .input-wrapper:focus-within {
+      border-color: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
     #userInput {
       flex: 1;
       background: transparent;
       border: none;
       color: var(--text);
-      font-size: 17px;
+      font-size: 15px;
       outline: none;
       padding: 12px 0;
+      font-family: inherit;
     }
-    #userInput::placeholder { color: var(--text-dim); }
+
+    #userInput::placeholder {
+      color: var(--text-tertiary);
+    }
 
     .send-btn {
-      width: 44px;
-      height: 44px;
-      background: var(--text-dim);
+      width: 36px;
+      height: 36px;
+      background: var(--text);
       color: var(--bg);
       border: none;
       border-radius: 50%;
-      font-size: 20px;
+      font-size: 18px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
-    .send-btn:hover { background: var(--text); transform: scale(1.08); }
 
-    /* Typing */
+    .send-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+    }
+
+    .send-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Typing Indicator */
     .typing-indicator {
       display: inline-flex;
       gap: 6px;
-      padding: 4px 0;
+      padding: 8px 0;
     }
+
     .typing-indicator span {
-      width: 8px; height: 8px;
-      background: var(--text-dim);
+      width: 8px;
+      height: 8px;
+      background: var(--text-secondary);
       border-radius: 50%;
       animation: typingBounce 1.4s infinite ease-in-out;
     }
+
+    .typing-indicator span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-indicator span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
     @keyframes typingBounce {
-      0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-      30% { transform: translateY(-10px); opacity: 1; }
+      0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.4;
+      }
+      30% {
+        transform: translateY(-10px);
+        opacity: 1;
+      }
     }
 
     /* Modals */
     .teach-modal {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.85);
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 1000;
-      backdrop-filter: blur(20px);
+      opacity: 0;
+      transition: opacity 0.25s ease;
     }
-    .teach-modal.active { display: flex; }
+
+    .teach-modal.active {
+      display: flex;
+      animation: fadeIn 0.25s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
 
     .teach-content {
-      background: var(--glass);
-      backdrop-filter: var(--blur);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
       padding: 32px;
       max-width: 520px;
       width: 90%;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
       position: relative;
+      animation: modalSlide 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    @keyframes modalSlide {
+      from {
+        transform: scale(0.95) translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .teach-content h2 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      color: var(--text);
     }
 
     .close-btn {
       position: absolute;
-      top: 20px; right: 20px;
-      background: rgba(255,255,255,0.08);
+      top: 20px;
+      right: 20px;
+      background: var(--hover-bg);
       border: none;
-      color: var(--text-dim);
-      font-size: 28px;
+      color: var(--text-secondary);
+      font-size: 24px;
       cursor: pointer;
-      width: 40px; height: 40px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .close-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+
+    .close-btn:hover {
+      background: var(--active-bg);
+      color: var(--text);
+      transform: scale(1.1);
+    }
+
+    .close-btn:active {
+      transform: scale(0.9);
+    }
+
+    .teach-input-group {
+      margin-bottom: 20px;
+    }
+
+    .teach-input-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .teach-input-group input,
+    .teach-input-group textarea {
+      width: 100%;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-size: 15px;
+      font-family: inherit;
+      transition: all 0.2s;
+      resize: vertical;
+    }
+
+    .teach-input-group input:focus,
+    .teach-input-group textarea:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.2);
+      background: var(--bg);
+    }
+
+    .teach-input-group textarea {
+      min-height: 100px;
+    }
+
+    .teach-submit-btn {
+      width: 100%;
+      background: var(--text);
+      color: var(--bg);
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .teach-submit-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2);
+    }
+
+    .teach-submit-btn:active {
+      transform: scale(0.98);
+    }
+
+    #profilePreview {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      background-size: cover;
+      background-position: center;
+      border: 2px solid var(--border);
+      transition: all 0.3s;
+    }
+
+    #profilePreview:hover {
+      transform: scale(1.05);
+    }
   </style>
 </head>
 <body>
-  <div class="sidebar" id="sidebar">
+  <div class="sidebar collapsed" id="sidebar">
     <div class="header">
       <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-      <div class="title-wrapper">
-        <div class="title" id="sidebarTitle">Indy/</div>
-      </div>
+      <div class="title">Indy/</div>
     </div>
     <div class="sidebar-content">
-      <button class="sidebar-btn" onclick="newChat()">New Chat</button>
-      <button class="sidebar-btn" onclick="openProjects()">Projects</button>
-      <button class="sidebar-btn" onclick="openProfile()">Profile Settings</button>
-      <button class="sidebar-btn danger" onclick="deleteAllChats()">Delete Everything</button>
+      <button class="sidebar-btn" data-icon="✦" onclick="newChat()">
+        <span>New Chat</span>
+      </button>
+      <button class="sidebar-btn" data-icon="🗂" onclick="openProjects()">
+        <span>Projects</span>
+      </button>
+      <button class="sidebar-btn" data-icon="👤" onclick="openProfile()">
+        <span>Profile Settings</span>
+      </button>
+      <button class="sidebar-btn danger" data-icon="🗑" onclick="deleteAllChats()">
+        <span>Delete Everything</span>
+      </button>
       <hr>
       <div id="chatList"></div>
     </div>
@@ -326,13 +662,13 @@
 
     <div class="input-area">
       <div class="input-wrapper">
-        <input type="text" id="userInput" placeholder="Ask Anything" onkeypress="if(event.key==='Enter') sendMessage()">
+        <input type="text" id="userInput" placeholder="Ask anything..." onkeypress="if(event.key==='Enter') sendMessage()">
         <button class="send-btn" onclick="sendMessage()">↑</button>
       </div>
     </div>
   </div>
 
-  <!-- Teach Modal (kept but simplified) -->
+  <!-- Teach Modal -->
   <div class="teach-modal" id="teachModal">
     <div class="teach-content">
       <button class="close-btn" onclick="closeTeachModal()">×</button>
@@ -355,7 +691,7 @@
       <button class="close-btn" onclick="closeProfileModal()">×</button>
       <h2>Profile Settings</h2>
       <div style="display:flex;justify-content:center;margin-bottom:20px;">
-        <div id="profilePreview" style="width:100px;height:100px;border-radius:50%;background:#282828;background-size:cover;background-position:center;"></div>
+        <div id="profilePreview"></div>
       </div>
       <div class="teach-input-group">
         <label>Your Name</label>
@@ -371,13 +707,13 @@
 
   <script>
 let knowledge = [];
-    let personality = "";
-    let currentChatId = null;
-    let userProfile = JSON.parse(localStorage.getItem('userProfile')) || { name: '', picture: '' };
+let personality = "";
+let currentChatId = null;
+let userProfile = JSON.parse(localStorage.getItem('userProfile')) || { name: '', picture: '' };
 
-    function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('collapsed');
-    }
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
 
 function saveCurrentChat() {
   if (!currentChatId) return;
@@ -522,7 +858,7 @@ function updateProfilePreview() {
   const preview = document.getElementById('profilePreview');
   const pictureUrl = document.getElementById('profilePicture').value.trim();
   preview.style.backgroundImage = pictureUrl ? `url(${pictureUrl})` : 'none';
-  preview.style.backgroundColor = pictureUrl ? 'transparent' : '#282828';
+  preview.style.backgroundColor = pictureUrl ? 'transparent' : 'var(--bg-elevated)';
 }
 
 function submitProfile() {
@@ -536,7 +872,10 @@ function openProjects() {
   alert("Projects view coming soon! You can later expand this to show saved projects or canvases.");
 }
 
-// ── Rest of your script remains 100% functional ──────────────────────────────
+function getSystemPrompt() {
+  return `You are Indy, a helpful AI assistant. Be concise, friendly, and conversational. ${personality}`.trim() + "\n\nUser: ";
+}
+
 function cosineSimilarity(a, b) {
   const tokensA = a.toLowerCase().match(/\w+/g) || [];
   const tokensB = b.toLowerCase().match(/\w+/g) || [];
@@ -692,7 +1031,7 @@ async function sendMessage() {
 
     if (result.startsWith('http')) {
       replaceLastBot(
-        `Here’s your Flux image:\n\n` +
+        `Here's your Flux image:\n\n` +
         `<img src="${result}" alt="${imagePrompt}" ` +
         `style="max-width:100%; border-radius:20px; margin:16px 0; box-shadow:0 8px 32px rgba(0,0,0,0.5);">` +
         `\n\n**Prompt:** ${imagePrompt}\n` +
@@ -772,27 +1111,25 @@ function createChatButton(chatId, name) {
   const chatList = document.getElementById('chatList');
   const btn = document.createElement('button');
   btn.className = 'sidebar-btn';
-  btn.style.display = 'flex';
-  btn.style.justifyContent = 'space-between';
-  btn.style.alignItems = 'center';
-  btn.textContent = name;
   btn.onclick = () => newChat(chatId);
-  const delBtn = document.createElement('span');
-  delBtn.textContent = '✕';
-  delBtn.style.marginLeft = '8px';
-  delBtn.style.cursor = 'pointer';
-  delBtn.style.color = '#ff3b30';
-  delBtn.onclick = (e) => {
+  
+  const nameSpan = document.createElement('span');
+  nameSpan.textContent = name;
+  
+  const delSpan = document.createElement('span');
+  delSpan.textContent = '✕';
+  delSpan.onclick = (e) => {
     e.stopPropagation();
     deleteChat(chatId);
   };
-  btn.appendChild(delBtn);
+  
+  btn.appendChild(nameSpan);
+  btn.appendChild(delSpan);
   chatList.appendChild(btn);
 }
 
 // Init
 window.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('sidebar').classList.add('collapsed');
   loadSavedChats();
   const chatList = JSON.parse(localStorage.getItem('chatList') || '[]');
   if (chatList.length > 0) {
@@ -801,6 +1138,3 @@ window.addEventListener('DOMContentLoaded', () => {
     addMessage('bot', `Ready when you are!`, false);
   }
 });
-  </script>
-</body>
-</html>
