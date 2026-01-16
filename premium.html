@@ -19,13 +19,10 @@
       --glass-border: rgba(255, 255, 255, 0.08);
       --hover-bg: rgba(255, 255, 255, 0.05);
       --active-bg: rgba(255, 255, 255, 0.08);
+      --accent: #6366f1;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       background: var(--bg);
@@ -36,7 +33,6 @@
       overflow: hidden;
     }
 
-    /* ── Sidebar ──────────────────────────────────────────────── */
     .sidebar {
       position: fixed;
       inset: 0 auto 0 0;
@@ -50,12 +46,10 @@
       overflow: hidden;
     }
     
-    .sidebar.collapsed {
-      width: 72px;
-    }
+    .sidebar.collapsed { width: 72px; }
 
     .header {
-      padding: 20px 20px;
+      padding: 20px;
       display: flex;
       align-items: center;
       gap: 14px;
@@ -85,9 +79,7 @@
       transform: scale(1.05);
     }
     
-    .menu-btn:active {
-      transform: scale(0.95);
-    }
+    .menu-btn:active { transform: scale(0.95); }
 
     .title {
       font-size: 22px;
@@ -111,14 +103,8 @@
       overflow-x: hidden;
     }
 
-    .sidebar-content::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .sidebar-content::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
+    .sidebar-content::-webkit-scrollbar { width: 6px; }
+    .sidebar-content::-webkit-scrollbar-track { background: transparent; }
     .sidebar-content::-webkit-scrollbar-thumb {
       background: var(--border);
       border-radius: 10px;
@@ -164,31 +150,22 @@
       pointer-events: none;
     }
 
-    .sidebar.collapsed .sidebar-btn {
-      justify-content: center;
-    }
+    .sidebar.collapsed .sidebar-btn { justify-content: center; }
 
     .sidebar-btn:hover {
       background: var(--hover-bg);
       color: var(--text);
     }
 
-    .sidebar-btn:hover::before {
-      opacity: 1;
-    }
+    .sidebar-btn:hover::before { opacity: 1; }
 
     .sidebar-btn:active {
       background: var(--active-bg);
       transform: scale(0.98);
     }
 
-    .sidebar-btn.danger {
-      color: #ff453a;
-    }
-
-    .sidebar-btn.danger:hover {
-      background: rgba(255, 69, 58, 0.1);
-    }
+    .sidebar-btn.danger { color: #ff453a; }
+    .sidebar-btn.danger:hover { background: rgba(255, 69, 58, 0.1); }
 
     hr {
       border: none;
@@ -196,10 +173,14 @@
       margin: 12px 0;
     }
 
-    /* Chat List Items */
     #chatList .sidebar-btn {
       justify-content: space-between;
       padding-right: 8px;
+    }
+
+    #chatList .sidebar-btn::before {
+      content: '○';
+      font-size: 12px;
     }
 
     #chatList .sidebar-btn span:first-of-type {
@@ -219,16 +200,13 @@
       flex-shrink: 0;
     }
 
-    #chatList .sidebar-btn:hover span:last-of-type {
-      opacity: 0.7;
-    }
+    #chatList .sidebar-btn:hover span:last-of-type { opacity: 0.7; }
 
     #chatList .sidebar-btn span:last-of-type:hover {
       opacity: 1;
       background: rgba(255, 69, 58, 0.15);
     }
 
-    /* ── Main ─────────────────────────────────────────────────── */
     .main {
       flex: 1;
       margin-left: 280px;
@@ -238,9 +216,7 @@
       height: 100vh;
     }
     
-    .sidebar.collapsed ~ .main {
-      margin-left: 72px;
-    }
+    .sidebar.collapsed ~ .main { margin-left: 72px; }
 
     .chat-container {
       flex: 1;
@@ -251,20 +227,13 @@
       gap: 24px;
     }
 
-    .chat-container::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .chat-container::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
+    .chat-container::-webkit-scrollbar { width: 8px; }
+    .chat-container::-webkit-scrollbar-track { background: transparent; }
     .chat-container::-webkit-scrollbar-thumb {
       background: var(--border);
       border-radius: 10px;
     }
 
-    /* Messages */
     .message {
       max-width: 80%;
       animation: messageSlide 0.3s cubic-bezier(0.32, 0.72, 0, 1);
@@ -281,13 +250,8 @@
       }
     }
 
-    .user {
-      align-self: flex-end;
-    }
-
-    .bot {
-      align-self: flex-start;
-    }
+    .user { align-self: flex-end; }
+    .bot { align-self: flex-start; }
 
     .bubble {
       padding: 12px 16px;
@@ -323,7 +287,26 @@
       margin: 12px 0;
     }
 
-    /* Copy button */
+    .bot .bubble pre {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 12px 0;
+      font-family: 'SF Mono', Monaco, Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .bot .bubble code {
+      background: var(--bg-card);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'SF Mono', Monaco, Consolas, monospace;
+      font-size: 13px;
+    }
+
     .copy-btn {
       position: absolute;
       top: 8px;
@@ -341,9 +324,7 @@
       font-weight: 500;
     }
 
-    .bot:hover .copy-btn {
-      opacity: 1;
-    }
+    .bot:hover .copy-btn { opacity: 1; }
 
     .copy-btn:hover {
       background: var(--hover-bg);
@@ -351,11 +332,8 @@
       transform: scale(1.05);
     }
 
-    .copy-btn:active {
-      transform: scale(0.95);
-    }
+    .copy-btn:active { transform: scale(0.95); }
 
-    /* Input Area */
     .input-area {
       padding: 20px 24px 24px;
       background: var(--bg);
@@ -368,9 +346,7 @@
       transition: left 0.35s cubic-bezier(0.32, 0.72, 0, 1);
     }
 
-    .sidebar.collapsed ~ .main .input-area {
-      left: 72px;
-    }
+    .sidebar.collapsed ~ .main .input-area { left: 72px; }
 
     .input-wrapper {
       max-width: 900px;
@@ -404,9 +380,7 @@
       font-family: inherit;
     }
 
-    #userInput::placeholder {
-      color: var(--text-tertiary);
-    }
+    #userInput::placeholder { color: var(--text-tertiary); }
 
     .send-btn {
       width: 36px;
@@ -429,42 +403,38 @@
       box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
     }
 
-    .send-btn:active {
-      transform: scale(0.95);
-    }
+    .send-btn:active { transform: scale(0.95); }
 
-    /* Typing Indicator */
-    .typing-indicator {
+    /* Unique Thinking Animation */
+    .thinking-indicator {
       display: inline-flex;
-      gap: 6px;
+      align-items: center;
+      gap: 8px;
       padding: 8px 0;
+      color: var(--text-secondary);
+      font-size: 14px;
     }
 
-    .typing-indicator span {
-      width: 8px;
-      height: 8px;
-      background: var(--text-secondary);
-      border-radius: 50%;
-      animation: typingBounce 1.4s infinite ease-in-out;
+    .thinking-star {
+      font-size: 20px;
+      display: inline-block;
+      animation: thinkingSpin 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+      transform-origin: center;
     }
 
-    .typing-indicator span:nth-child(2) {
-      animation-delay: 0.2s;
+    @keyframes thinkingSpin {
+      0% { transform: rotate(0deg) scale(1); opacity: 0.6; }
+      50% { transform: rotate(180deg) scale(1.3); opacity: 1; }
+      100% { transform: rotate(360deg) scale(1); opacity: 0.6; }
     }
 
-    .typing-indicator span:nth-child(3) {
-      animation-delay: 0.4s;
+    .thinking-text {
+      animation: thinkingPulse 1.5s ease-in-out infinite;
     }
 
-    @keyframes typingBounce {
-      0%, 60%, 100% {
-        transform: translateY(0);
-        opacity: 0.4;
-      }
-      30% {
-        transform: translateY(-10px);
-        opacity: 1;
-      }
+    @keyframes thinkingPulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
     }
 
     /* Modals */
@@ -488,9 +458,7 @@
     }
 
     @keyframes fadeIn {
-      to {
-        opacity: 1;
-      }
+      to { opacity: 1; }
     }
 
     .teach-content {
@@ -547,13 +515,9 @@
       transform: scale(1.1);
     }
 
-    .close-btn:active {
-      transform: scale(0.9);
-    }
+    .close-btn:active { transform: scale(0.9); }
 
-    .teach-input-group {
-      margin-bottom: 20px;
-    }
+    .teach-input-group { margin-bottom: 20px; }
 
     .teach-input-group label {
       display: block;
@@ -584,9 +548,7 @@
       background: var(--bg);
     }
 
-    .teach-input-group textarea {
-      min-height: 100px;
-    }
+    .teach-input-group textarea { min-height: 100px; }
 
     .teach-submit-btn {
       width: 100%;
@@ -606,9 +568,7 @@
       box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2);
     }
 
-    .teach-submit-btn:active {
-      transform: scale(0.98);
-    }
+    .teach-submit-btn:active { transform: scale(0.98); }
 
     #profilePreview {
       width: 100px;
@@ -621,8 +581,30 @@
       transition: all 0.3s;
     }
 
-    #profilePreview:hover {
-      transform: scale(1.05);
+    #profilePreview:hover { transform: scale(1.05); }
+
+    /* Collapsed sidebar logo */
+    .sidebar.collapsed .sidebar-content > *:not(#chatList) {
+      display: none;
+    }
+
+    .sidebar.collapsed hr { display: none; }
+
+    .sidebar-logo {
+      display: none;
+      font-size: 32px;
+      text-align: center;
+      padding: 20px 0;
+      animation: logoFloat 3s ease-in-out infinite;
+    }
+
+    .sidebar.collapsed .sidebar-logo {
+      display: block;
+    }
+
+    @keyframes logoFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
     }
   </style>
 </head>
@@ -633,17 +615,21 @@
       <div class="title">Indy/</div>
     </div>
     <div class="sidebar-content">
+      <div class="sidebar-logo">✦</div>
       <button class="sidebar-btn" data-icon="✦" onclick="newChat()">
         <span>New Chat</span>
       </button>
-      <button class="sidebar-btn" data-icon="🗂" onclick="openProjects()">
+      <button class="sidebar-btn" data-icon="◈" onclick="openCode()">
+        <span>Code Sandbox</span>
+      </button>
+      <button class="sidebar-btn" data-icon="☰" onclick="openProjects()">
         <span>Projects</span>
       </button>
-      <button class="sidebar-btn" data-icon="👤" onclick="openProfile()">
-        <span>Profile Settings</span>
+      <button class="sidebar-btn" data-icon="⚙" onclick="openProfile()">
+        <span>Settings</span>
       </button>
-      <button class="sidebar-btn danger" data-icon="🗑" onclick="deleteAllChats()">
-        <span>Delete Everything</span>
+      <button class="sidebar-btn danger" data-icon="⨯" onclick="deleteAllChats()">
+        <span>Clear All</span>
       </button>
       <hr>
       <div id="chatList"></div>
@@ -654,8 +640,8 @@
     <div class="chat-container" id="chatMessages">
       <div class="message bot">
         <div class="bubble">
-          How's it going! I'm Indy,<br>
-          Ready when you are!
+          Hey! I'm Indy ✦<br>
+          What can I help you with today?
         </div>
       </div>
     </div>
@@ -689,7 +675,7 @@
   <div class="teach-modal" id="profileModal">
     <div class="teach-content">
       <button class="close-btn" onclick="closeProfileModal()">×</button>
-      <h2>Profile Settings</h2>
+      <h2>Settings</h2>
       <div style="display:flex;justify-content:center;margin-bottom:20px;">
         <div id="profilePreview"></div>
       </div>
@@ -701,7 +687,33 @@
         <label>Profile Picture URL</label>
         <input type="text" id="profilePicture" placeholder="https://example.com/image.jpg" oninput="updateProfilePreview()">
       </div>
-      <button class="teach-submit-btn" onclick="submitProfile()">Save Profile</button>
+      <button class="teach-submit-btn" onclick="submitProfile()">Save Settings</button>
+    </div>
+  </div>
+
+  <!-- Code Sandbox Modal -->
+  <div class="teach-modal" id="codeModal">
+    <div class="teach-content" style="max-width: 800px;">
+      <button class="close-btn" onclick="closeCodeModal()">×</button>
+      <h2>Code Sandbox</h2>
+      <div class="teach-input-group">
+        <label>Language</label>
+        <select id="codeLanguage" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;padding:12px 16px;color:var(--text);font-size:15px;font-family:inherit;">
+          <option value="javascript">JavaScript</option>
+          <option value="python">Python</option>
+          <option value="html">HTML</option>
+          <option value="css">CSS</option>
+        </select>
+      </div>
+      <div class="teach-input-group">
+        <label>Your Code</label>
+        <textarea id="codeInput" placeholder="Write your code here..." style="min-height:200px;font-family:'SF Mono',Monaco,monospace;font-size:13px;"></textarea>
+      </div>
+      <div class="teach-input-group">
+        <label>Output</label>
+        <pre id="codeOutput" style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;padding:16px;min-height:100px;max-height:200px;overflow-y:auto;color:var(--text-secondary);font-size:13px;"></pre>
+      </div>
+      <button class="teach-submit-btn" onclick="runCode()">▶ Run Code</button>
     </div>
   </div>
 
@@ -720,7 +732,8 @@ function saveCurrentChat() {
   const messages = [];
   document.querySelectorAll('#chatMessages .message').forEach(msg => {
     const sender = msg.classList.contains('user') ? 'user' : 'bot';
-    const text = msg.querySelector('.bubble').textContent.replace('Copy', '').trim();
+    const bubble = msg.querySelector('.bubble');
+    const text = bubble.innerHTML.replace(/<button[^>]*>.*?<\/button>/g, '').trim();
     messages.push({ sender, text });
   });
   const chatData = {
@@ -759,7 +772,7 @@ async function newChat(chatId = null) {
   }
   currentChatId = `chat_${Date.now()}`;
   document.getElementById('chatMessages').innerHTML = '';
-  addMessage('bot', `Ready when you are!`, false);
+  addMessage('bot', `Hey! I'm Indy ✦<br>What can I help you with today?`, false);
   const chatList = JSON.parse(localStorage.getItem('chatList') || '[]');
   chatList.unshift({ id: currentChatId, name: 'New Chat' });
   localStorage.setItem('chatList', JSON.stringify(chatList));
@@ -797,7 +810,7 @@ function deleteChat(chatId) {
   if (currentChatId === chatId) {
     currentChatId = null;
     document.getElementById('chatMessages').innerHTML = '';
-    addMessage('bot', `Ready when you are!`, false);
+    addMessage('bot', `Hey! I'm Indy ✦<br>What can I help you with today?`, false);
   }
   loadSavedChats();
 }
@@ -810,7 +823,7 @@ function deleteAllChats() {
     knowledge = [];
     currentChatId = null;
     document.getElementById('chatMessages').innerHTML = '';
-    addMessage('bot', `All chats deleted! Ready for a fresh start!`, false);
+    addMessage('bot', `All chats cleared! Ready for a fresh start ✦`, false);
     loadSavedChats();
   }
 }
@@ -839,7 +852,7 @@ function submitTeaching() {
     }
   }
   if (!found) knowledge.push({ questions: [q], answer: a });
-  addMessage('bot', "Learned! I'll remember that.");
+  addMessage('bot', "Got it! I'll remember that ✦");
   closeTeachModal();
 }
 
@@ -869,7 +882,45 @@ function submitProfile() {
 }
 
 function openProjects() {
-  alert("Projects view coming soon! You can later expand this to show saved projects or canvases.");
+  alert("Projects coming soon! Stay tuned ✦");
+}
+
+function openCode() {
+  document.getElementById('codeModal').classList.add('active');
+  document.getElementById('codeInput').value = '';
+  document.getElementById('codeOutput').textContent = 'Output will appear here...';
+}
+
+function closeCodeModal() {
+  document.getElementById('codeModal').classList.remove('active');
+}
+
+function runCode() {
+  const code = document.getElementById('codeInput').value;
+  const lang = document.getElementById('codeLanguage').value;
+  const output = document.getElementById('codeOutput');
+  
+  if (!code.trim()) {
+    output.textContent = 'Error: No code to run!';
+    return;
+  }
+  
+  if (lang === 'javascript') {
+    const logs = [];
+    const originalLog = console.log;
+    console.log = (...args) => logs.push(args.join(' '));
+    
+    try {
+      const result = eval(code);
+      console.log = originalLog;
+      output.textContent = logs.length > 0 ? logs.join('\n') : (result !== undefined ? String(result) : 'Code executed successfully!');
+    } catch (e) {
+      console.log = originalLog;
+      output.textContent = `Error: ${e.message}`;
+    }
+  } else {
+    output.textContent = `${lang} execution coming soon! For now, only JavaScript works.`;
+  }
 }
 
 function getSystemPrompt() {
@@ -918,7 +969,7 @@ async function getDefinition(word) {
   try {
     const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
     const data = await res.json();
-    if (!data.title) return `**${word}:** ${data[0].meanings[0].definitions[0].definition}`;
+    if (!data.title) return `<strong>${word}:</strong> ${data[0].meanings[0].definitions[0].definition}`;
   } catch {}
   return null;
 }
@@ -927,7 +978,7 @@ async function getWikipedia(topic) {
   try {
     const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`);
     const data = await res.json();
-    if (data.extract) return `**${data.title}:** ${data.extract}`;
+    if (data.extract) return `<strong>${data.title}:</strong> ${data.extract}`;
   } catch {}
   return null;
 }
@@ -986,7 +1037,7 @@ async function sendMessage() {
 
   if (/^define |^meaning of /.test(msg.toLowerCase())) {
     const word = msg.replace(/^define |^meaning of /i, '').trim().split(' ')[0];
-    addTypingIndicator();
+    addThinkingIndicator();
     const def = await getDefinition(word);
     replaceLastBot(def || "Not found.");
     saveCurrentChat();
@@ -995,7 +1046,7 @@ async function sendMessage() {
 
   if (/^tell me about |^what is /.test(msg.toLowerCase())) {
     const topic = msg.replace(/^tell me about |^what is /i, '').trim();
-    addTypingIndicator();
+    addThinkingIndicator();
     const wiki = await getWikipedia(topic);
     replaceLastBot(wiki || "No result.");
     saveCurrentChat();
@@ -1004,7 +1055,7 @@ async function sendMessage() {
 
   const math = handleMath(msg);
   if (math !== null) {
-    addMessage('bot', `**${msg} = ${math}**`);
+    addMessage('bot', `<strong>${msg} = ${math}</strong>`);
     saveCurrentChat();
     return;
   }
@@ -1021,21 +1072,20 @@ async function sendMessage() {
       .trim();
 
     if (!imagePrompt) {
-      addMessage('bot', "Add a description please!\nExample: `!img neon cyberpunk fox in tokyo rain`");
+      addMessage('bot', "Add a description!<br>Example: <code>!img neon cyberpunk city</code>");
       saveCurrentChat();
       return;
     }
 
-    addTypingIndicator();
+    addThinkingIndicator();
     const result = await generateImage(imagePrompt);
 
     if (result.startsWith('http')) {
       replaceLastBot(
-        `Here's your Flux image:\n\n` +
+        `Here's your image ✦<br><br>` +
         `<img src="${result}" alt="${imagePrompt}" ` +
         `style="max-width:100%; border-radius:20px; margin:16px 0; box-shadow:0 8px 32px rgba(0,0,0,0.5);">` +
-        `\n\n**Prompt:** ${imagePrompt}\n` +
-        `(Powered by pollinations.ai – free & no login)`
+        `<br><strong>Prompt:</strong> ${imagePrompt}`
       );
     } else {
       replaceLastBot(result);
@@ -1044,7 +1094,7 @@ async function sendMessage() {
     return;
   }
 
-  addTypingIndicator();
+  addThinkingIndicator();
   const response = await getAIResponse(msg);
   replaceLastBot(response);
   saveCurrentChat();
@@ -1057,7 +1107,7 @@ function addMessage(sender, text, shouldSave = true) {
   if (sender === 'bot') {
     msgDiv.innerHTML = `
       <div class="bubble">
-        ${text.replace(/\n/g, '<br>')}
+        ${text}
         <button class="copy-btn" onclick="copyText(this)">Copy</button>
       </div>`;
   } else {
@@ -1068,14 +1118,15 @@ function addMessage(sender, text, shouldSave = true) {
   if (shouldSave) saveCurrentChat();
 }
 
-function addTypingIndicator() {
+function addThinkingIndicator() {
   const container = document.getElementById('chatMessages');
   const msgDiv = document.createElement('div');
   msgDiv.className = 'message bot';
   msgDiv.innerHTML = `
     <div class="bubble">
-      <div class="typing-indicator">
-        <span></span><span></span><span></span>
+      <div class="thinking-indicator">
+        <span class="thinking-star">✦</span>
+        <span class="thinking-text">thinking...</span>
       </div>
     </div>`;
   container.appendChild(msgDiv);
@@ -1085,7 +1136,7 @@ function addTypingIndicator() {
 function replaceLastBot(text) {
   const lastBotBubble = document.querySelector('.message.bot:last-child .bubble');
   if (lastBotBubble) {
-    lastBotBubble.innerHTML = text.replace(/\n/g, '<br>') +
+    lastBotBubble.innerHTML = text +
       '<button class="copy-btn" onclick="copyText(this)">Copy</button>';
   }
   document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
@@ -1096,7 +1147,7 @@ function copyText(btn) {
   const bubble = btn.parentElement;
   const text = bubble.textContent.replace('Copy', '').trim();
   navigator.clipboard.writeText(text);
-  btn.textContent = 'Copied';
+  btn.textContent = 'Copied!';
   setTimeout(() => btn.textContent = 'Copy', 2000);
 }
 
@@ -1117,7 +1168,7 @@ function createChatButton(chatId, name) {
   nameSpan.textContent = name;
   
   const delSpan = document.createElement('span');
-  delSpan.textContent = '✕';
+  delSpan.textContent = '⨯';
   delSpan.onclick = (e) => {
     e.stopPropagation();
     deleteChat(chatId);
@@ -1128,16 +1179,15 @@ function createChatButton(chatId, name) {
   chatList.appendChild(btn);
 }
 
-// Init
 window.addEventListener('DOMContentLoaded', () => {
   loadSavedChats();
   const chatList = JSON.parse(localStorage.getItem('chatList') || '[]');
   if (chatList.length > 0) {
     loadChat(chatList[0].id);
   } else {
-    addMessage('bot', `Ready when you are!`, false);
+    addMessage('bot', `Hey! I'm Indy ✦<br>What can I help you with today?`, false);
   }
 });
-</script>
+  </script>
 </body>
 </html>
