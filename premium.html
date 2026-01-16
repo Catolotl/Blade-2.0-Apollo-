@@ -837,11 +837,19 @@ async function sendMessage() {
 
   // Math
   const math = handleMath(msg);
-  if (math !== null) { 
-    addMessage('bot', `**${msg} = ${math}**`); 
+  if (math !== null) {
+    addMessage('bot', `**${msg} = ${math}**`);
     saveCurrentChat();
-    return; 
+    return;
   }
+
+  // ← Paste the image trigger block HERE
+
+  // AI response
+  addTypingIndicator();
+  const response = await getAIResponse(msg);
+  replaceLastBot(response);
+  saveCurrentChat();
 
   // AI response
   addTypingIndicator();
@@ -953,6 +961,97 @@ window.addEventListener('DOMContentLoaded', () => {
     addMessage('bot', `Ready when you are!`, false);
   }
 });
+
+
+
+   // ====================
+// Image Generation with DeepAI (or similar API)
+// Paste this at the end of your <script> block
+// ====================
+
+// ← Replace this with your actual DeepAI API key
+const DEEPAI_API_KEY = 'a0e55347-c83c-4afa-bb5e-a165ca514f06';  // ← Paste your key here
+
+async function generateImageWithDeepAI(prompt) {
+  if (!DEEPAI_API_KEY || DEEPAI_API_KEY === 'YOUR_DEEPAI_API_KEY_HERE') {
+    return "Error: Please set your DeepAI API key in the code first.";
+  }
+
+  try {
+    const response = await fetch('https://api.deepai.org/api/text2img', {
+      method: 'POST',
+      headers: {
+        'api-key': DEEPAI_API_KEY,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({
+        text: prompt,
+        // Optional: you can add more params if you want
+        // grid_size: '1',              // 1 = single image
+        // width: '1024',
+        // height: '1024',
+        // negative_prompt: 'blurry, low quality',
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      return `Error ${response.status}: ${err || 'Failed to generate image'}`;
+    }
+
+    const data = await response.json();
+    if (data.output_url) {
+      return data.output_url;
+    } else {
+      return "No image URL returned from API.";
+    }
+  } catch (err) {
+    console.error(err);
+    return `Network/API error: ${err.message}`;
+  }
+}
+
+// Add this block inside your sendMessage() function, 
+// ideally right after the math handler and before the final AI text response:
+
+// ── Image generation trigger ────────────────────────────────────────────────
+if (msg.toLowerCase().startsWith('!img ') || 
+    msg.toLowerCase().startsWith('generate image ') || 
+    msg.toLowerCase().startsWith('draw ')) {
+  
+  const imagePrompt = msg
+    .replace(/^!img /i, '')
+    .replace(/^generate image /i, '')
+    .replace(/^draw /i, '')
+    .trim();
+
+  if (!imagePrompt) {
+    addMessage('bot', "Please provide a description after the command.\nExample: `!img cyberpunk samurai in rain`");
+    return;
+  }
+
+  addTypingIndicator();
+
+  const imageUrlPromise = generateImageWithDeepAI(imagePrompt);
+
+  imageUrlPromise.then(urlOrError => {
+    if (urlOrError.startsWith('http')) {
+      // Success → show image inline
+      replaceLastBot(
+        `Here’s your generated image:\n\n` +
+        `<img src="${urlOrError}" alt="${imagePrompt}" ` +
+        `style="max-width:100%; border-radius:12px; margin:12px 0; box-shadow:0 4px 20px rgba(0,0,0,0.6);">` +
+        `\n\n**Prompt:** ${imagePrompt}`
+      );
+    } else {
+      // Error message
+      replaceLastBot(urlOrError);
+    }
+    saveCurrentChat();
+  });
+
+  return;  // Stop further processing (no text AI response needed)
+}
   </script>
 </body>
 </html>
