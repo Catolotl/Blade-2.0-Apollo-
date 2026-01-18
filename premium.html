@@ -640,7 +640,7 @@
     <div class="chat-container" id="chatMessages">
       <div class="message bot">
         <div class="bubble">
-          Hey! I'm Indy ✦<br>
+          Howdy 🤠! I'm indy!<br>
           What can I help you with today?
         </div>
       </div>
@@ -720,8 +720,35 @@
   <script>
 let knowledge = [];
 let personality = "";
+const openings = [
+  "Howdy 🤠! I'm Indy",
+  "Indy here!",
+  "Sup! I’m Indy",
+  "Good to see you 🤠 I’m Indy"
+];
+
+const openingPhrase = {
+  get value() {
+    return openings[Math.floor(Math.random() * openings.length)];
+  }
+};
+
 let currentChatId = null;
 let userProfile = JSON.parse(localStorage.getItem('userProfile')) || { name: '', picture: '' };
+
+const thinkingPhrases = [
+  "Thinking…",
+  "Hang tight 🤠",
+  "One sec…",
+  "Let me check on that"
+];
+
+const phrase = {
+  get value() {
+    return thinkingPhrases[Math.floor(Math.random() * thinkingPhrases.length)];
+  }
+};
+
 
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('collapsed');
@@ -772,7 +799,7 @@ async function newChat(chatId = null) {
   }
   currentChatId = `chat_${Date.now()}`;
   document.getElementById('chatMessages').innerHTML = '';
-  addMessage('bot', `Hey! I'm Indy ✦<br>What can I help you with today?`, false);
+  addMessage('bot', `${openingPhrase.value} <br>What can I help you with today?`, false);
   const chatList = JSON.parse(localStorage.getItem('chatList') || '[]');
   chatList.unshift({ id: currentChatId, name: 'New Chat' });
   localStorage.setItem('chatList', JSON.stringify(chatList));
@@ -810,7 +837,7 @@ function deleteChat(chatId) {
   if (currentChatId === chatId) {
     currentChatId = null;
     document.getElementById('chatMessages').innerHTML = '';
-    addMessage('bot', `Hey! I'm Indy ✦<br>What can I help you with today?`, false);
+    addMessage('bot', `${openingPhrase.value}<br>What can I help you with today?`, false);
   }
   loadSavedChats();
 }
@@ -882,7 +909,8 @@ function submitProfile() {
 }
 
 function openProjects() {
-  alert("Projects coming soon! Stay tuned ✦");
+  alert("Projects coming soon — appreciate the patience 🤠"
+);
 }
 
 function openCode() {
@@ -924,7 +952,7 @@ function runCode() {
 }
 
 function getSystemPrompt() {
-  return `You are Indy, a helpful AI assistant. Be concise, friendly, and conversational. ${personality}`.trim() + "\n\nUser: ";
+return `You are Indy, a helpful AI assistant by JVST co, running on the "Sunshile 1.0" model. Be concise, friendly, and conversational. Use a relaxed, modern tone that’s approachable and lightly playful, never exaggerated or folksy. Avoid stereotypes, dialect spellings, and novelty slang. Informal greetings (like “hey” or occasional “howdy”) are fine if natural. Use at most one emoji (e.g., 🤠 👋) sparingly to add warmth. Sound confident, warm, and contemporary — not performative. ${personality}`.trim() + "\n\nUser: ";
 }
 
 function cosineSimilarity(a, b) {
@@ -992,7 +1020,7 @@ async function getAIResponse(prompt) {
       return text.trim() || "…";
     }
   } catch {}
-  return "Thinking took too long.";
+  return "Couldnt connect to the servers, try again!";
 }
 
 async function generateImage(prompt) {
@@ -1062,11 +1090,15 @@ async function sendMessage() {
 
   if (msg.toLowerCase().startsWith('!img ') ||
       msg.toLowerCase().startsWith('generate image ') ||
+      msg.toLowerCase().startsWith('generate an image ') ||
+      msg.toLowerCase().startsWith('generate a picture') ||
       msg.toLowerCase().startsWith('draw ') ||
       msg.toLowerCase().startsWith('create image ')) {
     const imagePrompt = msg
       .replace(/^!img /i, '')
       .replace(/^generate image /i, '')
+      .replace(/^generate an image /i, '')
+      .replace(/^generate a picture /i, '')
       .replace(/^draw /i, '')
       .replace(/^create image /i, '')
       .trim();
@@ -1126,7 +1158,7 @@ function addThinkingIndicator() {
     <div class="bubble">
       <div class="thinking-indicator">
         <span class="thinking-star">✦</span>
-        <span class="thinking-text">thinking...</span>
+        <span class="thinking-text">${phrase.value}</span>
       </div>
     </div>`;
   container.appendChild(msgDiv);
