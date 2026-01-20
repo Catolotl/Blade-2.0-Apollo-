@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blade Card - Premium Access</title>
+    <title>Premium Access</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -630,18 +630,18 @@
                             <div id="scanWave" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom, transparent 0%, rgba(52,199,89,0.1) 50%, transparent 100%); transform: translateY(-100%); opacity: 0;"></div>
                         </div>
                         
-                        <p style="color: #666; margin-bottom: 30px;">Position your card near the device</p>
+                        <p style="color: #666; margin-bottom: 30px;">Log in using digital blade card</p>
                         
                         <div id="scanStatus" style="min-height: 24px; margin-bottom: 30px; font-weight: 500; opacity: 0; transition: all 0.3s;"></div>
                         
-                        <button class="premium-btn" id="scanBtn" onclick="attemptScan()">Scan Card</button>
+                        <button class="premium-btn" id="scanBtn" onclick="attemptScan()">Search for Digital Card</button>
                     </div>
                 </div>
 
                 <div id="codeStage" class="hidden">
                     <div style="text-align: center;">
                         <h2 style="font-size: 1.75rem; margin-bottom: 8px;">Enter Code</h2>
-                        <p style="color: #666; margin-bottom: 40px;">Enter the verification code from your card</p>
+                        <p style="color: #666; margin-bottom: 40px;">Enter the verification code</p>
                         <input type="text" id="cardCodeInput" maxlength="20" placeholder="••••••" autocomplete="off" style="padding: 16px 32px; font-size: 1.5rem; letter-spacing: 4px; text-align: center; width: 100%; max-width: 300px; border: 2px solid #e5e5e5; border-radius: 12px; font-family: 'Outfit', sans-serif;">
                         <p id="codeError" style="color: #ff3b30; margin-top: 16px; font-size: 0.9rem; opacity: 0; transition: opacity 0.3s;"></p>
                     </div>
@@ -725,7 +725,8 @@
                     <input type="password" id="password" required placeholder="password">
                 </div>
 
-                <button type="submit" class="submit-btn">Sign Up for Blade Card</button>
+                <button type="submit" class="submit-btn">Sign Up</button>
+                <p>Dont worry, we wont share this info.</p>
             </form>
         </div>
     </div>
@@ -857,7 +858,7 @@
                 var accessLock = document.createElement('div');
                 accessLock.id = 'accessLock';
                 accessLock.className = 'lock-overlay';
-                accessLock.innerHTML = '<div class="lock-icon">🔒</div><h3>Blade Card Required</h3><p>Upgrade to Blade Card membership to access these services</p><a href="mailto:developer@bladecard.com" class="contact-link">Contact developer for more info</a>';
+                accessLock.innerHTML = '<div class="lock-icon">🔒</div><h3>Blade Card Required</h3><p>Upgrade to Blade Card membership to access these services</p><a href="#" class="contact-link">Contact developer for more info</a>';
                 accessSection.appendChild(accessLock);
             }
         } else {
@@ -950,7 +951,7 @@
         var scanBtn = document.getElementById('scanBtn');
        
         scanBtn.disabled = true;
-        scanStatus.textContent = "Scanning...";
+        scanStatus.textContent = "Searching Database...";
         scanStatus.style.color = "#007aff";
         scanStatus.style.opacity = "1";
         var animCount = 0;
@@ -999,7 +1000,7 @@
                     document.getElementById('cardCodeInput').value = '';
                 }, 350);
             } else if (code.length >= 4) {
-                codeError.textContent = 'Invalid code. Please try again.';
+                codeError.textContent = 'This code is not linked to your card. Please try again.';
                 codeError.style.opacity = '1';
             }
         }
