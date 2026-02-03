@@ -1410,6 +1410,82 @@ function submitProfile() {
   updateSidebarProfile();
 }
   </script>
+
+  <script>
+// Indy Sunrise Update Popup (new features)
+// Paste before </body>
+
+(function() {
+    const UPDATE_KEY = "indy_sunrise_update_v1"; // change to v2 later if you add more
+
+    if (localStorage.getItem(UPDATE_KEY) === "true") return;
+
+    const modal = document.createElement("div");
+    modal.style.cssText = `
+        position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px);
+        z-index:9999; display:flex; align-items:center; justify-content:center; opacity:0;
+        transition:opacity 0.4s ease;
+    `;
+
+    const content = document.createElement("div");
+    content.style.cssText = `
+        background:rgba(30,30,40,0.95); border:1px solid rgba(255,255,255,0.12);
+        border-radius:16px; max-width:440px; width:90%; padding:28px 24px; text-align:center;
+        box-shadow:0 20px 60px rgba(0,0,0,0.7); transform:scale(0.92);
+        transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    `;
+
+    content.innerHTML = `
+        <div style="font-size:48px; margin-bottom:12px;">✦</div>
+        <h2 style="font-family:'Syne',sans-serif; font-weight:800; font-size:26px; margin-bottom:16px; letter-spacing:-1px;">
+            Indy Update
+        </h2>
+        <p style="font-size:15px; color:#ddd; line-height:1.6; margin-bottom:20px;">
+            Big glow-up for Indy — smarter, faster, and knows you better now.
+        </p>
+        <ul style="text-align:left; max-width:380px; margin:0 auto 24px; padding-left:20px; font-size:14px; color:#ccc; line-height:1.7; list-style-type:'→ ';">
+            <li>Made to have smarter, faster, replies</li>
+            <li>Remembers your name from Settings — says hi properly</li>
+        </ul>
+        <button id="acceptUpdateBtn" style="
+            background:linear-gradient(135deg,#ffffff,#e0e0e0); color:#000; border:none;
+            padding:12px 44px; font-size:16px; font-weight:700; border-radius:50px;
+            cursor:pointer; box-shadow:0 6px 20px rgba(255,255,255,0.15);
+            transition:all 0.3s ease;
+        ">
+            Let's go!
+        </button>
+    `;
+
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+
+    setTimeout(() => {
+        modal.style.opacity = "1";
+        content.style.transform = "scale(1)";
+    }, 50);
+
+    document.getElementById("acceptUpdateBtn").onclick = () => {
+        localStorage.setItem(UPDATE_KEY, "true");
+        modal.style.opacity = "0";
+        content.style.transform = "scale(0.92)";
+        setTimeout(() => modal.remove(), 400);
+        // Optional: quick toast / message
+        if (typeof addMessage === 'function') {
+            addMessage('bot', "Update locked in — let's cook 🤠", false);
+        }
+    };
+
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            localStorage.setItem(UPDATE_KEY, "true");
+            modal.style.opacity = "0";
+            content.style.transform = "scale(0.92)";
+            setTimeout(() => modal.remove(), 400);
+        }
+    };
+})();
+</script>
   
 </body>
 </html>
