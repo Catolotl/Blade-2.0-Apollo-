@@ -606,6 +606,68 @@
       0%, 100% { transform: translateY(0px); }
       50% { transform: translateY(-5px); }
     }
+
+    /* User Profile Footer */
+.user-profile-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-elevated);
+  transition: all 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.sidebar.collapsed .user-profile-footer {
+  padding: 12px 0;
+  justify-content: center;
+}
+
+.profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  background-size: cover;
+  background-position: center;
+  border: 2px solid var(--accent);
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+
+.sidebar.collapsed .profile-avatar {
+  width: 36px;
+  height: 36px;
+}
+
+.profile-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.profile-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.sidebar.collapsed .profile-info {
+  display: none;
+}
+
+/* Hover effect */
+.user-profile-footer:hover {
+  background: var(--hover-bg);
+  cursor: pointer;
+}
   </style>
 </head>
 <body>
@@ -635,6 +697,14 @@
       <div id="chatList"></div>
     </div>
   </div>
+
+  <!-- User Profile Footer (bottom of sidebar) -->
+<div id="userProfileFooter" class="user-profile-footer">
+  <div class="profile-avatar" id="sidebarAvatar"></div>
+  <div class="profile-info">
+    <span id="sidebarName" class="profile-name"></span>
+  </div>
+</div>
 
   <div class="main">
     <div class="chat-container" id="chatMessages">
@@ -774,15 +844,45 @@ function saveCurrentChat() {
 }
 
 async function generateChatName(firstMessage) {
+  // Use the same Groq setup as chat responses for consistency
+  const systemPrompt = `You are a concise title generator. Given the first message of a conversation, create a short, catchy chat title (3-6 words max). Make it descriptive but natural. Respond with ONLY the title — no quotes, no extra text, no explanations.`.trim();
+
   try {
-    const prompt = `Generate a short, concise chat title (3-5 words max) for a conversation that starts with: "${firstMessage}". Only respond with the title, nothing else.`;
-    const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}`);
-    if (res.ok) {
-      const name = await res.text();
-      return name.trim().replace(/['"]/g, '').substring(0, 40);
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer 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"
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",  // or whichever model you're using now
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `First message: "${firstMessage}"\n\nTitle:` }
+        ],
+        temperature: 0.6,          // lower = more focused/less creative
+        max_tokens: 30             // very short output
+      })
+    });
+
+    if (!res.ok) {
+      throw new Error(`Indy title gen failed: ${res.status}`);
     }
-  } catch {}
-  return `Chat ${Date.now()}`;
+
+    const data = await res.json();
+    let title = data.choices?.[0]?.message?.content?.trim() || "";
+
+    // Clean up any extra junk the model might add
+    title = title.replace(/^["']|["']$/g, '').trim();
+    title = title.substring(0, 40); // safety cap
+
+    return title || `Chat ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+
+  } catch (err) {
+    console.error("Title generation failed:", err);
+    // Simple fallback if Groq hiccups
+    return `Chat about ${firstMessage.substring(0, 20).trim()}...`;
+  }
 }
 
 function loadChat(chatId) {
@@ -907,6 +1007,9 @@ function submitProfile() {
   userProfile.picture = document.getElementById('profilePicture').value.trim();
   localStorage.setItem('userProfile', JSON.stringify(userProfile));
   closeProfileModal();
+
+  // Force refresh of userProfile variable so next prompt sees it
+  userProfile = JSON.parse(localStorage.getItem('userProfile')) || { name: '', picture: '' };
 }
 
 function openProjects() {
@@ -953,9 +1056,30 @@ function runCode() {
 }
 
 function getSystemPrompt() {
-return `You are Indy, a helpful AI assistant by JVST co, running on the "Sunshile 1.0" model. Be concise, friendly, and conversational. Use a relaxed, modern tone that’s approachable and lightly playful, never exaggerated or folksy. Avoid stereotypes, dialect spellings, and novelty slang. Informal greetings (like “hey” or occasional “howdy”) are fine if natural. Use at most one emoji (e.g., 🤠 👋) sparingly to add warmth. Sound confident, warm, and contemporary — not performative. ${personality}`.trim() + "\n\nUser: ";
-}
+  // Base instructions
+  let base = `You are Indy, a helpful AI assistant by JVST co, running on Sunshine 1.0. Be concise, friendly, and conversational with a relaxed, modern tone that's approachable and lightly playful — never exaggerated or folksy.
 
+Rules:
+- Use informal greetings like “hey” or occasional “howdy” only once at the very start of a conversation.
+- NEVER repeat the same phrase (like "What's on your mind?", "How can I help?", etc.) more than once.
+- Do NOT keep asking open-ended questions unless the user is clearly stuck or the topic calls for it.
+- Respond directly to what the user says. If they say little, give a short reply and wait.
+- Use at most one emoji (🤠 or 👋) sparingly, only when it fits naturally.
+- Sound confident, warm, and contemporary — not performative or needy.`.trim();
+
+  // Add name info ONLY if name exists and isn't blank/empty/whitespace
+  if (userProfile?.name && userProfile.name.trim() !== "") {
+    const name = userProfile.name.trim(); // clean it right here
+    base += `\n\nYou are talking to ${name}. Use their name naturally in conversation when it feels right (e.g. "Hey ${name}, good question!" or "Got it, ${name}!"). Do NOT use their name every reply — only when it makes the conversation warmer or more personal.`;
+  }
+
+  // Add custom personality if set
+  if (personality) {
+    base += `\n${personality}`;
+  }
+
+  return base;
+}
 function cosineSimilarity(a, b) {
   const tokensA = a.toLowerCase().match(/\w+/g) || [];
   const tokensB = b.toLowerCase().match(/\w+/g) || [];
@@ -1012,16 +1136,42 @@ async function getWikipedia(topic) {
   return null;
 }
 
-async function getAIResponse(prompt) {
-  const fullPrompt = getSystemPrompt() + prompt;
+async function getAIResponse(userMessage) {
+  // Use the dynamic prompt that includes the name when set
+  const systemPrompt = getSystemPrompt();  // ← this now includes name logic
+
   try {
-    const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}`);
-    if (res.ok) {
-      const text = await res.text();
-      return text.trim() || "…";
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer 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"
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userMessage }
+        ],
+        temperature: 0.7,
+        max_tokens: 2048
+      })
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Indy error details:", errorText);
+      throw new Error(`Indy HTTP ${res.status}: ${errorText}`);
     }
-  } catch {}
-  return "Couldnt connect to the servers, try again!";
+
+    const data = await res.json();
+    let text = data.choices?.[0]?.message?.content?.trim() || "…";
+    return text || "Got it — what's next? ✦";
+
+  } catch (err) {
+    console.error("Indy API call failed:", err);
+    return "Indy is taking a quick breather — try again in a moment ✦";
+  }
 }
 
 async function generateImage(prompt) {
@@ -1221,6 +1371,45 @@ window.addEventListener('DOMContentLoaded', () => {
     addMessage('bot', `Tip: Say !img + your prompt to generate an image`, false);
   }
 });
+// Function to update sidebar profile display
+function updateSidebarProfile() {
+  const avatar = document.getElementById('sidebarAvatar');
+  const nameEl = document.getElementById('sidebarName');
+
+  if (!avatar || !nameEl) return;
+
+  // Profile picture
+  const picUrl = userProfile?.picture?.trim();
+  avatar.style.backgroundImage = picUrl ? `url(${picUrl})` : 'none';
+  avatar.style.backgroundColor = picUrl ? 'transparent' : 'var(--bg-card)';
+
+  // Name (only show if exists)
+  const displayName = userProfile?.name?.trim();
+  nameEl.textContent = displayName || 'Guest';
+
+  // Optional: click to open settings
+  document.getElementById('userProfileFooter').onclick = () => {
+    document.getElementById('profileModal').classList.add('active');
+    document.getElementById('profileName').value = userProfile.name;
+    document.getElementById('profilePicture').value = userProfile.picture;
+    updateProfilePreview();
+  };
+}
+
+// Run on load
+updateSidebarProfile();
+
+// Also run whenever settings are saved (add to submitProfile)
+function submitProfile() {
+  userProfile.name = document.getElementById('profileName').value.trim();
+  userProfile.picture = document.getElementById('profilePicture').value.trim();
+  localStorage.setItem('userProfile', JSON.stringify(userProfile));
+  closeProfileModal();
+
+  // Refresh sidebar profile immediately
+  updateSidebarProfile();
+}
   </script>
+  
 </body>
 </html>
