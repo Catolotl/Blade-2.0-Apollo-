@@ -855,7 +855,7 @@ async function generateChatName(firstMessage) {
         "Authorization": "Bearer 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"
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",  // or whichever model you're using now
+        model: "llama-3.1-8b-instant",  // or whichever model you're using now
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `First message: "${firstMessage}"\n\nTitle:` }
