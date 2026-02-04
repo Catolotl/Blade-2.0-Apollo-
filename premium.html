@@ -810,6 +810,40 @@
     left: 20px;
   }
 }
+  .model-btn {
+  /* Existing styles */
+  padding: 0 12px;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.model-btn .chevron {
+  font-size: 10px;
+  opacity: 0.7;
+  margin-left: 4px;
+}
+
+#currentModelLabel {
+  white-space: nowrap;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.model-item {
+  /* Existing */
+  position: relative;
+}
+
+.model-item.active::after {
+  content: '✓';
+  position: absolute;
+  right: 16px;
+  color: var(--accent);
+  font-weight: bold;
+}
   </style>
 </head>
 <body>
@@ -860,19 +894,23 @@
 
     <div class="input-area">
 <div class="input-wrapper">
-  <button class="model-btn" id="modelSelectorBtn" title="Choose model">⛭</button>
+  <button class="model-btn" id="modelSelectorBtn" title="Choose model">
+    <span id="currentModelLabel">Indy Sunshine 1.0 Beta</span>
+    <span class="chevron">▼</span>
+  </button>
   <input type="text" id="userInput" placeholder="Ask anything..." onkeypress="if(event.key==='Enter') sendMessage()">
   <button class="send-btn" onclick="sendMessage()">↑</button>
 </div>
 
-<!-- Model popover (hidden by default) -->
+<!-- Model popover -->
 <div class="model-popover" id="modelPopover">
   <div class="model-header">Available Models</div>
-  <button class="model-item active" data-model="indy-sunshine-1.0">Indy Sunshine 1.0 Beta</button>
-  <button class="model-item" data-model="placeholder-grok">Sunshine Pro</button>
-  <button class="model-item" data-model="placeholder-gpt">Indy 3</button>
-  <button class="model-item" data-model="placeholder-claude">Creative Studio</button>
-  <button class="model-item" data-model="placeholder-claude">Code Assistant</button>
+  <button class="model-item active" data-model="Indy Sunshine 1.0 Beta">Indy Sunshine 1.0 Beta</button>
+  <button class="model-item" data-model="Sunshine Pro">Sunshine Pro</button>
+  <button class="model-item" data-model="Indy 3">Indy 3</button>
+  <button class="model-item" data-model="Creative Studio">Creative Studio</button>
+  <button class="model-item" data-model="Code Assistant">Code Assistant</button>
+  <div class="model-footer">More models coming soon</div>
 </div>
     </div>
   </div>
@@ -943,6 +981,7 @@
   <script>
 let knowledge = [];
 let personality = "";
+let modelDropdownValue = "";
 const openings = [
   "Howdy 🤠! I'm Indy",
   "Indy here!",
@@ -1210,7 +1249,7 @@ function runCode() {
 
 function getSystemPrompt() {
   // Base instructions
-  let base = `You are Indy, a helpful AI assistant by JVST co, running on Sunshine 1.0. Be concise, friendly, and conversational with a relaxed, modern tone that's approachable and lightly playful — never exaggerated or folksy.
+  let base = `You are Indy, a helpful AI assistant by JVST co, running on ${modelDropdownValue}. Be concise, friendly, and conversational with a relaxed, modern tone that's approachable and lightly playful — never exaggerated or folksy.
 
 Rules:
 - Use informal greetings like “hey” or occasional “howdy” only once at the very start of a conversation.
@@ -1638,7 +1677,7 @@ function submitProfile() {
         }
     };
 })();
-    // Model selector logic
+// Model selector logic
 const modelBtn = document.getElementById('modelSelectorBtn');
 const modelPopover = document.getElementById('modelPopover');
 
@@ -1648,22 +1687,47 @@ if (modelBtn && modelPopover) {
     modelPopover.classList.toggle('active');
   });
 
-  // Click outside → close
   document.addEventListener('click', (e) => {
     if (!modelPopover.contains(e.target) && e.target !== modelBtn) {
       modelPopover.classList.remove('active');
     }
   });
 
-  // Optional: fake selection (just visual)
   modelPopover.querySelectorAll('.model-item').forEach(item => {
     item.addEventListener('click', () => {
       modelPopover.querySelectorAll('.model-item').forEach(i => i.classList.remove('active'));
       item.classList.add('active');
-      // Could later save selected model to localStorage here
+
+      // ── This is the important part ──
+      const selectedModel = item.getAttribute('data-model');
+      modelDropdownValue = selectedModel;
+
+      // Save to localStorage
+      localStorage.setItem('selectedModel', selectedModel);
+
+      // Update visible label
+      document.getElementById('currentModelLabel').textContent = selectedModel;
+
       modelPopover.classList.remove('active');
     });
   });
+
+  // ── Load saved model on page load ──
+  const savedModel = localStorage.getItem('selectedModel');
+  if (savedModel) {
+    modelDropdownValue = savedModel;
+    document.getElementById('currentModelLabel').textContent = savedModel;
+
+    // Also mark the correct item as active
+    const activeItem = modelPopover.querySelector(`[data-model="${savedModel}"]`);
+    if (activeItem) {
+      modelPopover.querySelectorAll('.model-item').forEach(i => i.classList.remove('active'));
+      activeItem.classList.add('active');
+    }
+  } else {
+    // Default fallback
+    modelDropdownValue = "Indy Sunshine 1.0 Beta";
+  }
 }
 </script>
   
