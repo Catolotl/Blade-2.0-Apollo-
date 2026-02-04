@@ -670,20 +670,26 @@
 }
 
 .model-btn {
-  width: 48px;
-  height: 48px;
+  height: 44px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--glass-border);
   color: #fff;
-  font-size: 24px;
+  font-size: 14px;
   cursor: pointer;
-  border-radius: 50%;
+  border-radius: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
   transition: all 0.2s ease;
   flex-shrink: 0;
-  padding: 0;
+  font-weight: 500;
+}
+
+.model-btn .chevron {
+  font-size: 18px;
+  opacity: 0.8;
 }
 
 .model-btn:hover {
@@ -811,27 +817,6 @@
     left: 20px;
   }
 }
-  .model-btn {
-  /* Existing styles */
-  padding: 0 12px;
-  gap: 6px;
-  font-size: 14px;
-  color: var(--accent);
-  font-weight: 500;
-}
-
-.model-btn .chevron {
-  font-size: 10px;
-  opacity: 0.7;
-  margin-left: 4px;
-}
-
-#currentModelLabel {
-  white-space: nowrap;
-  max-width: 160px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 
 .model-item {
   /* Existing */
@@ -844,15 +829,6 @@
   right: 16px;
   color: var(--accent);
   font-weight: bold;
-}
-  .model-btn {
-  color: #ffffff;
-  text-shadow: 0 0 8px rgba(255,255,255,0.15);
-  font-size: 12.5rem;
-}
-
-.model-btn:hover {
-  text-shadow: 0 0 14px rgba(255,255,255,0.4);
 }
   </style>
 </head>
@@ -904,10 +880,12 @@
 
     <div class="input-area">
 <div class="input-wrapper">
+<div style="display: flex; align-items: center; gap: 8px;">
   <button class="model-btn" id="modelSelectorBtn" title="Choose model">
-    <span id="currentModelLabel">Indy Sunshine 1.0 Beta</span>
-    <span class="chevron">⛭</span>
+    ⚙️
   </button>
+  <span id="currentModelLabel" style="font-size: 13px; color: var(--text-secondary);">Indy Sunshine 1.0 Beta</span>
+</div>
   <input type="text" id="userInput" placeholder="Ask anything..." onkeypress="if(event.key==='Enter') sendMessage()">
   <button class="send-btn" onclick="sendMessage()">↑</button>
 </div>
