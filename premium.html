@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Indy Sunrise AI</title>
+  <title>INDY AI</title>
   <link rel="shortcut icon" type="image/png" href="favicon.png">
   
 <style>
@@ -1356,11 +1356,21 @@ async function getAIResponse(userMessage) {
 
 async function generateImage(prompt) {
   try {
-    const encoded = encodeURIComponent(prompt.trim());
-    const url = `https://image.pollinations.ai/prompt/${encoded}?model=flux&width=1152&height=896&nologo=true&safe=true`;
+    const encodedPrompt = encodeURIComponent(prompt.trim());
+    
+    // Pixazo public endpoint — no key, no auth (early 2026 status)
+    const url = `https://api.pixazo.ai/text-to-image/stable-diffusion?prompt=${encodedPrompt}&width=1152&height=896&style=realistic`;
+    
+    // Optional: you can add &style=anime, &style=cyberpunk, etc. if you want
+    
+    // HEAD check → confirms it should work (same pattern you already use)
     const head = await fetch(url, { method: 'HEAD' });
-    if (!head.ok) throw new Error(`Pollinations responded ${head.status}`);
-    return url;
+    if (!head.ok) {
+      throw new Error(`Pixazo responded ${head.status}`);
+    }
+    
+    return url;  // direct image URL — just like Pollinations
+    
   } catch (err) {
     console.error("Image gen error:", err);
     return `Error generating image: ${err.message}. Try again in a few seconds.`;
