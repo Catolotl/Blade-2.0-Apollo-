@@ -2350,6 +2350,149 @@ window.copyText = function(btn) {
     setTimeout(() => btn.textContent = 'Copy', 2000);
   });
 };
+
+// ─────────────────────────────────────────────
+// Syntax-highlighted code blocks for Indy's responses
+// Activates automatically when bot messages are added
+// ─────────────────────────────────────────────
+(function enhanceIndyCodeBlocks() {
+
+  // Very lightweight tokenizer/highlighter (no external lib)
+  function highlightCode(code, lang = '') {
+    // Common keywords for JS/TS/Python-ish languages
+    const keywords = /\b(?:function|const|let|var|if|else|for|while|return|class|new|this|super|try|catch|finally|switch|case|break|continue|async|await|import|export|default|true|false|null|undefined|void|typeof|instanceof|delete|in|do|with|yield|static|public|private|protected|interface|enum|implements|extends|package)\b/g;
+    
+    const functions = /\b([a-zA-Z_$][\w$]*)\s*(?=\()/g;
+    const strings   = /(["'`])(?:(?=(\\?))\2.)*?\1/g;
+    const comments  = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)/gm;
+    const numbers   = /\b(?:0[xX][0-9a-fA-F]+|0[bB][01]+|\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\b/g;
+
+    let highlighted = code
+      // Comments first (they can contain anything)
+      .replace(comments,  '<span style="color:#6a9955;">$&</span>')
+      // Then strings (so keywords inside strings aren't colored)
+      .replace(strings,   '<span style="color:#ce9178;">$&</span>')
+      // Numbers
+      .replace(numbers,   '<span style="color:#b5cea8;">$&</span>')
+      // Keywords
+      .replace(keywords,  '<span style="color:#569cd6;">$&</span>')
+      // Function names (before paren)
+      .replace(functions, '<span style="color:#dcdcaa;">$1</span>');
+
+    return highlighted;
+  }
+
+  // Main function that processes new bot messages
+  function processNewBotMessage(bubble) {
+    // Find all triple-backtick code blocks
+    bubble.innerHTML = bubble.innerHTML.replace(
+      /```(\w+)?\n?([\s\S]*?)\n?```/g,
+      (match, lang, code) => {
+        const language = (lang || 'text').toLowerCase();
+        const cleanCode = code.trim();
+        
+        const highlighted = highlightCode(cleanCode, language);
+
+        return `
+<div class="indy-code-container">
+  <div class="indy-code-header">
+    <span>${language.toUpperCase() || 'CODE'}</span>
+    <button class="indy-copy-code" onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.textContent);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1800)">Copy</button>
+  </div>
+  <pre class="indy-code-block"><code>${highlighted}</code></pre>
+</div>`;
+      }
+    );
+  }
+
+  // Observe new bot messages
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach(mutation => {
+      mutation.addedNodes.forEach(node => {
+        if (node.nodeType !== 1) return;
+        if (!node.classList?.contains('message') || !node.classList?.contains('bot')) return;
+
+        const bubble = node.querySelector('.bubble');
+        if (bubble) {
+          processNewBotMessage(bubble);
+        }
+      });
+    });
+  });
+
+  observer.observe(document.getElementById('chatMessages'), {
+    childList: true,
+    subtree: true
+  });
+
+  // Also process already existing messages (useful on reload)
+  document.querySelectorAll('.message.bot .bubble').forEach(bubble => {
+    processNewBotMessage(bubble);
+  });
+
+})();
+
+// Optional: Paste this into your <style> block (near other code-related rules)
+const codeStyles = `
+.indy-code-container {
+  margin: 14px 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-elevated);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.indy-code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--border);
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+}
+
+.indy-copy-code {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-tertiary);
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.13s;
+}
+
+.indy-copy-code:hover {
+  background: var(--hover-bg);
+  border-color: var(--border-strong);
+  color: var(--text-secondary);
+}
+
+.indy-code-block {
+  margin: 0;
+  padding: 14px 16px;
+  overflow-x: auto;
+  background: transparent;
+  line-height: 1.55;
+}
+
+.indy-code-block code {
+  white-space: pre;
+}
+`;
+
+// Inject styles if not already present
+if (!document.getElementById('indy-code-styles')) {
+  const styleEl = document.createElement('style');
+  styleEl.id = 'indy-code-styles';
+  styleEl.textContent = codeStyles;
+  document.head.appendChild(styleEl);
+}
 </script>
   
 </body>
