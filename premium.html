@@ -2222,13 +2222,21 @@ function renderStarterChips() {
     });
 
     chip.addEventListener('click', () => {
-      const input = document.getElementById('userInput');
-      if (input) {
-        input.value = prompt + ' ';
-        input.focus();
-        // Trigger resize if textarea
-        input.dispatchEvent(new Event('input'));
+// Simpler easter egg trigger – replace the old override
+const input = document.getElementById('userInput');
+if (input) {
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const text = input.value.trim().toLowerCase();
+      const triggers = ['!strangerthings', '!upsidedown', '!upside-down', '!vecna', '!demogorgon', '!the upside down'];
+      if (triggers.some(t => text === t || text.startsWith(t + ' '))) {
+        e.preventDefault();
+        input.value = '';
+        enterUpsideDown();
       }
+    }
+  });
+}
       wrapper.remove();
     });
 
@@ -2493,6 +2501,9 @@ if (!document.getElementById('indy-code-styles')) {
   styleEl.textContent = codeStyles;
   document.head.appendChild(styleEl);
 }
+
+</script>
+<script>
 
 // ─────────────────────────────────────────────
 // Stranger Things Upside Down – V7 FINAL LOCKED (red first + consistent red storm)
