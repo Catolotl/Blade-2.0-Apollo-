@@ -2493,6 +2493,240 @@ if (!document.getElementById('indy-code-styles')) {
   styleEl.textContent = codeStyles;
   document.head.appendChild(styleEl);
 }
+
+// ─────────────────────────────────────────────
+// Stranger Things Upside Down – V7 FINAL LOCKED (red first + consistent red storm)
+// Red loads/fades in BEFORE flip → no hue cycling → storm always red-tinted
+// ─────────────────────────────────────────────
+(function addStrangerThingsEasterEgg() {
+
+  const triggers = [
+    '!strangerthings', '!upsidedown', '!upside-down', '!vecna',
+    '!demogorgon', '!the upside down'
+  ].map(t => t.toLowerCase());
+
+  let isActive = false;
+  let particles = [];
+  let pulseInterval = null;
+
+  // ── Styles ──────────────────────────────────────────────
+  if (!document.getElementById('upsidedown-v7-locked')) {
+    const style = document.createElement('style');
+    style.id = 'upsidedown-v7-locked';
+    style.textContent = `
+      @keyframes chaoticDrift {
+        0%   { transform: translate(0,0) scale(1);   opacity: 0.50; }
+        30%  { opacity: 0.85; }
+        60%  { opacity: 0.35; }
+        100% { transform: translate(var(--dx),var(--dy)) scale(var(--s)); opacity: 0.50; }
+      }
+      @keyframes slowRotate {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+      }
+      .upside-particle {
+        position: fixed;
+        background: #ffe6e6;           /* very pale red-tinted white */
+        pointer-events: none;
+        z-index: 9995;
+        border-radius: 1px;
+        box-shadow: 0 0 12px rgba(255,80,80,0.7);
+        animation: 
+          chaoticDrift infinite ease-in-out,
+          slowRotate infinite linear;
+        will-change: transform, opacity;
+      }
+
+      #red-flood {
+        position: fixed;
+        inset: 0;
+        background: #2e0000;
+        pointer-events: none;
+        z-index: 10001;
+        opacity: 0;
+        transition: opacity 5.2s ease-out;
+        box-shadow: inset 0 0 160px rgba(0,0,0,0.98);
+      }
+      #red-flood.fade-in {
+        animation: fadeInRed 0.9s ease-in forwards;
+      }
+      @keyframes fadeInRed {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+      }
+      #red-flood.visible {
+        opacity: 1;
+      }
+
+      #upsidedown-red-tint {
+        position: fixed;
+        inset: 0;
+        background: rgba(80,0,0,0.35);
+        pointer-events: none;
+        z-index: 9000;
+        mix-blend-mode: multiply;
+        opacity: 0;
+        transition: opacity 6s ease-in-out;
+      }
+      body.upsidedown #upsidedown-red-tint {
+        opacity: 1;
+      }
+      body.upsidedown {
+        filter: brightness(0.78) contrast(1.22) sepia(0.15);
+        transition: filter 7s ease-in-out;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function createParticle() {
+    const size = 1.4 + Math.random() * 5.2;
+    const x = Math.random() * 100;
+    const y = Math.random() * 100;
+
+    const dx = (Math.random() - 0.5) * 1500;
+    const dy = (Math.random() - 0.5) * 1500;
+    const scale = 0.35 + Math.random() * 2.3;
+    const driftDuration = 85 + Math.random() * 170;
+    const rotateDuration = 45 + Math.random() * 90;
+
+    const p = document.createElement('div');
+    p.className = 'upside-particle';
+    p.style.cssText = `
+      width: ${size}px;
+      height: ${size}px;
+      left: ${x}vw;
+      top: ${y}vh;
+      --dx: ${dx}px;
+      --dy: ${dy}px;
+      --s: ${scale};
+      animation-duration: ${driftDuration}s, ${rotateDuration}s;
+      animation-direction: ${Math.random() > 0.5 ? 'normal' : 'reverse'}, normal;
+      animation-delay: -${Math.random() * driftDuration}s, 0s;
+      opacity: 0.50;
+    `;
+    document.body.appendChild(p);
+    particles.push(p);
+  }
+
+  function startParticles() {
+    if (particles.length > 0) return;
+
+    for (let i = 0; i < 90; i++) {
+      setTimeout(createParticle, i * 32);
+    }
+
+    setInterval(() => {
+      if (particles.length < 160) {
+        createParticle();
+      }
+    }, 4500 + Math.random() * 11000);
+  }
+
+  function startRedPulses() {
+    pulseInterval = setInterval(() => {
+      if (Math.random() > 0.4) {
+        const pulse = document.createElement('div');
+        pulse.style.cssText = `
+          position: fixed;
+          inset: 0;
+          background: radial-gradient(circle at ${Math.random()*100}% ${Math.random()*100}%,
+            #ff1a1a 0%, rgba(255,60,60,0.45) 35%, transparent 70%);
+          pointer-events: none;
+          z-index: 9999;
+          opacity: 0;
+        `;
+        document.body.appendChild(pulse);
+
+        pulse.animate([
+          { opacity: 0 },
+          { opacity: 0.95, offset: 0.07 },
+          { opacity: 0.10, offset: 0.70 },
+          { opacity: 0 }
+        ], 2200 + Math.random() * 3600).onfinish = () => pulse.remove();
+      }
+    }, 3400 + Math.random() * 6200);
+  }
+
+  function enterUpsideDown() {
+    if (isActive) return;
+    isActive = true;
+
+    // 1. Red flood starts fading IN first
+    const flood = document.createElement('div');
+    flood.id = 'red-flood';
+    document.body.appendChild(flood);
+    flood.classList.add('fade-in');
+
+    // 2. Flip happens as red reaches near-full (illusion preserved)
+    setTimeout(() => {
+      document.body.style.transform = 'rotate(180deg)';
+      document.body.style.transformOrigin = 'center center';
+      flood.classList.add('visible');
+    }, 600);
+
+    // Start storm during red phase
+    startParticles();
+    startRedPulses();
+
+    // 3. Hold → very slow fade out
+    setTimeout(() => {
+      flood.style.opacity = '0';
+
+      setTimeout(() => {
+        flood.remove();
+
+        document.body.classList.add('upsidedown');
+
+        const tint = document.createElement('div');
+        tint.id = 'upsidedown-red-tint';
+        document.body.appendChild(tint);
+
+        setTimeout(() => {
+          if (typeof addMessage === 'function') {
+            addMessage('bot',
+              "It swallowed everything.<br>" +
+              "<span style='color:#c00; opacity:0.97;'>You’re in the Upside Down.</span><br>" +
+              "<small style='opacity:0.78'>reload if you want to leave</small>"
+            );
+          }
+        }, 1800);
+
+      }, 5200); // slow fade out
+
+    }, 2800); // red holds strong ~2.8s
+  }
+
+  // Hook input
+  const originalSend = window.sendMessage;
+  window.sendMessage = function() {
+    const input = document.getElementById('userInput');
+    if (!input) return originalSend?.();
+
+    const text = input.value.trim().toLowerCase();
+
+    if (triggers.some(t => text === t || text.startsWith(t + ' '))) {
+      input.value = '';
+      enterUpsideDown();
+      return;
+    }
+
+    originalSend?.();
+  };
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && document.activeElement.id === 'userInput') {
+      const text = document.getElementById('userInput').value.trim().toLowerCase();
+      if (triggers.includes(text)) {
+        e.preventDefault();
+        enterUpsideDown();
+        document.getElementById('userInput').value = '';
+      }
+    }
+  });
+
+  console.log("Upside Down V7 LOCKED – red fades in first + consistent red storm + rotating spores");
+})();
 </script>
   
 </body>
