@@ -7,47 +7,28 @@
   <link rel="shortcut icon" type="image/png" href="favicon.png">
   
 <style>
-/* ============================================================
-   INDY AI — Redesigned CSS
-   Aesthetic: Industrial monochrome / terminal-precision
-   Palette: True black, zinc greys, off-white, single accent
-   ============================================================ */
-
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
 
 :root {
-  /* Core palette — no gradients, just tones */
   --bg:            #080808;
   --bg-elevated:   #101010;
   --bg-card:       #161616;
   --bg-input:      #0d0d0d;
-
-  /* Type */
   --text:          #f0f0f0;
   --text-secondary:#8a8a8a;
   --text-tertiary: #4a4a4a;
   --text-dim:      #2e2e2e;
-
-  /* Borders — razor-thin, structural */
   --border:        rgba(255,255,255,0.07);
   --border-strong: rgba(255,255,255,0.12);
   --border-focus:  rgba(255,255,255,0.25);
-
-  /* Surfaces with subtle opacity */
   --glass-bg:      rgba(18,18,18,0.85);
   --glass-border:  rgba(255,255,255,0.08);
   --hover-bg:      rgba(255,255,255,0.04);
   --active-bg:     rgba(255,255,255,0.07);
-
-  /* Single accent — clean electric blue-white */
   --accent:        #c8c8ff;
   --accent-dim:    rgba(200,200,255,0.12);
-
-  /* Fonts */
   --font-ui:       'IBM Plex Sans', system-ui, sans-serif;
   --font-mono:     'IBM Plex Mono', 'Fira Code', monospace;
-
-  /* Sizing */
   --radius-sm:     6px;
   --radius-md:     10px;
   --radius-lg:     14px;
@@ -55,12 +36,8 @@
   --radius-pill:   999px;
 }
 
-/* ── Reset ── */
-*, *::before, *::after {
-  margin: 0; padding: 0; box-sizing: border-box;
-}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* ── Body ── */
 body {
   background: var(--bg);
   color: var(--text);
@@ -70,19 +47,10 @@ body {
   min-height: 100vh;
   display: flex;
   overflow: hidden;
-  /* Subtle scanline texture — pure CSS, no images */
-  background-image: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(255,255,255,0.008) 2px,
-    rgba(255,255,255,0.008) 4px
-  );
+  background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.008) 2px, rgba(255,255,255,0.008) 4px);
 }
 
-/* ═══════════════════════════════════════
-   SIDEBAR
-═══════════════════════════════════════ */
+/* ── SIDEBAR ── */
 .sidebar {
   position: fixed;
   inset: 0 auto 0 0;
@@ -95,10 +63,8 @@ body {
   z-index: 100;
   overflow: hidden;
 }
-
 .sidebar.collapsed { width: 60px; }
 
-/* ── Sidebar Header ── */
 .header {
   padding: 16px;
   display: flex;
@@ -109,7 +75,6 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
-/* ── Menu button ── */
 .menu-btn {
   background: transparent;
   border: 1px solid transparent;
@@ -126,19 +91,9 @@ body {
   font-family: var(--font-mono);
   letter-spacing: -0.05em;
 }
+.menu-btn:hover { background: var(--hover-bg); border-color: var(--border-strong); color: var(--text); }
+.menu-btn:active { background: var(--active-bg); transform: scale(0.96); }
 
-.menu-btn:hover {
-  background: var(--hover-bg);
-  border-color: var(--border-strong);
-  color: var(--text);
-}
-
-.menu-btn:active {
-  background: var(--active-bg);
-  transform: scale(0.96);
-}
-
-/* ── Title ── */
 .title {
   font-family: var(--font-mono);
   font-size: 15px;
@@ -150,29 +105,19 @@ body {
   opacity: 1;
   transition: opacity 0.2s ease;
 }
+.sidebar.collapsed .title { opacity: 0; pointer-events: none; }
 
-.sidebar.collapsed .title {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* ── Sidebar content ── */
 .sidebar-content {
   flex: 1;
   padding: 10px;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-bottom: 80px; /* space for profile footer */
+  padding-bottom: 80px;
 }
-
 .sidebar-content::-webkit-scrollbar { width: 4px; }
 .sidebar-content::-webkit-scrollbar-track { background: transparent; }
-.sidebar-content::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: var(--radius-pill);
-}
+.sidebar-content::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: var(--radius-pill); }
 
-/* ── Sidebar buttons ── */
 .sidebar-btn {
   width: 100%;
   height: 40px;
@@ -195,7 +140,6 @@ body {
   overflow: hidden;
   letter-spacing: 0.01em;
 }
-
 .sidebar-btn::before {
   content: attr(data-icon);
   font-size: 15px;
@@ -206,106 +150,28 @@ body {
   width: 18px;
   text-align: center;
 }
-
-.sidebar-btn span {
-  white-space: nowrap;
-  opacity: 1;
-  transition: opacity 0.2s ease;
-}
-
-.sidebar.collapsed .sidebar-btn span {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.sidebar.collapsed .sidebar-btn {
-  justify-content: center;
-  padding: 0;
-}
-
-.sidebar.collapsed .sidebar-btn::before {
-  width: auto;
-}
-
-.sidebar-btn:hover {
-  background: var(--hover-bg);
-  border-color: var(--border);
-  color: var(--text);
-}
-
+.sidebar-btn span { white-space: nowrap; opacity: 1; transition: opacity 0.2s ease; }
+.sidebar.collapsed .sidebar-btn span { opacity: 0; pointer-events: none; }
+.sidebar.collapsed .sidebar-btn { justify-content: center; padding: 0; }
+.sidebar.collapsed .sidebar-btn::before { width: auto; }
+.sidebar-btn:hover { background: var(--hover-bg); border-color: var(--border); color: var(--text); }
 .sidebar-btn:hover::before { opacity: 1; }
-
-.sidebar-btn:active {
-  background: var(--active-bg);
-  transform: scale(0.99);
-}
-
-/* ── Danger variant ── */
+.sidebar-btn:active { background: var(--active-bg); transform: scale(0.99); }
 .sidebar-btn.danger { color: #e05050; }
-.sidebar-btn.danger:hover {
-  background: rgba(224,80,80,0.08);
-  border-color: rgba(224,80,80,0.2);
-  color: #ff6b6b;
-}
+.sidebar-btn.danger:hover { background: rgba(224,80,80,0.08); border-color: rgba(224,80,80,0.2); color: #ff6b6b; }
 
-/* ── Divider ── */
-hr {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 8px 0;
-}
+hr { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
 
-/* ── Chat list ── */
-#chatList .sidebar-btn {
-  justify-content: space-between;
-  padding-right: 8px;
-}
-
-#chatList .sidebar-btn::before {
-  content: '—';
-  font-size: 11px;
-  color: var(--text-dim);
-  font-family: var(--font-mono);
-}
-
-#chatList .sidebar-btn span:first-of-type {
-  flex: 1;
-  text-align: left;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-#chatList .sidebar-btn span:last-of-type {
-  opacity: 0;
-  color: #e05050;
-  font-size: 14px;
-  padding: 3px 6px;
-  border-radius: var(--radius-sm);
-  transition: all 0.15s;
-  flex-shrink: 0;
-  font-family: var(--font-mono);
-}
-
+#chatList .sidebar-btn { justify-content: space-between; padding-right: 8px; }
+#chatList .sidebar-btn::before { content: '—'; font-size: 11px; color: var(--text-dim); font-family: var(--font-mono); }
+#chatList .sidebar-btn span:first-of-type { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; }
+#chatList .sidebar-btn span:last-of-type { opacity: 0; color: #e05050; font-size: 14px; padding: 3px 6px; border-radius: var(--radius-sm); transition: all 0.15s; flex-shrink: 0; font-family: var(--font-mono); }
 #chatList .sidebar-btn:hover span:last-of-type { opacity: 0.6; }
-#chatList .sidebar-btn span:last-of-type:hover {
-  opacity: 1;
-  background: rgba(224,80,80,0.12);
-}
+#chatList .sidebar-btn span:last-of-type:hover { opacity: 1; background: rgba(224,80,80,0.12); }
 
-/* ── Collapsed logo ── */
-.sidebar-logo {
-  display: none;
-  font-family: var(--font-mono);
-  font-size: 22px;
-  text-align: center;
-  padding: 16px 0;
-  color: var(--text-secondary);
-  letter-spacing: 0.1em;
-}
-
+.sidebar-logo { display: none; font-family: var(--font-mono); font-size: 22px; text-align: center; padding: 16px 0; color: var(--text-secondary); letter-spacing: 0.1em; }
 .sidebar.collapsed .sidebar-logo { display: block; }
 
-/* ── Profile footer ── */
 .user-profile-footer {
   position: absolute;
   bottom: 0; left: 0; right: 0;
@@ -318,17 +184,11 @@ hr {
   cursor: pointer;
   transition: background 0.15s;
 }
-
 .user-profile-footer:hover { background: var(--hover-bg); }
-
-.sidebar.collapsed .user-profile-footer {
-  padding: 12px 0;
-  justify-content: center;
-}
+.sidebar.collapsed .user-profile-footer { padding: 12px 0; justify-content: center; }
 
 .profile-avatar {
-  width: 32px;
-  height: 32px;
+  width: 32px; height: 32px;
   border-radius: var(--radius-sm);
   background: var(--bg-card);
   background-size: cover;
@@ -337,46 +197,16 @@ hr {
   flex-shrink: 0;
   transition: border-color 0.2s;
 }
-
-.user-profile-footer:hover .profile-avatar {
-  border-color: var(--border-focus);
-}
-
-.sidebar.collapsed .profile-avatar {
-  width: 30px;
-  height: 30px;
-}
-
+.user-profile-footer:hover .profile-avatar { border-color: var(--border-focus); }
+.sidebar.collapsed .profile-avatar { width: 30px; height: 30px; }
 .profile-info { flex: 1; overflow: hidden; }
 .sidebar.collapsed .profile-info { display: none; }
+.profile-name { font-size: 13px; font-weight: 500; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; font-family: var(--font-mono); letter-spacing: 0.02em; }
 
-.profile-name {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-  font-family: var(--font-mono);
-  letter-spacing: 0.02em;
-}
-
-/* ═══════════════════════════════════════
-   MAIN CONTENT
-═══════════════════════════════════════ */
-.main {
-  flex: 1;
-  margin-left: 260px;
-  display: flex;
-  flex-direction: column;
-  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  height: 100vh;
-}
-
+/* ── MAIN ── */
+.main { flex: 1; margin-left: 260px; display: flex; flex-direction: column; transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); height: 100vh; }
 .sidebar.collapsed ~ .main { margin-left: 60px; }
 
-/* ── Chat container ── */
 .chat-container {
   flex: 1;
   overflow-y: auto;
@@ -389,118 +219,28 @@ hr {
   margin: 0 auto;
   align-self: center;
 }
-
 .chat-container::-webkit-scrollbar { width: 6px; }
 .chat-container::-webkit-scrollbar-track { background: transparent; }
-.chat-container::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: var(--radius-pill);
-}
+.chat-container::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: var(--radius-pill); }
 
-/* ── Messages ── */
-.message {
-  max-width: 78%;
-  animation: msgIn 0.22s cubic-bezier(0.2, 0.8, 0.4, 1);
-}
-
-@keyframes msgIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
+.message { max-width: 78%; animation: msgIn 0.22s cubic-bezier(0.2, 0.8, 0.4, 1); }
+@keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 .user { align-self: flex-end; }
 .bot  { align-self: flex-start; }
 
-/* ── Bubbles ── */
-.bubble {
-  padding: 11px 15px;
-  border-radius: var(--radius-lg);
-  line-height: 1.6;
-  font-size: 14px;
-  position: relative;
-}
+.bubble { padding: 11px 15px; border-radius: var(--radius-lg); line-height: 1.6; font-size: 14px; position: relative; }
+.user .bubble { background: var(--bg-card); border: 1px solid var(--border-strong); color: var(--text); border-bottom-right-radius: var(--radius-sm); font-family: var(--font-ui); }
+.bot .bubble { background: transparent; border: none; padding: 0; color: var(--text); font-size: 14px; font-family: var(--font-ui); }
+.bot .bubble img { border-radius: var(--radius-md); border: 1px solid var(--border); margin: 12px 0; display: block; }
+.bot .bubble pre { background: var(--bg-card); border: 1px solid var(--border); border-left: 2px solid var(--border-focus); border-radius: var(--radius-md); padding: 14px 16px; overflow-x: auto; margin: 10px 0; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); }
+.bot .bubble code { background: var(--bg-card); border: 1px solid var(--border); padding: 1px 5px; border-radius: 4px; font-family: var(--font-mono); font-size: 12.5px; color: var(--accent); }
 
-.user .bubble {
-  background: var(--bg-card);
-  border: 1px solid var(--border-strong);
-  color: var(--text);
-  border-bottom-right-radius: var(--radius-sm);
-  font-family: var(--font-ui);
-}
-
-.bot .bubble {
-  background: transparent;
-  border: none;
-  padding: 0;
-  color: var(--text);
-  font-size: 14px;
-  font-family: var(--font-ui);
-}
-
-/* ── Bot content elements ── */
-.bot .bubble img {
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  margin: 12px 0;
-  display: block;
-}
-
-.bot .bubble pre {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-left: 2px solid var(--border-focus);
-  border-radius: var(--radius-md);
-  padding: 14px 16px;
-  overflow-x: auto;
-  margin: 10px 0;
-  font-family: var(--font-mono);
-  font-size: 12.5px;
-  line-height: 1.6;
-  color: var(--text-secondary);
-}
-
-.bot .bubble code {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  padding: 1px 5px;
-  border-radius: 4px;
-  font-family: var(--font-mono);
-  font-size: 12.5px;
-  color: var(--accent);
-}
-
-/* ── Copy button ── */
-.copy-btn {
-  position: absolute;
-  top: -4px;
-  right: 0;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  color: var(--text-tertiary);
-  font-size: 11px;
-  font-family: var(--font-mono);
-  letter-spacing: 0.04em;
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  opacity: 0;
-  transition: all 0.15s ease;
-  text-transform: uppercase;
-}
-
+.copy-btn { position: absolute; top: -4px; right: 0; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-tertiary); font-size: 11px; font-family: var(--font-mono); letter-spacing: 0.04em; padding: 4px 8px; border-radius: var(--radius-sm); cursor: pointer; opacity: 0; transition: all 0.15s ease; text-transform: uppercase; }
 .bot:hover .copy-btn { opacity: 1; }
-
-.copy-btn:hover {
-  background: var(--hover-bg);
-  border-color: var(--border-strong);
-  color: var(--text-secondary);
-}
-
+.copy-btn:hover { background: var(--hover-bg); border-color: var(--border-strong); color: var(--text-secondary); }
 .copy-btn:active { transform: scale(0.96); }
 
-/* ═══════════════════════════════════════
-   INPUT AREA
-═══════════════════════════════════════ */
+/* ── INPUT AREA ── */
 .input-area {
   padding: 16px 24px 20px;
   background: var(--bg);
@@ -512,7 +252,6 @@ hr {
   z-index: 10;
   transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 .sidebar.collapsed ~ .main .input-area { left: 60px; }
 
 .input-wrapper {
@@ -527,10 +266,7 @@ hr {
   padding: 5px 5px 5px 16px;
   transition: border-color 0.2s ease;
 }
-
-.input-wrapper:focus-within {
-  border-color: var(--border-focus);
-}
+.input-wrapper:focus-within { border-color: var(--border-focus); }
 
 #userInput {
   flex: 1;
@@ -543,71 +279,15 @@ hr {
   padding: 10px 0;
   caret-color: var(--accent);
 }
+#userInput::placeholder { color: var(--text-tertiary); font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.02em; }
 
-#userInput::placeholder {
-  color: var(--text-tertiary);
-  font-family: var(--font-mono);
-  font-size: 13px;
-  letter-spacing: 0.02em;
-}
+.send-btn { width: 34px; height: 34px; background: var(--text); color: var(--bg); border: none; border-radius: var(--radius-sm); font-size: 16px; font-family: var(--font-mono); cursor: pointer; transition: all 0.15s ease; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.send-btn:hover { background: #ffffff; transform: scale(1.04); }
+.send-btn:active { transform: scale(0.95); background: #dcdcdc; }
 
-/* ── Send button ── */
-.send-btn {
-  width: 34px;
-  height: 34px;
-  background: var(--text);
-  color: var(--bg);
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: 16px;
-  font-family: var(--font-mono);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
+.model-btn { height: 34px; background: transparent; border: 1px solid transparent; color: var(--text-tertiary); font-size: 13px; font-family: var(--font-mono); cursor: pointer; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0 10px; transition: all 0.15s ease; flex-shrink: 0; letter-spacing: 0.03em; }
+.model-btn:hover { background: var(--hover-bg); border-color: var(--border); color: var(--text-secondary); }
 
-.send-btn:hover {
-  background: #ffffff;
-  transform: scale(1.04);
-}
-
-.send-btn:active {
-  transform: scale(0.95);
-  background: #dcdcdc;
-}
-
-/* ── Model selector button ── */
-.model-btn {
-  height: 34px;
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--text-tertiary);
-  font-size: 13px;
-  font-family: var(--font-mono);
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 0 10px;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-  letter-spacing: 0.03em;
-}
-
-.model-btn:hover {
-  background: var(--hover-bg);
-  border-color: var(--border);
-  color: var(--text-secondary);
-}
-
-.model-btn:active { transform: scale(0.96); }
-
-/* ── Model popover ── */
 .model-popover {
   position: absolute;
   bottom: 76px;
@@ -624,313 +304,130 @@ hr {
   transform: translateY(8px);
   transition: all 0.2s cubic-bezier(0.2, 0.8, 0.4, 1);
 }
+.model-popover.active { opacity: 1; visibility: visible; transform: translateY(0); }
+.model-header { padding: 10px 14px; font-size: 10px; font-family: var(--font-mono); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-tertiary); border-bottom: 1px solid var(--border); }
+.model-item { width: 100%; padding: 10px 14px; background: transparent; border: none; text-align: left; color: var(--text-secondary); font-size: 13px; font-family: var(--font-ui); cursor: pointer; transition: all 0.12s ease; position: relative; }
+.model-item:hover { background: var(--hover-bg); color: var(--text); }
+.model-item.active { color: var(--accent); background: var(--accent-dim); font-weight: 500; }
+.model-item.active::after { content: '✓'; position: absolute; right: 14px; color: var(--accent); font-size: 12px; font-family: var(--font-mono); }
+.model-footer { padding: 8px 14px; font-size: 11px; font-family: var(--font-mono); color: var(--text-dim); text-align: center; border-top: 1px solid var(--border); letter-spacing: 0.04em; }
 
-.model-popover.active {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
+/* ── THINKING ── */
+.thinking-indicator { display: inline-flex; align-items: center; gap: 10px; padding: 6px 0; color: var(--text-tertiary); font-size: 13px; font-family: var(--font-mono); letter-spacing: 0.04em; }
+.thinking-star { font-size: 16px; display: inline-block; animation: thinkSpin 1.8s linear infinite; color: var(--text-secondary); }
+@keyframes thinkSpin { 0% { transform: rotate(0deg); opacity: 0.4; } 50% { transform: rotate(180deg); opacity: 0.9; } 100% { transform: rotate(360deg); opacity: 0.4; } }
+.thinking-text { animation: thinkPulse 1.8s ease-in-out infinite; }
+@keyframes thinkPulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.8; } }
 
-.model-popover::before {
-  content: '';
-  position: absolute;
-  bottom: -6px;
-  left: 20px;
-  width: 0; height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 6px solid var(--bg-card);
-}
+/* ── MODALS ── */
+.teach-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.82); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 1000; }
+.teach-modal.active { display: flex; animation: modalBgIn 0.2s ease forwards; }
+@keyframes modalBgIn { from { opacity: 0; } to { opacity: 1; } }
 
-.model-header {
-  padding: 10px 14px;
-  font-size: 10px;
-  font-family: var(--font-mono);
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-  border-bottom: 1px solid var(--border);
-}
+.teach-content { background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: var(--radius-xl); padding: 28px; max-width: 500px; width: 90%; box-shadow: 0 24px 64px rgba(0,0,0,0.6); position: relative; animation: modalIn 0.25s cubic-bezier(0.2, 0.8, 0.4, 1); }
+@keyframes modalIn { from { transform: scale(0.96) translateY(16px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
 
-.model-item {
-  width: 100%;
-  padding: 10px 14px;
-  background: transparent;
-  border: none;
-  text-align: left;
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-family: var(--font-ui);
-  cursor: pointer;
-  transition: all 0.12s ease;
-  position: relative;
-}
+.teach-content h2 { font-family: var(--font-mono); font-size: 18px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text); margin-bottom: 22px; }
 
-.model-item:hover {
-  background: var(--hover-bg);
-  color: var(--text);
-}
-
-.model-item.active {
-  color: var(--accent);
-  background: var(--accent-dim);
-  font-weight: 500;
-}
-
-.model-item.active::after {
-  content: '✓';
-  position: absolute;
-  right: 14px;
-  color: var(--accent);
-  font-size: 12px;
-  font-family: var(--font-mono);
-}
-
-.model-footer {
-  padding: 8px 14px;
-  font-size: 11px;
-  font-family: var(--font-mono);
-  color: var(--text-dim);
-  text-align: center;
-  border-top: 1px solid var(--border);
-  letter-spacing: 0.04em;
-}
-
-@media (max-width: 500px) {
-  .model-popover { left: 12px; width: calc(100% - 24px); }
-  .model-popover::before { left: 18px; }
-}
-
-/* ═══════════════════════════════════════
-   THINKING INDICATOR
-═══════════════════════════════════════ */
-.thinking-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 0;
-  color: var(--text-tertiary);
-  font-size: 13px;
-  font-family: var(--font-mono);
-  letter-spacing: 0.04em;
-}
-
-.thinking-star {
-  font-size: 16px;
-  display: inline-block;
-  animation: thinkSpin 1.8s linear infinite;
-  color: var(--text-secondary);
-}
-
-@keyframes thinkSpin {
-  0%   { transform: rotate(0deg); opacity: 0.4; }
-  50%  { transform: rotate(180deg); opacity: 0.9; }
-  100% { transform: rotate(360deg); opacity: 0.4; }
-}
-
-.thinking-text {
-  animation: thinkPulse 1.8s ease-in-out infinite;
-}
-
-@keyframes thinkPulse {
-  0%, 100% { opacity: 0.35; }
-  50%       { opacity: 0.8; }
-}
-
-/* ═══════════════════════════════════════
-   MODALS
-═══════════════════════════════════════ */
-.teach-modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.82);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.teach-modal.active {
-  display: flex;
-  animation: modalBgIn 0.2s ease forwards;
-}
-
-@keyframes modalBgIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-.teach-content {
-  background: var(--bg-card);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-xl);
-  padding: 28px;
-  max-width: 500px;
-  width: 90%;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
-  position: relative;
-  animation: modalIn 0.25s cubic-bezier(0.2, 0.8, 0.4, 1);
-}
-
-@keyframes modalIn {
-  from { transform: scale(0.96) translateY(16px); opacity: 0; }
-  to   { transform: scale(1) translateY(0); opacity: 1; }
-}
-
-.teach-content h2 {
-  font-family: var(--font-mono);
-  font-size: 18px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--text);
-  margin-bottom: 22px;
-}
-
-/* ── Close button ── */
-.close-btn {
-  position: absolute;
-  top: 18px; right: 18px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  color: var(--text-secondary);
-  font-size: 18px;
-  font-family: var(--font-mono);
-  cursor: pointer;
-  width: 32px; height: 32px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-}
-
-.close-btn:hover {
-  background: var(--hover-bg);
-  border-color: var(--border-strong);
-  color: var(--text);
-}
-
+.close-btn { position: absolute; top: 18px; right: 18px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-secondary); font-size: 18px; font-family: var(--font-mono); cursor: pointer; width: 32px; height: 32px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; transition: all 0.15s ease; }
+.close-btn:hover { background: var(--hover-bg); border-color: var(--border-strong); color: var(--text); }
 .close-btn:active { transform: scale(0.94); }
 
-/* ── Modal form elements ── */
 .teach-input-group { margin-bottom: 16px; }
-
-.teach-input-group label {
-  display: block;
-  margin-bottom: 6px;
-  color: var(--text-tertiary);
-  font-size: 11px;
-  font-family: var(--font-mono);
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.teach-input-group input,
-.teach-input-group textarea,
-.teach-input-group select {
-  width: 100%;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 13px;
-  color: var(--text);
-  font-size: 13.5px;
-  font-family: var(--font-ui);
-  transition: border-color 0.15s;
-  resize: vertical;
-}
-
-.teach-input-group select {
-  background: var(--bg-elevated) !important;
-  color: var(--text) !important;
-}
-
-.teach-input-group input:focus,
-.teach-input-group textarea:focus,
-.teach-input-group select:focus {
-  outline: none;
-  border-color: var(--border-focus);
-  background: var(--bg);
-}
-
+.teach-input-group label { display: block; margin-bottom: 6px; color: var(--text-tertiary); font-size: 11px; font-family: var(--font-mono); font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
+.teach-input-group input, .teach-input-group textarea, .teach-input-group select { width: 100%; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 13px; color: var(--text); font-size: 13.5px; font-family: var(--font-ui); transition: border-color 0.15s; resize: vertical; }
+.teach-input-group select { background: var(--bg-elevated) !important; color: var(--text) !important; }
+.teach-input-group input:focus, .teach-input-group textarea:focus, .teach-input-group select:focus { outline: none; border-color: var(--border-focus); background: var(--bg); }
 .teach-input-group textarea { min-height: 96px; }
+.teach-input-group input::placeholder, .teach-input-group textarea::placeholder { color: var(--text-tertiary); font-family: var(--font-mono); font-size: 12.5px; }
 
-.teach-input-group input::placeholder,
-.teach-input-group textarea::placeholder {
-  color: var(--text-tertiary);
-  font-family: var(--font-mono);
-  font-size: 12.5px;
-}
+.teach-submit-btn { width: 100%; background: var(--text); color: var(--bg); border: none; border-radius: var(--radius-sm); padding: 12px; font-size: 13px; font-family: var(--font-mono); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: all 0.15s ease; margin-top: 4px; }
+.teach-submit-btn:hover { background: #ffffff; transform: scale(1.01); }
+.teach-submit-btn:active { transform: scale(0.98); background: #dcdcdc; }
 
-/* ── Modal submit button ── */
-.teach-submit-btn {
-  width: 100%;
-  background: var(--text);
-  color: var(--bg);
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: 12px;
-  font-size: 13px;
-  font-family: var(--font-mono);
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  margin-top: 4px;
-}
+#profilePreview { width: 80px; height: 80px; border-radius: var(--radius-sm); background: var(--bg-elevated); background-size: cover; background-position: center; border: 1px solid var(--border-strong); transition: all 0.2s; }
+#profilePreview:hover { border-color: var(--border-focus); transform: scale(1.03); }
 
-.teach-submit-btn:hover {
-  background: #ffffff;
-  transform: scale(1.01);
-}
+#codeOutput { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; min-height: 90px; max-height: 200px; overflow-y: auto; color: var(--text-secondary); font-size: 12.5px; font-family: var(--font-mono); line-height: 1.6; }
 
-.teach-submit-btn:active {
-  transform: scale(0.98);
-  background: #dcdcdc;
-}
-
-/* ── Profile preview ── */
-#profilePreview {
-  width: 80px;
-  height: 80px;
-  border-radius: var(--radius-sm);
-  background: var(--bg-elevated);
-  background-size: cover;
-  background-position: center;
-  border: 1px solid var(--border-strong);
-  transition: all 0.2s;
-}
-
-#profilePreview:hover {
-  border-color: var(--border-focus);
-  transform: scale(1.03);
-}
-
-/* ── Code output pre ── */
-#codeOutput {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 14px;
-  min-height: 90px;
-  max-height: 200px;
-  overflow-y: auto;
-  color: var(--text-secondary);
-  font-size: 12.5px;
-  font-family: var(--font-mono);
-  line-height: 1.6;
-}
-
-/* ── Collapsed sidebar hidden items ── */
 .sidebar.collapsed .sidebar-content > *:not(#chatList) { display: none; }
 .sidebar.collapsed hr { display: none; }
-  </style>
+
+/* ── NEW: Token / char counter ── */
+.char-counter {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  padding: 0 6px;
+  flex-shrink: 0;
+  transition: color 0.2s;
+  user-select: none;
+}
+.char-counter.warn { color: #e0a050; }
+.char-counter.over { color: #e05050; }
+
+/* ── NEW: Reaction buttons ── */
+.reaction-row {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.message.bot:hover .reaction-row { opacity: 1; }
+.reaction-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-dim);
+  font-size: 13px;
+  padding: 3px 7px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  transition: all 0.12s;
+}
+.reaction-btn:hover { background: var(--hover-bg); border-color: var(--border); color: var(--text-secondary); }
+.reaction-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+/* ── NEW: Typing animation ── */
+@keyframes typingCursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.streaming-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 14px;
+  background: var(--accent);
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: typingCursor 0.8s ease infinite;
+  border-radius: 1px;
+}
+
+/* ── NEW: Pinned messages badge ── */
+.pinned-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid rgba(200,200,255,0.2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+/* ── NEW: Code blocks ── */
+.indy-code-container { margin: 14px 0; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; background: var(--bg-elevated); font-family: var(--font-mono); font-size: 13px; }
+.indy-code-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); font-size: 11.5px; color: var(--text-tertiary); font-family: var(--font-mono); }
+.indy-copy-code { background: transparent; border: 1px solid var(--border); color: var(--text-tertiary); font-size: 11px; padding: 3px 9px; border-radius: 4px; cursor: pointer; transition: all 0.13s; }
+.indy-copy-code:hover { background: var(--hover-bg); border-color: var(--border-strong); color: var(--text-secondary); }
+.indy-code-block { margin: 0; padding: 14px 16px; overflow-x: auto; background: transparent; line-height: 1.55; }
+.indy-code-block code { white-space: pre; }
+</style>
 </head>
 <body>
   <div class="sidebar collapsed" id="sidebar">
@@ -940,66 +437,52 @@ hr {
     </div>
     <div class="sidebar-content">
       <div class="sidebar-logo">✦</div>
-      <button class="sidebar-btn" data-icon="+" onclick="newChat()">
-        <span>New Chat</span>
-      </button>
-      <button class="sidebar-btn" data-icon="◈" onclick="openCode()">
-        <span>Code Sandbox</span>
-      </button>
-      <button class="sidebar-btn" data-icon="☰" onclick="openProjects()">
-        <span>Projects</span>
-      </button>
-      <button class="sidebar-btn" data-icon="⛭" onclick="openProfile()">
-        <span>Settings</span>
-      </button>
-      <button class="sidebar-btn danger" data-icon="⨯" onclick="deleteAllChats()">
-        <span>Clear All</span>
-      </button>
+      <button class="sidebar-btn" data-icon="+" onclick="newChat()"><span>New Chat</span></button>
+      <button class="sidebar-btn" data-icon="◈" onclick="openCode()"><span>Code Sandbox</span></button>
+      <button class="sidebar-btn" data-icon="↓" onclick="exportChat()"><span>Export Chat</span></button>
+      <button class="sidebar-btn" data-icon="⌕" onclick="openSearch()"><span>Search</span></button>
+      <button class="sidebar-btn" data-icon="⛭" onclick="openProfile()"><span>Settings</span></button>
+      <button class="sidebar-btn danger" data-icon="⨯" onclick="deleteAllChats()"><span>Clear All</span></button>
       <hr>
       <div id="chatList"></div>
     </div>
   </div>
 
-  <!-- User Profile Footer (bottom of sidebar) -->
-<div id="userProfileFooter" class="user-profile-footer">
-  <div class="profile-avatar" id="sidebarAvatar"></div>
-  <div class="profile-info">
-    <span id="sidebarName" class="profile-name"></span>
+  <div id="userProfileFooter" class="user-profile-footer">
+    <div class="profile-avatar" id="sidebarAvatar"></div>
+    <div class="profile-info">
+      <span id="sidebarName" class="profile-name"></span>
+    </div>
   </div>
-</div>
 
   <div class="main">
     <div class="chat-container" id="chatMessages">
       <div class="message bot">
         <div class="bubble">
-          Howdy 🤠! I'm indy!<br>
-          What can I help you with today?
+          Howdy 🤠! I'm Indy!<br>What can I help you with today?
         </div>
       </div>
     </div>
 
     <div class="input-area">
-<div class="input-wrapper">
-<div style="display: flex; align-items: center; gap: 8px;">
-  <button class="model-btn" id="modelSelectorBtn" title="Choose model">
-    ⛭
-  </button>
-  <!--<span id="currentModelLabel" style="font-size: 13px; color: var(--text-secondary);">Indy Sunshine 1.0 Beta</span> -->
-</div>
-  <input type="text" id="userInput" placeholder="Ask anything..." onkeypress="if(event.key==='Enter') sendMessage()">
-  <button class="send-btn" onclick="sendMessage()">↑</button>
-</div>
+      <div class="input-wrapper">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button class="model-btn" id="modelSelectorBtn" title="Choose model">⛭</button>
+        </div>
+        <textarea id="userInput" placeholder="Ask anything... (Shift+Enter for new line)" rows="1"></textarea>
+        <span class="char-counter" id="charCounter">0</span>
+        <button class="send-btn" onclick="sendMessage()">↑</button>
+      </div>
 
-<!-- Model popover -->
-<div class="model-popover" id="modelPopover">
-  <div class="model-header">Available Models</div>
-  <button class="model-item active" data-model="Indy Sunshine 1.0 Beta">Indy Sunshine 1.0 Beta</button>
-  <button class="model-item" data-model="Sunshine Pro">Sunshine Pro</button>
-  <button class="model-item" data-model="Indy 3">Indy 3</button>
-  <button class="model-item" data-model="Creative Studio">Creative Studio</button>
-  <button class="model-item" data-model="Code Assistant">Code Assistant</button>
-  <div class="model-footer">More models coming soon</div>
-</div>
+      <div class="model-popover" id="modelPopover">
+        <div class="model-header">Available Models</div>
+        <button class="model-item active" data-model="Indy Sunshine 1.0 Beta">Indy Sunshine 1.0 Beta</button>
+        <button class="model-item" data-model="Sunshine Pro">Sunshine Pro</button>
+        <button class="model-item" data-model="Indy 3">Indy 3</button>
+        <button class="model-item" data-model="Creative Studio">Creative Studio</button>
+        <button class="model-item" data-model="Code Assistant">Code Assistant</button>
+        <div class="model-footer">More models coming soon</div>
+      </div>
     </div>
   </div>
 
@@ -1042,7 +525,7 @@ hr {
 
   <!-- Code Sandbox Modal -->
   <div class="teach-modal" id="codeModal">
-    <div class="teach-content" style="max-width: 800px;">
+    <div class="teach-content" style="max-width:800px;">
       <button class="close-btn" onclick="closeCodeModal()">×</button>
       <h2>Code Sandbox</h2>
       <div class="teach-input-group">
@@ -1056,111 +539,98 @@ hr {
       </div>
       <div class="teach-input-group">
         <label>Your Code</label>
-        <textarea id="codeInput" placeholder="Write your code here..." style="min-height:200px;font-family:'SF Mono',Monaco,monospace;font-size:13px;"></textarea>
+        <textarea id="codeInput" placeholder="Write your code here..." style="min-height:200px;font-family:'IBM Plex Mono',monospace;font-size:13px;"></textarea>
       </div>
       <div class="teach-input-group">
         <label>Output</label>
-        <pre id="codeOutput" style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;padding:16px;min-height:100px;max-height:200px;overflow-y:auto;color:var(--text-secondary);font-size:13px;"></pre>
+        <pre id="codeOutput">Output will appear here...</pre>
       </div>
       <button class="teach-submit-btn" onclick="runCode()">▶ Run Code</button>
     </div>
   </div>
 
-  <script>
+  <!-- Pinned Messages Modal -->
+  <div class="teach-modal" id="pinnedModal">
+    <div class="teach-content">
+      <button class="close-btn" onclick="document.getElementById('pinnedModal').classList.remove('active')">×</button>
+      <h2>Pinned Messages</h2>
+      <div id="pinnedList" style="display:flex;flex-direction:column;gap:10px;max-height:400px;overflow-y:auto;"></div>
+      <p id="noPinnedMsg" style="color:var(--text-tertiary);font-family:var(--font-mono);font-size:13px;text-align:center;padding:20px 0;">No pinned messages yet.<br>Hover a bot reply and click 📌</p>
+    </div>
+  </div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  INDY AI — Core State
+// ═══════════════════════════════════════════════════════════
+
+// ── CONVERSATION HISTORY (THE BIG FIX) ──────────────────
+// This array holds the full chat history sent to Groq with every request.
+// Without this, every message starts a brand new conversation.
+let conversationHistory = [];
+
 let knowledge = [];
 let personality = "";
-let modelDropdownValue = "";
-const openings = [
-  "Howdy 🤠! I'm Indy",
-  "Indy here!",
-  "Sup! I’m Indy",
-  "Good to see you 🤠 I’m Indy"
-];
-
-const openingPhrase = {
-  get value() {
-    return openings[Math.floor(Math.random() * openings.length)];
-  }
-};
-
+let modelDropdownValue = "Indy Sunshine 1.0 Beta";
 let currentChatId = null;
 let userProfile = JSON.parse(localStorage.getItem('userProfile')) || { name: '', picture: '' };
+let pinnedMessages = JSON.parse(localStorage.getItem('pinnedMessages') || '[]');
 
-const thinkingPhrases = [
-  "Thinking...",
-  "Hang tight...",
-  "One sec...",
-  "Let me check on that",
-  "Processing..."
-];
+const openings = ["Howdy 🤠! I'm Indy", "Indy here!", "Sup! I'm Indy", "Good to see you 🤠 I'm Indy"];
+const openingPhrase = { get value() { return openings[Math.floor(Math.random() * openings.length)]; } };
 
-const phrase = {
-  get value() {
-    return thinkingPhrases[Math.floor(Math.random() * thinkingPhrases.length)];
-  }
-};
+const thinkingPhrases = ["Thinking...", "Hang tight...", "One sec...", "Let me check on that", "Processing..."];
+const phrase = { get value() { return thinkingPhrases[Math.floor(Math.random() * thinkingPhrases.length)]; } };
 
-
+// ═══════════════════════════════════════════════════════════
+//  SIDEBAR
+// ═══════════════════════════════════════════════════════════
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('collapsed');
 }
 
+// ═══════════════════════════════════════════════════════════
+//  CHAT PERSISTENCE
+// ═══════════════════════════════════════════════════════════
 function saveCurrentChat() {
   if (!currentChatId) return;
   const messages = [];
   document.querySelectorAll('#chatMessages .message').forEach(msg => {
     const sender = msg.classList.contains('user') ? 'user' : 'bot';
     const bubble = msg.querySelector('.bubble');
-    const text = bubble.innerHTML.replace(/<button[^>]*>.*?<\/button>/g, '').trim();
+    const text = bubble.innerHTML.replace(/<button[^>]*>.*?<\/button>/g, '').replace(/<div class="reaction-row"[^>]*>.*?<\/div>/gs, '').trim();
     messages.push({ sender, text });
   });
   const chatData = {
     id: currentChatId,
     name: getChatName(currentChatId),
     messages,
+    // Also persist conversation history so memory survives page reload
+    history: conversationHistory,
     lastUpdated: Date.now()
   };
   localStorage.setItem(`chat_${currentChatId}`, JSON.stringify(chatData));
 }
 
 async function generateChatName(firstMessage) {
-  // Use the same Groq setup as chat responses for consistency
-  const systemPrompt = `You are a concise title generator. Given the first message of a conversation, create a short, catchy chat title (3-6 words max). Make it descriptive but natural. Respond with ONLY the title — no quotes, no extra text, no explanations.`.trim();
-
+  const systemPrompt = `You are a concise title generator. Given the first message of a conversation, create a short, catchy chat title (3-6 words max). Respond with ONLY the title — no quotes, no extra text.`;
   try {
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer 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"
-      },
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer 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" },
       body: JSON.stringify({
-        model: "llama-3.1-8b-instant",  // or whichever model you're using now
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: `First message: "${firstMessage}"\n\nTitle:` }
-        ],
-        temperature: 0.6,          // lower = more focused/less creative
-        max_tokens: 30             // very short output
+        model: "llama-3.1-8b-instant",
+        messages: [{ role: "system", content: systemPrompt }, { role: "user", content: `First message: "${firstMessage}"\n\nTitle:` }],
+        temperature: 0.6,
+        max_tokens: 30
       })
     });
-
-    if (!res.ok) {
-      throw new Error(`Indy title gen failed: ${res.status}`);
-    }
-
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     let title = data.choices?.[0]?.message?.content?.trim() || "";
-
-    // Clean up any extra junk the model might add
-    title = title.replace(/^["']|["']$/g, '').trim();
-    title = title.substring(0, 40); // safety cap
-
+    title = title.replace(/^["']|["']$/g, '').trim().substring(0, 40);
     return title || `Chat ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
-
   } catch (err) {
-    console.error("Title generation failed:", err);
-    // Simple fallback if Groq hiccups
     return `Chat about ${firstMessage.substring(0, 20).trim()}...`;
   }
 }
@@ -1169,16 +639,17 @@ function loadChat(chatId) {
   const chatData = JSON.parse(localStorage.getItem(`chat_${chatId}`));
   if (!chatData) return;
   currentChatId = chatId;
+  // Restore conversation history so Indy remembers the loaded chat
+  conversationHistory = chatData.history || [];
   document.getElementById('chatMessages').innerHTML = '';
   chatData.messages.forEach(msg => addMessage(msg.sender, msg.text, false));
 }
 
 async function newChat(chatId = null) {
-  if (chatId) {
-    loadChat(chatId);
-    return;
-  }
+  if (chatId) { loadChat(chatId); return; }
   currentChatId = `chat_${Date.now()}`;
+  // Reset memory for new chat
+  conversationHistory = [];
   document.getElementById('chatMessages').innerHTML = '';
   addMessage('bot', `${openingPhrase.value} <br>What can I help you with today?`, false);
   const chatList = JSON.parse(localStorage.getItem('chatList') || '[]');
@@ -1186,6 +657,7 @@ async function newChat(chatId = null) {
   localStorage.setItem('chatList', JSON.stringify(chatList));
   saveCurrentChat();
   loadSavedChats();
+  setTimeout(renderStarterChips, 80);
 }
 
 async function updateChatName(chatId, firstMessage) {
@@ -1196,10 +668,7 @@ async function updateChatName(chatId, firstMessage) {
     chat.name = generatedName;
     localStorage.setItem('chatList', JSON.stringify(chatList));
     const chatData = JSON.parse(localStorage.getItem(`chat_${chatId}`));
-    if (chatData) {
-      chatData.name = generatedName;
-      localStorage.setItem(`chat_${chatId}`, JSON.stringify(chatData));
-    }
+    if (chatData) { chatData.name = generatedName; localStorage.setItem(`chat_${chatId}`, JSON.stringify(chatData)); }
     loadSavedChats();
   }
 }
@@ -1217,6 +686,7 @@ function deleteChat(chatId) {
   localStorage.setItem('chatList', JSON.stringify(chatList));
   if (currentChatId === chatId) {
     currentChatId = null;
+    conversationHistory = [];
     document.getElementById('chatMessages').innerHTML = '';
     addMessage('bot', `${openingPhrase.value}<br>What can I help you with today?`, false);
   }
@@ -1229,6 +699,7 @@ function deleteAllChats() {
     chatList.forEach(chat => localStorage.removeItem(`chat_${chat.id}`));
     localStorage.removeItem('chatList');
     knowledge = [];
+    conversationHistory = [];
     currentChatId = null;
     document.getElementById('chatMessages').innerHTML = '';
     addMessage('bot', `All chats cleared! Ready for a fresh start ✦`, false);
@@ -1236,16 +707,16 @@ function deleteAllChats() {
   }
 }
 
+// ═══════════════════════════════════════════════════════════
+//  MODALS
+// ═══════════════════════════════════════════════════════════
 function teachAI() {
   document.getElementById('teachModal').classList.add('active');
   document.getElementById('triggerInput').value = '';
   document.getElementById('responseInput').value = '';
   document.getElementById('triggerInput').focus();
 }
-
-function closeTeachModal() {
-  document.getElementById('teachModal').classList.remove('active');
-}
+function closeTeachModal() { document.getElementById('teachModal').classList.remove('active'); }
 
 function submitTeaching() {
   const q = document.getElementById('triggerInput').value.trim();
@@ -1253,11 +724,7 @@ function submitTeaching() {
   if (!q || !a) { alert('Please fill in both fields!'); return; }
   let found = false;
   for (const entry of knowledge) {
-    if (entry.answer.toLowerCase() === a.toLowerCase()) {
-      entry.questions.push(q);
-      found = true;
-      break;
-    }
+    if (entry.answer.toLowerCase() === a.toLowerCase()) { entry.questions.push(q); found = true; break; }
   }
   if (!found) knowledge.push({ questions: [q], answer: a });
   addMessage('bot', "Got it! I'll remember that ✦");
@@ -1270,10 +737,7 @@ function openProfile() {
   document.getElementById('profilePicture').value = userProfile.picture;
   updateProfilePreview();
 }
-
-function closeProfileModal() {
-  document.getElementById('profileModal').classList.remove('active');
-}
+function closeProfileModal() { document.getElementById('profileModal').classList.remove('active'); }
 
 function updateProfilePreview() {
   const preview = document.getElementById('profilePreview');
@@ -1286,42 +750,30 @@ function submitProfile() {
   userProfile.name = document.getElementById('profileName').value.trim();
   userProfile.picture = document.getElementById('profilePicture').value.trim();
   localStorage.setItem('userProfile', JSON.stringify(userProfile));
-  closeProfileModal();
-
-  // Force refresh of userProfile variable so next prompt sees it
   userProfile = JSON.parse(localStorage.getItem('userProfile')) || { name: '', picture: '' };
+  closeProfileModal();
+  updateSidebarProfile();
+  showToast('Settings saved ✦');
 }
 
-function openProjects() {
-  alert("Projects coming soon — appreciate the patience"
-);
-}
+function openProjects() { alert("Projects coming soon — appreciate the patience"); }
 
 function openCode() {
   document.getElementById('codeModal').classList.add('active');
   document.getElementById('codeInput').value = '';
   document.getElementById('codeOutput').textContent = 'Output will appear here...';
 }
-
-function closeCodeModal() {
-  document.getElementById('codeModal').classList.remove('active');
-}
+function closeCodeModal() { document.getElementById('codeModal').classList.remove('active'); }
 
 function runCode() {
   const code = document.getElementById('codeInput').value;
   const lang = document.getElementById('codeLanguage').value;
   const output = document.getElementById('codeOutput');
-  
-  if (!code.trim()) {
-    output.textContent = 'Error: No code to run!';
-    return;
-  }
-  
+  if (!code.trim()) { output.textContent = 'Error: No code to run!'; return; }
   if (lang === 'javascript') {
     const logs = [];
     const originalLog = console.log;
     console.log = (...args) => logs.push(args.join(' '));
-    
     try {
       const result = eval(code);
       console.log = originalLog;
@@ -1335,31 +787,32 @@ function runCode() {
   }
 }
 
+// ═══════════════════════════════════════════════════════════
+//  SYSTEM PROMPT
+// ═══════════════════════════════════════════════════════════
 function getSystemPrompt() {
-  // Base instructions
-  let base = `You are Indy, a helpful AI assistant by JVST co, running on ${modelDropdownValue}. Be concise, friendly, and conversational with a relaxed, modern tone that's approachable and lightly playful — never exaggerated or folksy.
+  let base = `You are Indy, a helpful AI assistant by JVST co, running on ${modelDropdownValue}. Be concise, friendly, and conversational with a relaxed, modern tone.
 
 Rules:
-- Use informal greetings like “hey” or occasional “howdy” only once at the very start of a conversation.
+- Use informal greetings like "hey" or occasional "howdy" only once at the very start of a conversation.
 - NEVER repeat the same phrase (like "What's on your mind?", "How can I help?", etc.) more than once.
-- Do NOT keep asking open-ended questions unless the user is clearly stuck or the topic calls for it.
-- Respond directly to what the user says. If they say little, give a short reply and wait.
-- Use at most one emoji (🤠 or 👋) sparingly, only when it fits naturally.
-- Sound confident, warm, and contemporary — not performative or needy.`.trim();
+- Do NOT keep asking open-ended questions unless the user is clearly stuck.
+- Respond directly to what the user says.
+- Use at most one emoji sparingly, only when it fits naturally.
+- Sound confident, warm, and contemporary.
+- You remember everything said earlier in this conversation — refer back to prior messages naturally when relevant.`.trim();
 
-  // Add name info ONLY if name exists and isn't blank/empty/whitespace
   if (userProfile?.name && userProfile.name.trim() !== "") {
-    const name = userProfile.name.trim(); // clean it right here
-    base += `\n\nYou are talking to ${name}. Use their name naturally in conversation when it feels right (e.g. "Hey ${name}, good question!" or "Got it, ${name}!"). Do NOT use their name every reply — only when it makes the conversation warmer or more personal.`;
+    const name = userProfile.name.trim();
+    base += `\n\nYou are talking to ${name}. Use their name naturally when it feels right. Do NOT use their name every reply.`;
   }
-
-  // Add custom personality if set
-  if (personality) {
-    base += `\n${personality}`;
-  }
-
+  if (personality) base += `\n${personality}`;
   return base;
 }
+
+// ═══════════════════════════════════════════════════════════
+//  KNOWLEDGE BASE HELPERS
+// ═══════════════════════════════════════════════════════════
 function cosineSimilarity(a, b) {
   const tokensA = a.toLowerCase().match(/\w+/g) || [];
   const tokensB = b.toLowerCase().match(/\w+/g) || [];
@@ -1367,11 +820,7 @@ function cosineSimilarity(a, b) {
   const vecA = set.map(t => tokensA.filter(w => w === t).length);
   const vecB = set.map(t => tokensB.filter(w => w === t).length);
   let dot = 0, normA = 0, normB = 0;
-  for (let i = 0; i < set.length; i++) {
-    dot += vecA[i] * vecB[i];
-    normA += vecA[i] ** 2;
-    normB += vecB[i] ** 2;
-  }
+  for (let i = 0; i < set.length; i++) { dot += vecA[i] * vecB[i]; normA += vecA[i] ** 2; normB += vecB[i] ** 2; }
   return normA && normB ? dot / (Math.sqrt(normA) * Math.sqrt(normB)) : 0;
 }
 
@@ -1380,18 +829,14 @@ function findInKnowledge(msg) {
   for (const entry of knowledge) {
     for (const q of entry.questions) {
       const score = cosineSimilarity(msg, q);
-      if (score > bestScore && score > 0.5) {
-        bestScore = score;
-        best = entry.answer;
-      }
+      if (score > bestScore && score > 0.5) { bestScore = score; best = entry.answer; }
     }
   }
   return best;
 }
 
 function handleMath(msg) {
-  const expr = msg.toLowerCase().replace(/^(what is|calculate|\s)+/g, '').trim()
-    .replace(/×/g,'*').replace(/÷/g,'/').replace(/\^/g,'**');
+  const expr = msg.toLowerCase().replace(/^(what is|calculate|\s)+/g, '').trim().replace(/×/g,'*').replace(/÷/g,'/').replace(/\^/g,'**');
   if (/^[0-9+\-*/().\s**]+$/.test(expr)) {
     try { return Function('"use strict"; return (' + expr + ')')(); } catch(e) {}
   }
@@ -1416,9 +861,20 @@ async function getWikipedia(topic) {
   return null;
 }
 
+// ═══════════════════════════════════════════════════════════
+//  AI RESPONSE — WITH FULL CONVERSATION HISTORY
+// ═══════════════════════════════════════════════════════════
 async function getAIResponse(userMessage) {
-  // Use the dynamic prompt that includes the name when set
-  const systemPrompt = getSystemPrompt();  // ← this now includes name logic
+  const systemPrompt = getSystemPrompt();
+
+  // Add the new user message to history BEFORE sending
+  conversationHistory.push({ role: "user", content: userMessage });
+
+  // Keep history from growing too large (last 40 messages = 20 turns)
+  const MAX_HISTORY = 40;
+  if (conversationHistory.length > MAX_HISTORY) {
+    conversationHistory = conversationHistory.slice(-MAX_HISTORY);
+  }
 
   try {
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -1431,7 +887,7 @@ async function getAIResponse(userMessage) {
         model: "llama-3.3-70b-versatile",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: userMessage }
+          ...conversationHistory   // ← Full history goes here
         ],
         temperature: 0.7,
         max_tokens: 2048
@@ -1440,13 +896,19 @@ async function getAIResponse(userMessage) {
 
     if (!res.ok) {
       const errorText = await res.text();
-      console.error("Indy error details:", errorText);
-      throw new Error(`Indy HTTP ${res.status}: ${errorText}`);
+      console.error("Indy error:", errorText);
+      // Remove the message we added if the request failed
+      conversationHistory.pop();
+      throw new Error(`HTTP ${res.status}`);
     }
 
     const data = await res.json();
-    let text = data.choices?.[0]?.message?.content?.trim() || "…";
-    return text || "Got it — what's next? ✦";
+    const reply = data.choices?.[0]?.message?.content?.trim() || "…";
+
+    // Add assistant reply to history so it's included in next request
+    conversationHistory.push({ role: "assistant", content: reply });
+
+    return reply;
 
   } catch (err) {
     console.error("Indy API call failed:", err);
@@ -1454,29 +916,25 @@ async function getAIResponse(userMessage) {
   }
 }
 
+// ═══════════════════════════════════════════════════════════
+//  IMAGE GENERATION
+// ═══════════════════════════════════════════════════════════
 async function generateImage(prompt) {
   try {
     const encodedPrompt = encodeURIComponent(prompt.trim());
-    
-    // Pixazo public endpoint — no key, no auth (early 2026 status)
     const url = `https://api.pixazo.ai/text-to-image/stable-diffusion?prompt=${encodedPrompt}&width=1152&height=896&style=realistic`;
-    
-    // Optional: you can add &style=anime, &style=cyberpunk, etc. if you want
-    
-    // HEAD check → confirms it should work (same pattern you already use)
     const head = await fetch(url, { method: 'HEAD' });
-    if (!head.ok) {
-      throw new Error(`Pixazo responded ${head.status}`);
-    }
-    
-    return url;  // direct image URL — just like Pollinations
-    
+    if (!head.ok) throw new Error(`Pixazo responded ${head.status}`);
+    return url;
   } catch (err) {
     console.error("Image gen error:", err);
     return `Error generating image: ${err.message}. Try again in a few seconds.`;
   }
 }
 
+// ═══════════════════════════════════════════════════════════
+//  SEND MESSAGE
+// ═══════════════════════════════════════════════════════════
 async function sendMessage() {
   const input = document.getElementById('userInput');
   const msg = input.value.trim();
@@ -1484,6 +942,7 @@ async function sendMessage() {
 
   if (!currentChatId) {
     currentChatId = `chat_${Date.now()}`;
+    conversationHistory = [];
     const chatList = JSON.parse(localStorage.getItem('chatList') || '[]');
     chatList.unshift({ id: currentChatId, name: 'New Chat' });
     localStorage.setItem('chatList', JSON.stringify(chatList));
@@ -1491,18 +950,17 @@ async function sendMessage() {
 
   addMessage('user', msg);
   input.value = '';
+  input.style.height = 'auto';
+  updateCharCounter('');
+
+  // Remove starter chips if present
+  document.getElementById('starterChips')?.remove();
 
   const messageCount = document.querySelectorAll('#chatMessages .message.user').length;
-  if (messageCount === 1) {
-    updateChatName(currentChatId, msg);
-  }
+  if (messageCount === 1) updateChatName(currentChatId, msg);
 
   const learned = findInKnowledge(msg);
-  if (learned) {
-    addMessage('bot', learned);
-    saveCurrentChat();
-    return;
-  }
+  if (learned) { addMessage('bot', learned); saveCurrentChat(); return; }
 
   if (/^define |^meaning of /.test(msg.toLowerCase())) {
     const word = msg.replace(/^define |^meaning of /i, '').trim().split(' ')[0];
@@ -1517,9 +975,8 @@ async function sendMessage() {
     const topic = msg.replace(/^tell me about |^what is /i, '').trim();
     addThinkingIndicator();
     const wiki = await getWikipedia(topic);
-    replaceLastBot(wiki || "No result.");
-    saveCurrentChat();
-    return;
+    if (wiki) { replaceLastBot(wiki); saveCurrentChat(); return; }
+    // If Wikipedia fails, fall through to AI
   }
 
   const math = handleMath(msg);
@@ -1529,41 +986,32 @@ async function sendMessage() {
     return;
   }
 
-  if (msg.toLowerCase().startsWith('!img ') ||
-      msg.toLowerCase().startsWith('generate image ') ||
-      msg.toLowerCase().startsWith('generate an image ') ||
-      msg.toLowerCase().startsWith('generate a picture') ||
-      msg.toLowerCase().startsWith('draw ') ||
-      msg.toLowerCase().startsWith('create image ')) {
+  if (msg.toLowerCase().startsWith('!img ') || msg.toLowerCase().startsWith('generate image ') ||
+      msg.toLowerCase().startsWith('generate an image ') || msg.toLowerCase().startsWith('generate a picture') ||
+      msg.toLowerCase().startsWith('draw ') || msg.toLowerCase().startsWith('create image ')) {
     const imagePrompt = msg
-      .replace(/^!img /i, '')
-      .replace(/^generate image /i, '')
-      .replace(/^generate an image /i, '')
-      .replace(/^generate a picture /i, '')
-      .replace(/^draw /i, '')
-      .replace(/^create image /i, '')
-      .trim();
+      .replace(/^!img /i,'').replace(/^generate image /i,'').replace(/^generate an image /i,'')
+      .replace(/^generate a picture /i,'').replace(/^draw /i,'').replace(/^create image /i,'').trim();
 
-    if (!imagePrompt) {
-      addMessage('bot', "Add a description!<br>Example: <code>!img neon cyberpunk city</code>");
-      saveCurrentChat();
-      return;
-    }
+    if (!imagePrompt) { addMessage('bot', "Add a description!<br>Example: <code>!img neon cyberpunk city</code>"); saveCurrentChat(); return; }
 
     addThinkingIndicator();
     const result = await generateImage(imagePrompt);
-
     if (result.startsWith('http')) {
       replaceLastBot(
         `Here's your image ✦<br><br>` +
-        `<img src="${result}" alt="${imagePrompt}" ` +
-        `style="max-width:100%; border-radius:20px; margin:16px 0; box-shadow:0 8px 32px rgba(0,0,0,0.5);">` +
+        `<img src="${result}" alt="${imagePrompt}" style="max-width:100%;border-radius:20px;margin:16px 0;box-shadow:0 8px 32px rgba(0,0,0,0.5);">` +
         `<br><strong>Prompt:</strong> ${imagePrompt}`
       );
-    } else {
-      replaceLastBot(result);
-    }
+    } else { replaceLastBot(result); }
     saveCurrentChat();
+    return;
+  }
+
+  // Stranger Things trigger
+  const udTriggers = ['!strangerthings','!upsidedown','!upside-down','!vecna','!demogorgon','!the upside down'];
+  if (udTriggers.some(t => msg.toLowerCase() === t || msg.toLowerCase().startsWith(t + ' '))) {
+    enterUpsideDown();
     return;
   }
 
@@ -1573,6 +1021,9 @@ async function sendMessage() {
   saveCurrentChat();
 }
 
+// ═══════════════════════════════════════════════════════════
+//  MESSAGE RENDERING
+// ═══════════════════════════════════════════════════════════
 function addMessage(sender, text, shouldSave = true) {
   const container = document.getElementById('chatMessages');
   const msgDiv = document.createElement('div');
@@ -1582,6 +1033,12 @@ function addMessage(sender, text, shouldSave = true) {
       <div class="bubble">
         ${text}
         <button class="copy-btn" onclick="copyText(this)">Copy</button>
+        <div class="reaction-row">
+          <button class="reaction-btn" title="Helpful" onclick="reactToMessage(this,'👍')">👍</button>
+          <button class="reaction-btn" title="Not helpful" onclick="reactToMessage(this,'👎')">👎</button>
+          <button class="reaction-btn" title="Pin" onclick="pinMessage(this)">📌</button>
+          <button class="reaction-btn" title="Regenerate" onclick="regenerateLast(this)">↺</button>
+        </div>
       </div>`;
   } else {
     msgDiv.innerHTML = `<div class="bubble">${text.replace(/\n/g, '<br>')}</div>`;
@@ -1595,13 +1052,7 @@ function addThinkingIndicator() {
   const container = document.getElementById('chatMessages');
   const msgDiv = document.createElement('div');
   msgDiv.className = 'message bot';
-  msgDiv.innerHTML = `
-    <div class="bubble">
-      <div class="thinking-indicator">
-        <span class="thinking-star">✦</span>
-        <span class="thinking-text">${phrase.value}</span>
-      </div>
-    </div>`;
+  msgDiv.innerHTML = `<div class="bubble"><div class="thinking-indicator"><span class="thinking-star">✦</span><span class="thinking-text">${phrase.value}</span></div></div>`;
   container.appendChild(msgDiv);
   container.scrollTop = container.scrollHeight;
 }
@@ -1610,20 +1061,22 @@ function replaceLastBot(text) {
   const lastBotBubble = document.querySelector('.message.bot:last-child .bubble');
   if (lastBotBubble) {
     lastBotBubble.innerHTML = text +
-      '<button class="copy-btn" onclick="copyText(this)">Copy</button>';
+      '<button class="copy-btn" onclick="copyText(this)">Copy</button>' +
+      '<div class="reaction-row">' +
+        '<button class="reaction-btn" title="Helpful" onclick="reactToMessage(this,\'👍\')">👍</button>' +
+        '<button class="reaction-btn" title="Not helpful" onclick="reactToMessage(this,\'👎\')">👎</button>' +
+        '<button class="reaction-btn" title="Pin" onclick="pinMessage(this)">📌</button>' +
+        '<button class="reaction-btn" title="Regenerate" onclick="regenerateLast(this)">↺</button>' +
+      '</div>';
+    processCodeBlocks(lastBotBubble);
   }
   document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
   saveCurrentChat();
 }
 
-function copyText(btn) {
-  const bubble = btn.parentElement;
-  const text = bubble.textContent.replace('Copy', '').trim();
-  navigator.clipboard.writeText(text);
-  btn.textContent = 'Copied!';
-  setTimeout(() => btn.textContent = 'Copy', 2000);
-}
-
+// ═══════════════════════════════════════════════════════════
+//  CHAT LIST
+// ═══════════════════════════════════════════════════════════
 function loadSavedChats() {
   const chatList = document.getElementById('chatList');
   chatList.innerHTML = '';
@@ -1636,48 +1089,27 @@ function createChatButton(chatId, name) {
   const btn = document.createElement('button');
   btn.className = 'sidebar-btn';
   btn.onclick = () => newChat(chatId);
-  
   const nameSpan = document.createElement('span');
   nameSpan.textContent = name;
-  
   const delSpan = document.createElement('span');
   delSpan.textContent = '⨯';
-  delSpan.onclick = (e) => {
-    e.stopPropagation();
-    deleteChat(chatId);
-  };
-  
+  delSpan.onclick = (e) => { e.stopPropagation(); deleteChat(chatId); };
   btn.appendChild(nameSpan);
   btn.appendChild(delSpan);
   chatList.appendChild(btn);
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  loadSavedChats();
-  const chatList = JSON.parse(localStorage.getItem('chatList') || '[]');
-  if (chatList.length > 0) {
-    loadChat(chatList[0].id);
-  } else {
-    addMessage('bot', `Tip: Say !img + your prompt to generate an image`, false);
-  }
-});
-// Function to update sidebar profile display
+// ═══════════════════════════════════════════════════════════
+//  SIDEBAR PROFILE
+// ═══════════════════════════════════════════════════════════
 function updateSidebarProfile() {
   const avatar = document.getElementById('sidebarAvatar');
   const nameEl = document.getElementById('sidebarName');
-
   if (!avatar || !nameEl) return;
-
-  // Profile picture
   const picUrl = userProfile?.picture?.trim();
   avatar.style.backgroundImage = picUrl ? `url(${picUrl})` : 'none';
   avatar.style.backgroundColor = picUrl ? 'transparent' : 'var(--bg-card)';
-
-  // Name (only show if exists)
-  const displayName = userProfile?.name?.trim();
-  nameEl.textContent = displayName || 'Guest';
-
-  // Optional: click to open settings
+  nameEl.textContent = userProfile?.name?.trim() || 'Guest';
   document.getElementById('userProfileFooter').onclick = () => {
     document.getElementById('profileModal').classList.add('active');
     document.getElementById('profileName').value = userProfile.name;
@@ -1685,283 +1117,140 @@ function updateSidebarProfile() {
     updateProfilePreview();
   };
 }
-
-// Run on load
 updateSidebarProfile();
 
-// Also run whenever settings are saved (add to submitProfile)
-function submitProfile() {
-  userProfile.name = document.getElementById('profileName').value.trim();
-  userProfile.picture = document.getElementById('profilePicture').value.trim();
-  localStorage.setItem('userProfile', JSON.stringify(userProfile));
-  closeProfileModal();
-
-  // Refresh sidebar profile immediately
-  updateSidebarProfile();
+// ═══════════════════════════════════════════════════════════
+//  COPY
+// ═══════════════════════════════════════════════════════════
+function copyText(btn) {
+  const bubble = btn.parentElement;
+  const clone = bubble.cloneNode(true);
+  clone.querySelectorAll('button').forEach(b => b.remove());
+  clone.querySelectorAll('.reaction-row').forEach(r => r.remove());
+  const text = (clone.innerText || clone.textContent || '').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied ✓';
+    showToast('Copied to clipboard');
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  }).catch(() => { btn.textContent = 'Failed'; setTimeout(() => btn.textContent = 'Copy', 2000); });
 }
-  </script>
 
-  <script>
-// Indy Sunrise Update Popup (new features)
-// Paste before </body>
-
-(function() {
-    const UPDATE_KEY = "indy_sunrise_update_v1"; // change to v2 later if you add more
-
-    if (localStorage.getItem(UPDATE_KEY) === "true") return;
-
-    const modal = document.createElement("div");
-    modal.style.cssText = `
-        position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px);
-        z-index:9999; display:flex; align-items:center; justify-content:center; opacity:0;
-        transition:opacity 0.4s ease;
-    `;
-
-    const content = document.createElement("div");
-    content.style.cssText = `
-        background:rgba(30,30,40,0.95); border:1px solid rgba(255,255,255,0.12);
-        border-radius:16px; max-width:440px; width:90%; padding:28px 24px; text-align:center;
-        box-shadow:0 20px 60px rgba(0,0,0,0.7); transform:scale(0.92);
-        transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);
-    `;
-
-    content.innerHTML = `
-        <div style="font-size:48px; margin-bottom:12px;">✦</div>
-        <h2 style="font-family:'Syne',sans-serif; font-weight:800; font-size:26px; margin-bottom:16px; letter-spacing:-1px;">
-            Indy Update
-        </h2>
-        <p style="font-size:15px; color:#ddd; line-height:1.6; margin-bottom:20px;">
-            Big glow-up for Indy — smarter, faster, and knows you better now.
-        </p>
-        <ul style="text-align:left; max-width:380px; margin:0 auto 24px; padding-left:20px; font-size:14px; color:#ccc; line-height:1.7; list-style-type:'→ ';">
-            <li>Made to have smarter, faster, replies</li>
-            <li>Remembers your name from Settings — says hi properly</li>
-        </ul>
-        <button id="acceptUpdateBtn" style="
-            background:linear-gradient(135deg,#ffffff,#e0e0e0); color:#000; border:none;
-            padding:12px 44px; font-size:16px; font-weight:700; border-radius:50px;
-            cursor:pointer; box-shadow:0 6px 20px rgba(255,255,255,0.15);
-            transition:all 0.3s ease;
-        ">
-            Let's go!
-        </button>
-    `;
-
-    modal.appendChild(content);
-    document.body.appendChild(modal);
-
-    setTimeout(() => {
-        modal.style.opacity = "1";
-        content.style.transform = "scale(1)";
-    }, 50);
-
-    document.getElementById("acceptUpdateBtn").onclick = () => {
-        localStorage.setItem(UPDATE_KEY, "true");
-        modal.style.opacity = "0";
-        content.style.transform = "scale(0.92)";
-        setTimeout(() => modal.remove(), 400);
-        // Optional: quick toast / message
-        if (typeof addMessage === 'function') {
-            addMessage('bot', "Update locked in — let's cook 🤠", false);
-        }
-    };
-
-    modal.onclick = (e) => {
-        if (e.target === modal) {
-            localStorage.setItem(UPDATE_KEY, "true");
-            modal.style.opacity = "0";
-            content.style.transform = "scale(0.92)";
-            setTimeout(() => modal.remove(), 400);
-        }
-    };
-})();
-// Model selector logic
-const modelBtn = document.getElementById('modelSelectorBtn');
-const modelPopover = document.getElementById('modelPopover');
-
-if (modelBtn && modelPopover) {
-  modelBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    modelPopover.classList.toggle('active');
+// ═══════════════════════════════════════════════════════════
+//  FEATURE 1 — REACTION BUTTONS (👍👎📌↺)
+// ═══════════════════════════════════════════════════════════
+function reactToMessage(btn, reaction) {
+  const isActive = btn.classList.contains('active');
+  // Clear other thumbs in same row
+  const row = btn.closest('.reaction-row');
+  row.querySelectorAll('.reaction-btn').forEach(b => {
+    if (b.textContent === '👍' || b.textContent === '👎') b.classList.remove('active');
   });
+  if (!isActive) {
+    btn.classList.add('active');
+    showToast(reaction === '👍' ? 'Marked as helpful' : 'Got it — will improve');
+  }
+}
 
-  document.addEventListener('click', (e) => {
-    if (!modelPopover.contains(e.target) && e.target !== modelBtn) {
-      modelPopover.classList.remove('active');
-    }
-  });
+// ═══════════════════════════════════════════════════════════
+//  FEATURE 2 — PIN MESSAGES
+// ═══════════════════════════════════════════════════════════
+function pinMessage(btn) {
+  const bubble = btn.closest('.bubble');
+  const clone = bubble.cloneNode(true);
+  clone.querySelectorAll('button').forEach(b => b.remove());
+  clone.querySelectorAll('.reaction-row').forEach(r => r.remove());
+  const text = (clone.innerText || clone.textContent || '').trim();
+  if (!text) return;
 
-  modelPopover.querySelectorAll('.model-item').forEach(item => {
-    item.addEventListener('click', () => {
-      modelPopover.querySelectorAll('.model-item').forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-
-      // ── This is the important part ──
-      const selectedModel = item.getAttribute('data-model');
-      modelDropdownValue = selectedModel;
-
-      // Save to localStorage
-      localStorage.setItem('selectedModel', selectedModel);
-
-      // Update visible label
-      document.getElementById('currentModelLabel').textContent = selectedModel;
-
-      modelPopover.classList.remove('active');
-    });
-  });
-
-  // ── Load saved model on page load ──
-  const savedModel = localStorage.getItem('selectedModel');
-  if (savedModel) {
-    modelDropdownValue = savedModel;
-    document.getElementById('currentModelLabel').textContent = savedModel;
-
-    // Also mark the correct item as active
-    const activeItem = modelPopover.querySelector(`[data-model="${savedModel}"]`);
-    if (activeItem) {
-      modelPopover.querySelectorAll('.model-item').forEach(i => i.classList.remove('active'));
-      activeItem.classList.add('active');
-    }
+  const alreadyPinned = pinnedMessages.some(p => p.text === text);
+  if (alreadyPinned) {
+    pinnedMessages = pinnedMessages.filter(p => p.text !== text);
+    btn.classList.remove('active');
+    showToast('Unpinned');
   } else {
-    // Default fallback
-    modelDropdownValue = "Indy Sunrise 1.0 Beta";
+    pinnedMessages.push({ text, chatId: currentChatId, time: Date.now() });
+    btn.classList.add('active');
+    showToast('Message pinned 📌');
   }
+  localStorage.setItem('pinnedMessages', JSON.stringify(pinnedMessages));
 }
 
+function openPinned() {
+  const modal = document.getElementById('pinnedModal');
+  const list = document.getElementById('pinnedList');
+  const noMsg = document.getElementById('noPinnedMsg');
+  list.innerHTML = '';
+  if (pinnedMessages.length === 0) {
+    noMsg.style.display = 'block';
+  } else {
+    noMsg.style.display = 'none';
+    pinnedMessages.forEach((pin, i) => {
+      const item = document.createElement('div');
+      item.style.cssText = `background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 14px;position:relative;`;
+      item.innerHTML = `
+        <div class="pinned-badge">📌 pinned</div>
+        <div style="font-size:13px;color:var(--text-secondary);line-height:1.5;">${pin.text.substring(0,200)}${pin.text.length>200?'…':''}</div>
+        <button onclick="this.parentElement.remove();pinnedMessages.splice(${i},1);localStorage.setItem('pinnedMessages',JSON.stringify(pinnedMessages));" style="position:absolute;top:8px;right:8px;background:transparent;border:none;color:var(--text-dim);cursor:pointer;font-family:var(--font-mono);font-size:14px;">⨯</button>
+      `;
+      list.appendChild(item);
+    });
+  }
+  modal.classList.add('active');
+}
 
+// ═══════════════════════════════════════════════════════════
+//  FEATURE 3 — REGENERATE LAST RESPONSE
+// ═══════════════════════════════════════════════════════════
+async function regenerateLast(btn) {
+  // Find the last user message
+  const userMessages = document.querySelectorAll('#chatMessages .message.user');
+  if (!userMessages.length) return;
+  const lastUserMsg = userMessages[userMessages.length - 1];
+  const lastUserText = (lastUserMsg.querySelector('.bubble').textContent || '').trim();
+  if (!lastUserText) return;
 
+  showToast('Regenerating…');
 
-// ============================================================
-//  INDY FEATURES — Paste at the end of your <script> block
-//  Features: Keyboard shortcuts, message search, export chat,
-//  auto-resize input, message reactions, character count,
-//  swipe to delete on mobile, conversation starters
-// ============================================================
-
-
-// ─────────────────────────────────────────────
-// 1. AUTO-RESIZE INPUT (grows as you type)
-//    Replaces the fixed-height input with one
-//    that expands up to ~5 lines naturally.
-// ─────────────────────────────────────────────
-(function initAutoResize() {
-  const input = document.getElementById('userInput');
-  if (!input) return;
-
-  // Swap to textarea for multi-line support
-  const textarea = document.createElement('textarea');
-  textarea.id = 'userInput';
-  textarea.placeholder = input.placeholder;
-  textarea.rows = 1;
-  textarea.style.cssText = `
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: var(--text);
-    font-size: 14px;
-    font-family: var(--font-ui, inherit);
-    outline: none;
-    padding: 10px 0;
-    caret-color: var(--accent, #c8c8ff);
-    resize: none;
-    overflow-y: hidden;
-    max-height: 120px;
-    line-height: 1.5;
-  `;
-
-  input.replaceWith(textarea);
-
-  textarea.addEventListener('input', () => {
-    textarea.style.height = 'auto';
-    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
-  });
-
-  // Enter sends, Shift+Enter = new line
-  textarea.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-      setTimeout(() => {
-        textarea.style.height = 'auto';
-      }, 0);
-    }
-  });
-})();
-
-
-// ─────────────────────────────────────────────
-// 2. KEYBOARD SHORTCUTS
-//    / → focus input
-//    Ctrl+K → open search
-//    Ctrl+N → new chat
-//    Esc → close any open modal
-//    Ctrl+E → export current chat
-// ─────────────────────────────────────────────
-document.addEventListener('keydown', (e) => {
-  const active = document.activeElement;
-  const isTyping = active.tagName === 'INPUT' || active.tagName === 'TEXTAREA';
-
-  // / to focus input
-  if (e.key === '/' && !isTyping) {
-    e.preventDefault();
-    document.getElementById('userInput')?.focus();
+  // Remove last assistant turn from history so we can get a fresh answer
+  if (conversationHistory.length >= 2 && conversationHistory[conversationHistory.length - 1].role === 'assistant') {
+    conversationHistory.pop(); // remove last assistant
+    conversationHistory.pop(); // remove last user (will be re-added in getAIResponse)
   }
 
-  // Ctrl/Cmd + K → search
-  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-    e.preventDefault();
-    openSearch();
-  }
+  // Show thinking state in the current bubble
+  const bubble = btn.closest('.bubble');
+  bubble.innerHTML = `<div class="thinking-indicator"><span class="thinking-star">✦</span><span class="thinking-text">Regenerating...</span></div>`;
 
-  // Ctrl/Cmd + N → new chat
-  if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
-    e.preventDefault();
-    newChat();
-  }
+  const response = await getAIResponse(lastUserText);
+  bubble.innerHTML = response +
+    '<button class="copy-btn" onclick="copyText(this)">Copy</button>' +
+    '<div class="reaction-row">' +
+      '<button class="reaction-btn" onclick="reactToMessage(this,\'👍\')">👍</button>' +
+      '<button class="reaction-btn" onclick="reactToMessage(this,\'👎\')">👎</button>' +
+      '<button class="reaction-btn" onclick="pinMessage(this)">📌</button>' +
+      '<button class="reaction-btn" onclick="regenerateLast(this)">↺</button>' +
+    '</div>';
+  processCodeBlocks(bubble);
+  saveCurrentChat();
+}
 
-  // Ctrl/Cmd + E → export
-  if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
-    e.preventDefault();
-    exportChat();
-  }
-
-  // Esc → close modals
-  if (e.key === 'Escape') {
-    document.querySelectorAll('.teach-modal.active').forEach(m => m.classList.remove('active'));
-    document.getElementById('searchOverlay')?.remove();
-    document.getElementById('modelPopover')?.classList.remove('active');
-  }
-});
-
-
-// ─────────────────────────────────────────────
-// 3. EXPORT CHAT
-//    Downloads current conversation as a
-//    clean .txt file. Works offline, no deps.
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+//  FEATURE 4 — EXPORT CHAT
+// ═══════════════════════════════════════════════════════════
 function exportChat() {
   const messages = document.querySelectorAll('#chatMessages .message');
-  if (!messages.length) return;
+  if (!messages.length) { showToast('Nothing to export'); return; }
 
-  let text = `INDY CHAT EXPORT\n`;
-  text += `Date: ${new Date().toLocaleString()}\n`;
-  text += `Chat: ${getChatName(currentChatId) || 'Untitled'}\n`;
-  text += `${'─'.repeat(40)}\n\n`;
-
+  let text = `INDY CHAT EXPORT\nDate: ${new Date().toLocaleString()}\nChat: ${getChatName(currentChatId) || 'Untitled'}\n${'─'.repeat(40)}\n\n`;
   messages.forEach(msg => {
     const isUser = msg.classList.contains('user');
     const bubble = msg.querySelector('.bubble');
     if (!bubble) return;
-
-    // Strip buttons and HTML tags cleanly
     const clone = bubble.cloneNode(true);
-    clone.querySelectorAll('button').forEach(b => b.remove());
-    const rawText = clone.innerText || clone.textContent || '';
-    const clean = rawText.trim();
+    clone.querySelectorAll('button, .reaction-row').forEach(b => b.remove());
+    const clean = (clone.innerText || clone.textContent || '').trim();
     if (!clean) return;
-
-    const label = isUser ? 'YOU' : 'INDY';
-    text += `[${label}]\n${clean}\n\n`;
+    text += `[${isUser ? 'YOU' : 'INDY'}]\n${clean}\n\n`;
   });
 
   const blob = new Blob([text], { type: 'text/plain' });
@@ -1971,123 +1260,69 @@ function exportChat() {
   a.download = `indy-chat-${Date.now()}.txt`;
   a.click();
   URL.revokeObjectURL(url);
-
-  // Quick toast feedback
   showToast('Chat exported ↓');
 }
 
-// Wire to sidebar if you want a button (optional — shortcut works either way)
-// Add this to your sidebar HTML: <button class="sidebar-btn" data-icon="↓" onclick="exportChat()"><span>Export Chat</span></button>
+// ═══════════════════════════════════════════════════════════
+//  FEATURE 5 — CHARACTER COUNTER
+// ═══════════════════════════════════════════════════════════
+function updateCharCounter(text) {
+  const counter = document.getElementById('charCounter');
+  if (!counter) return;
+  const len = text.length;
+  const MAX = 2000;
+  counter.textContent = len > 0 ? len : '';
+  counter.className = 'char-counter';
+  if (len > MAX * 0.85) counter.classList.add('warn');
+  if (len > MAX) counter.classList.add('over');
+}
 
-
-// ─────────────────────────────────────────────
-// 4. MESSAGE SEARCH
-//    Ctrl+K opens a floating search that
-//    highlights matching messages and scrolls to them.
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+//  FEATURE 6 — MESSAGE SEARCH (Ctrl+K)
+// ═══════════════════════════════════════════════════════════
 function openSearch() {
   if (document.getElementById('searchOverlay')) return;
-
   const overlay = document.createElement('div');
   overlay.id = 'searchOverlay';
-  overlay.style.cssText = `
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.75);
-    backdrop-filter: blur(10px);
-    z-index: 2000;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding-top: 120px;
-    animation: fadeIn 0.15s ease;
-  `;
-
+  overlay.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);z-index:2000;display:flex;align-items:flex-start;justify-content:center;padding-top:120px;`;
   overlay.innerHTML = `
-    <div style="
-      background: var(--bg-card);
-      border: 1px solid var(--border-strong);
-      border-radius: 12px;
-      width: 90%;
-      max-width: 520px;
-      overflow: hidden;
-      box-shadow: 0 16px 48px rgba(0,0,0,0.6);
-    ">
-      <div style="display:flex; align-items:center; gap:10px; padding: 14px 16px; border-bottom: 1px solid var(--border);">
-        <span style="font-family:var(--font-mono); color:var(--text-tertiary); font-size:14px;">⌕</span>
-        <input id="searchInput" placeholder="Search messages…" autocomplete="off" style="
-          flex:1; background:transparent; border:none; outline:none;
-          color:var(--text); font-size:14px; font-family:var(--font-ui, inherit);
-          caret-color: var(--accent, #c8c8ff);
-        ">
-        <span style="font-family:var(--font-mono); color:var(--text-tertiary); font-size:11px; letter-spacing:.05em;">ESC</span>
+    <div style="background:var(--bg-card);border:1px solid var(--border-strong);border-radius:12px;width:90%;max-width:520px;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,0.6);">
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);">
+        <span style="font-family:var(--font-mono);color:var(--text-tertiary);font-size:14px;">⌕</span>
+        <input id="searchInput" placeholder="Search messages…" autocomplete="off" style="flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:14px;font-family:var(--font-ui);caret-color:var(--accent);">
+        <span style="font-family:var(--font-mono);color:var(--text-tertiary);font-size:11px;">ESC</span>
       </div>
-      <div id="searchResults" style="
-        max-height: 320px;
-        overflow-y: auto;
-        padding: 8px 0;
-      ">
-        <div style="padding:16px; color:var(--text-tertiary); font-size:13px; text-align:center; font-family:var(--font-mono);">
-          Start typing to search…
-        </div>
+      <div id="searchResults" style="max-height:320px;overflow-y:auto;padding:8px 0;">
+        <div style="padding:16px;color:var(--text-tertiary);font-size:13px;text-align:center;font-family:var(--font-mono);">Start typing to search…</div>
       </div>
-    </div>
-  `;
-
+    </div>`;
   document.body.appendChild(overlay);
-
   const searchInput = document.getElementById('searchInput');
   searchInput.focus();
 
   searchInput.addEventListener('input', () => {
     const query = searchInput.value.trim().toLowerCase();
     const resultsEl = document.getElementById('searchResults');
-
-    if (!query) {
-      resultsEl.innerHTML = `<div style="padding:16px; color:var(--text-tertiary); font-size:13px; text-align:center; font-family:var(--font-mono);">Start typing to search…</div>`;
-      return;
-    }
-
+    if (!query) { resultsEl.innerHTML = `<div style="padding:16px;color:var(--text-tertiary);font-size:13px;text-align:center;font-family:var(--font-mono);">Start typing to search…</div>`; return; }
     const messages = document.querySelectorAll('#chatMessages .message');
     const matches = [];
-
     messages.forEach((msg, i) => {
       const bubble = msg.querySelector('.bubble');
       if (!bubble) return;
       const clone = bubble.cloneNode(true);
-      clone.querySelectorAll('button').forEach(b => b.remove());
+      clone.querySelectorAll('button, .reaction-row').forEach(b => b.remove());
       const text = (clone.innerText || clone.textContent || '').trim();
-      if (text.toLowerCase().includes(query)) {
-        matches.push({ index: i, text, isUser: msg.classList.contains('user'), el: msg });
-      }
+      if (text.toLowerCase().includes(query)) matches.push({ index: i, text, isUser: msg.classList.contains('user'), el: msg });
     });
-
-    if (!matches.length) {
-      resultsEl.innerHTML = `<div style="padding:16px; color:var(--text-tertiary); font-size:13px; text-align:center; font-family:var(--font-mono);">No results for "${query}"</div>`;
-      return;
-    }
-
+    if (!matches.length) { resultsEl.innerHTML = `<div style="padding:16px;color:var(--text-tertiary);font-size:13px;text-align:center;font-family:var(--font-mono);">No results for "${query}"</div>`; return; }
     resultsEl.innerHTML = matches.map((m, i) => {
       const snippet = m.text.length > 80 ? m.text.slice(0, 80) + '…' : m.text;
-      const highlighted = snippet.replace(
-        new RegExp(query, 'gi'),
-        match => `<mark style="background:rgba(200,200,255,0.25);color:var(--text);border-radius:2px;padding:0 2px;">${match}</mark>`
-      );
-      return `
-        <button data-match-index="${i}" style="
-          width:100%; background:transparent; border:none; text-align:left;
-          padding:10px 16px; cursor:pointer; transition:background .12s;
-          border-bottom: 1px solid var(--border);
-        " onmouseover="this.style.background='var(--hover-bg)'"
-           onmouseout="this.style.background='transparent'">
-          <div style="font-size:10px; font-family:var(--font-mono); color:var(--text-tertiary); letter-spacing:.06em; margin-bottom:4px; text-transform:uppercase;">
-            ${m.isUser ? 'You' : 'Indy'}
-          </div>
-          <div style="font-size:13px; color:var(--text-secondary); line-height:1.5;">${highlighted}</div>
-        </button>
-      `;
+      const highlighted = snippet.replace(new RegExp(query, 'gi'), match => `<mark style="background:rgba(200,200,255,0.25);color:var(--text);border-radius:2px;padding:0 2px;">${match}</mark>`);
+      return `<button data-match-index="${i}" style="width:100%;background:transparent;border:none;text-align:left;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--border);" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='transparent'">
+        <div style="font-size:10px;font-family:var(--font-mono);color:var(--text-tertiary);letter-spacing:.06em;margin-bottom:4px;text-transform:uppercase;">${m.isUser ? 'You' : 'Indy'}</div>
+        <div style="font-size:13px;color:var(--text-secondary);line-height:1.5;">${highlighted}</div>
+      </button>`;
     }).join('');
-
     resultsEl.querySelectorAll('button[data-match-index]').forEach((btn, i) => {
       btn.addEventListener('click', () => {
         matches[i].el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2098,647 +1333,288 @@ function openSearch() {
       });
     });
   });
-
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) overlay.remove();
-  });
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 }
 
-
-// ─────────────────────────────────────────────
-// 5. TOAST NOTIFICATIONS
-//    Lightweight, auto-dismissing status toasts.
-//    Call: showToast("message") from anywhere.
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════════
 function showToast(message, duration = 2200) {
   const existing = document.getElementById('indyToast');
   if (existing) existing.remove();
-
   const toast = document.createElement('div');
   toast.id = 'indyToast';
   toast.textContent = message;
-  toast.style.cssText = `
-    position: fixed;
-    bottom: 90px;
-    left: 50%;
-    transform: translateX(-50%) translateY(8px);
-    background: var(--bg-card);
-    border: 1px solid var(--border-strong);
-    color: var(--text-secondary);
-    font-size: 12.5px;
-    font-family: var(--font-mono, monospace);
-    letter-spacing: 0.04em;
-    padding: 8px 16px;
-    border-radius: 999px;
-    z-index: 9999;
-    opacity: 0;
-    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.4, 1);
-    pointer-events: none;
-    white-space: nowrap;
-  `;
-
+  toast.style.cssText = `position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--bg-card);border:1px solid var(--border-strong);color:var(--text-secondary);font-size:12.5px;font-family:var(--font-mono);letter-spacing:0.04em;padding:8px 16px;border-radius:999px;z-index:9999;opacity:0;transition:all 0.2s cubic-bezier(0.2,0.8,0.4,1);pointer-events:none;white-space:nowrap;`;
   document.body.appendChild(toast);
-
-  requestAnimationFrame(() => {
-    toast.style.opacity = '1';
-    toast.style.transform = 'translateX(-50%) translateY(0)';
-  });
-
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateX(-50%) translateY(6px)';
-    setTimeout(() => toast.remove(), 200);
-  }, duration);
+  requestAnimationFrame(() => { toast.style.opacity = '1'; toast.style.transform = 'translateX(-50%) translateY(0)'; });
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(-50%) translateY(6px)'; setTimeout(() => toast.remove(), 200); }, duration);
 }
 
+// ═══════════════════════════════════════════════════════════
+//  KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('keydown', (e) => {
+  const active = document.activeElement;
+  const isTyping = active.tagName === 'INPUT' || active.tagName === 'TEXTAREA';
+  if (e.key === '/' && !isTyping) { e.preventDefault(); document.getElementById('userInput')?.focus(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'n') { e.preventDefault(); newChat(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'e') { e.preventDefault(); exportChat(); }
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.teach-modal.active').forEach(m => m.classList.remove('active'));
+    document.getElementById('searchOverlay')?.remove();
+    document.getElementById('modelPopover')?.classList.remove('active');
+  }
+});
 
-// ─────────────────────────────────────────────
-// 6. CONVERSATION STARTERS
-//    Shows prompt chips when the chat is empty.
-//    Tapping one fills the input instantly.
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+//  AUTO-RESIZE TEXTAREA
+// ═══════════════════════════════════════════════════════════
+(function initAutoResize() {
+  const textarea = document.getElementById('userInput');
+  if (!textarea) return;
+  textarea.style.cssText += `resize:none;overflow-y:hidden;max-height:120px;line-height:1.5;`;
+  textarea.addEventListener('input', () => {
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+    updateCharCounter(textarea.value);
+  });
+  textarea.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+      setTimeout(() => { textarea.style.height = 'auto'; }, 0);
+    }
+  });
+})();
+
+// ═══════════════════════════════════════════════════════════
+//  CODE BLOCK SYNTAX HIGHLIGHTING
+// ═══════════════════════════════════════════════════════════
+function highlightCode(code) {
+  const keywords = /\b(?:function|const|let|var|if|else|for|while|return|class|new|this|super|try|catch|finally|switch|case|break|continue|async|await|import|export|default|true|false|null|undefined|void|typeof|instanceof|delete|in|do|with|yield|static|public|private|protected)\b/g;
+  const functions = /\b([a-zA-Z_$][\w$]*)\s*(?=\()/g;
+  const strings = /(["'`])(?:(?=(\\?))\2.)*?\1/g;
+  const comments = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)/gm;
+  const numbers = /\b(?:0[xX][0-9a-fA-F]+|\d+(?:\.\d+)?)\b/g;
+  return code
+    .replace(comments, '<span style="color:#6a9955;">$&</span>')
+    .replace(strings,  '<span style="color:#ce9178;">$&</span>')
+    .replace(numbers,  '<span style="color:#b5cea8;">$&</span>')
+    .replace(keywords, '<span style="color:#569cd6;">$&</span>')
+    .replace(functions,'<span style="color:#dcdcaa;">$1</span>');
+}
+
+function processCodeBlocks(bubble) {
+  bubble.innerHTML = bubble.innerHTML.replace(
+    /```(\w+)?\n?([\s\S]*?)\n?```/g,
+    (match, lang, code) => {
+      const language = (lang || 'text').toLowerCase();
+      const highlighted = highlightCode(code.trim());
+      return `<div class="indy-code-container">
+        <div class="indy-code-header">
+          <span>${language.toUpperCase()}</span>
+          <button class="indy-copy-code" onclick="navigator.clipboard.writeText(this.closest('.indy-code-container').querySelector('code').textContent);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1800)">Copy</button>
+        </div>
+        <pre class="indy-code-block"><code>${highlighted}</code></pre>
+      </div>`;
+    }
+  );
+}
+
+// Observe new bot messages for code blocks
+new MutationObserver((mutations) => {
+  mutations.forEach(mutation => {
+    mutation.addedNodes.forEach(node => {
+      if (node.nodeType !== 1 || !node.classList?.contains('bot')) return;
+      const bubble = node.querySelector('.bubble');
+      if (bubble) processCodeBlocks(bubble);
+    });
+  });
+}).observe(document.getElementById('chatMessages'), { childList: true });
+
+// ═══════════════════════════════════════════════════════════
+//  MODEL SELECTOR
+// ═══════════════════════════════════════════════════════════
+const modelBtn = document.getElementById('modelSelectorBtn');
+const modelPopover = document.getElementById('modelPopover');
+if (modelBtn && modelPopover) {
+  modelBtn.addEventListener('click', (e) => { e.stopPropagation(); modelPopover.classList.toggle('active'); });
+  document.addEventListener('click', (e) => {
+    if (!modelPopover.contains(e.target) && e.target !== modelBtn) modelPopover.classList.remove('active');
+  });
+  modelPopover.querySelectorAll('.model-item').forEach(item => {
+    item.addEventListener('click', () => {
+      modelPopover.querySelectorAll('.model-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+      modelDropdownValue = item.getAttribute('data-model');
+      localStorage.setItem('selectedModel', modelDropdownValue);
+      modelPopover.classList.remove('active');
+      showToast(`Model: ${modelDropdownValue}`);
+    });
+  });
+  const savedModel = localStorage.getItem('selectedModel');
+  if (savedModel) {
+    modelDropdownValue = savedModel;
+    const activeItem = modelPopover.querySelector(`[data-model="${savedModel}"]`);
+    if (activeItem) { modelPopover.querySelectorAll('.model-item').forEach(i => i.classList.remove('active')); activeItem.classList.add('active'); }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CONVERSATION STARTERS
+// ═══════════════════════════════════════════════════════════
 const STARTER_PROMPTS = [
-  "Explain something complex simply",
-  "Help me debug my code",
-  "Write a short story about",
-  "What are the pros and cons of",
-  "Summarize this idea:",
-  "Give me 5 ideas for",
-  "How does X work?",
-  "Help me write an email about",
+  "Explain something complex simply", "Help me debug my code",
+  "Write a short story about...", "What are the pros and cons of...",
+  "Summarize this idea:", "Give me 5 ideas for...",
+  "How does X work?", "Help me write an email about...",
 ];
 
 function renderStarterChips() {
   const container = document.getElementById('chatMessages');
-  if (!container) return;
-
-  // Only show if there's just the welcome message
+  if (!container || document.getElementById('starterChips')) return;
   const existingMsgs = container.querySelectorAll('.message');
   if (existingMsgs.length > 1) return;
 
-  const chipsEl = document.getElementById('starterChips');
-  if (chipsEl) return; // already rendered
-
   const wrapper = document.createElement('div');
   wrapper.id = 'starterChips';
-  wrapper.style.cssText = `
-    align-self: flex-start;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    max-width: 100%;
-    animation: msgIn 0.3s ease;
-  `;
-
-  // Pick 4 random starters
+  wrapper.style.cssText = `align-self:flex-start;display:flex;flex-wrap:wrap;gap:8px;max-width:100%;animation:msgIn 0.3s ease;`;
   const shuffled = [...STARTER_PROMPTS].sort(() => Math.random() - 0.5).slice(0, 4);
-
   shuffled.forEach(prompt => {
     const chip = document.createElement('button');
     chip.textContent = prompt;
-    chip.style.cssText = `
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text-secondary);
-      font-size: 12.5px;
-      font-family: var(--font-mono, monospace);
-      padding: 7px 12px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      letter-spacing: 0.02em;
-      text-align: left;
-    `;
-
-    chip.addEventListener('mouseenter', () => {
-      chip.style.borderColor = 'var(--border-strong)';
-      chip.style.color = 'var(--text)';
-      chip.style.background = 'var(--hover-bg)';
-    });
-    chip.addEventListener('mouseleave', () => {
-      chip.style.borderColor = 'var(--border)';
-      chip.style.color = 'var(--text-secondary)';
-      chip.style.background = 'var(--bg-card)';
-    });
-
+    chip.style.cssText = `background:var(--bg-card);border:1px solid var(--border);border-radius:6px;color:var(--text-secondary);font-size:12.5px;font-family:var(--font-mono);padding:7px 12px;cursor:pointer;transition:all 0.15s ease;text-align:left;`;
+    chip.addEventListener('mouseenter', () => { chip.style.borderColor='var(--border-strong)';chip.style.color='var(--text)';chip.style.background='var(--hover-bg)'; });
+    chip.addEventListener('mouseleave', () => { chip.style.borderColor='var(--border)';chip.style.color='var(--text-secondary)';chip.style.background='var(--bg-card)'; });
     chip.addEventListener('click', () => {
-// Simpler easter egg trigger – replace the old override
-const input = document.getElementById('userInput');
-if (input) {
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      const text = input.value.trim().toLowerCase();
-      const triggers = ['!strangerthings', '!upsidedown', '!upside-down', '!vecna', '!demogorgon', '!the upside down'];
-      if (triggers.some(t => text === t || text.startsWith(t + ' '))) {
-        e.preventDefault();
-        input.value = '';
-        enterUpsideDown();
-      }
-    }
-  });
-}
+      const input = document.getElementById('userInput');
+      if (input) { input.value = prompt.replace('...',''); input.focus(); updateCharCounter(input.value); }
       wrapper.remove();
     });
-
     wrapper.appendChild(chip);
   });
-
   container.appendChild(wrapper);
   container.scrollTop = container.scrollHeight;
 }
 
-// Hook into newChat to show chips on fresh conversations
-const _originalNewChat = newChat;
-window.newChat = async function(chatId) {
-  await _originalNewChat(chatId);
-  if (!chatId) {
-    // Small delay so welcome message renders first
-    setTimeout(renderStarterChips, 80);
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  loadSavedChats();
+  const chatList = JSON.parse(localStorage.getItem('chatList') || '[]');
+  if (chatList.length > 0) {
+    loadChat(chatList[0].id);
+  } else {
+    currentChatId = `chat_${Date.now()}`;
+    conversationHistory = [];
+    const list = JSON.parse(localStorage.getItem('chatList') || '[]');
+    list.unshift({ id: currentChatId, name: 'New Chat' });
+    localStorage.setItem('chatList', JSON.stringify(list));
+    loadSavedChats();
+    setTimeout(renderStarterChips, 150);
   }
-};
-
-// Also render on first load if the chat is fresh
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    const msgs = document.querySelectorAll('#chatMessages .message');
-    if (msgs.length <= 1) renderStarterChips();
-  }, 150);
 });
 
-
-// ─────────────────────────────────────────────
-// 7. SHORTCUTS HINT BAR
-//    A subtle, one-time hint shown below the
-//    input the first time the user loads Indy.
-//    Auto-hides after 5s or on first keypress.
-// ─────────────────────────────────────────────
-(function showShortcutHint() {
-  const KEY = 'indy_shortcuts_hint_seen';
-  if (localStorage.getItem(KEY)) return;
-
-  const bar = document.createElement('div');
-  bar.style.cssText = `
-    position: fixed;
-    bottom: 72px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 20px;
-    background: transparent;
-    z-index: 50;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    pointer-events: none;
-  `;
-
-  const shortcuts = [
-    ['⌘K', 'Search'],
-    ['⌘N', 'New chat'],
-    ['⌘E', 'Export'],
-    ['/', 'Focus'],
-  ];
-
-  shortcuts.forEach(([key, label]) => {
-    const item = document.createElement('div');
-    item.style.cssText = `
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-family: var(--font-mono, monospace);
-      font-size: 11px;
-      color: var(--text-dim);
-    `;
-    item.innerHTML = `
-      <kbd style="
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 4px;
-        padding: 2px 6px;
-        font-size: 10px;
-        color: var(--text-tertiary);
-        font-family: inherit;
-      ">${key}</kbd>
-      <span>${label}</span>
-    `;
-    bar.appendChild(item);
-  });
-
-  document.body.appendChild(bar);
-
-  setTimeout(() => { bar.style.opacity = '1'; }, 600);
-
-  function dismiss() {
-    localStorage.setItem(KEY, 'true');
-    bar.style.opacity = '0';
-    setTimeout(() => bar.remove(), 400);
-    document.removeEventListener('keydown', dismiss);
-  }
-
-  setTimeout(dismiss, 5000);
-  document.addEventListener('keydown', dismiss);
-})();
-
-
-// ─────────────────────────────────────────────
-// 8. COPY FEEDBACK — upgrade the existing copy
-//    button to also show a toast confirmation
-// ─────────────────────────────────────────────
-// Override the existing copyText function
-window.copyText = function(btn) {
-  const bubble = btn.parentElement;
-  const clone = bubble.cloneNode(true);
-  clone.querySelectorAll('button').forEach(b => b.remove());
-  const text = (clone.innerText || clone.textContent || '').trim();
-  navigator.clipboard.writeText(text).then(() => {
-    btn.textContent = 'Copied ✓';
-    showToast('Copied to clipboard');
-    setTimeout(() => btn.textContent = 'Copy', 2000);
-  }).catch(() => {
-    btn.textContent = 'Failed';
-    setTimeout(() => btn.textContent = 'Copy', 2000);
-  });
-};
-
-// ─────────────────────────────────────────────
-// Syntax-highlighted code blocks for Indy's responses
-// Activates automatically when bot messages are added
-// ─────────────────────────────────────────────
-(function enhanceIndyCodeBlocks() {
-
-  // Very lightweight tokenizer/highlighter (no external lib)
-  function highlightCode(code, lang = '') {
-    // Common keywords for JS/TS/Python-ish languages
-    const keywords = /\b(?:function|const|let|var|if|else|for|while|return|class|new|this|super|try|catch|finally|switch|case|break|continue|async|await|import|export|default|true|false|null|undefined|void|typeof|instanceof|delete|in|do|with|yield|static|public|private|protected|interface|enum|implements|extends|package)\b/g;
-    
-    const functions = /\b([a-zA-Z_$][\w$]*)\s*(?=\()/g;
-    const strings   = /(["'`])(?:(?=(\\?))\2.)*?\1/g;
-    const comments  = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)/gm;
-    const numbers   = /\b(?:0[xX][0-9a-fA-F]+|0[bB][01]+|\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\b/g;
-
-    let highlighted = code
-      // Comments first (they can contain anything)
-      .replace(comments,  '<span style="color:#6a9955;">$&</span>')
-      // Then strings (so keywords inside strings aren't colored)
-      .replace(strings,   '<span style="color:#ce9178;">$&</span>')
-      // Numbers
-      .replace(numbers,   '<span style="color:#b5cea8;">$&</span>')
-      // Keywords
-      .replace(keywords,  '<span style="color:#569cd6;">$&</span>')
-      // Function names (before paren)
-      .replace(functions, '<span style="color:#dcdcaa;">$1</span>');
-
-    return highlighted;
-  }
-
-  // Main function that processes new bot messages
-  function processNewBotMessage(bubble) {
-    // Find all triple-backtick code blocks
-    bubble.innerHTML = bubble.innerHTML.replace(
-      /```(\w+)?\n?([\s\S]*?)\n?```/g,
-      (match, lang, code) => {
-        const language = (lang || 'text').toLowerCase();
-        const cleanCode = code.trim();
-        
-        const highlighted = highlightCode(cleanCode, language);
-
-        return `
-<div class="indy-code-container">
-  <div class="indy-code-header">
-    <span>${language.toUpperCase() || 'CODE'}</span>
-    <button class="indy-copy-code" onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.textContent);this.textContent='Copied ✓';setTimeout(()=>this.textContent='Copy',1800)">Copy</button>
-  </div>
-  <pre class="indy-code-block"><code>${highlighted}</code></pre>
-</div>`;
-      }
-    );
-  }
-
-  // Observe new bot messages
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach(mutation => {
-      mutation.addedNodes.forEach(node => {
-        if (node.nodeType !== 1) return;
-        if (!node.classList?.contains('message') || !node.classList?.contains('bot')) return;
-
-        const bubble = node.querySelector('.bubble');
-        if (bubble) {
-          processNewBotMessage(bubble);
-        }
-      });
-    });
-  });
-
-  observer.observe(document.getElementById('chatMessages'), {
-    childList: true,
-    subtree: true
-  });
-
-  // Also process already existing messages (useful on reload)
-  document.querySelectorAll('.message.bot .bubble').forEach(bubble => {
-    processNewBotMessage(bubble);
-  });
-
-})();
-
-// Optional: Paste this into your <style> block (near other code-related rules)
-const codeStyles = `
-.indy-code-container {
-  margin: 14px 0;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--bg-elevated);
-  font-family: var(--font-mono);
-  font-size: 13px;
-}
-
-.indy-code-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 14px;
-  background: rgba(255,255,255,0.03);
-  border-bottom: 1px solid var(--border);
-  font-size: 11.5px;
-  color: var(--text-tertiary);
-  font-family: var(--font-mono);
-}
-
-.indy-copy-code {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-tertiary);
-  font-size: 11px;
-  padding: 3px 9px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.13s;
-}
-
-.indy-copy-code:hover {
-  background: var(--hover-bg);
-  border-color: var(--border-strong);
-  color: var(--text-secondary);
-}
-
-.indy-code-block {
-  margin: 0;
-  padding: 14px 16px;
-  overflow-x: auto;
-  background: transparent;
-  line-height: 1.55;
-}
-
-.indy-code-block code {
-  white-space: pre;
-}
-`;
-
-// Inject styles if not already present
-if (!document.getElementById('indy-code-styles')) {
-  const styleEl = document.createElement('style');
-  styleEl.id = 'indy-code-styles';
-  styleEl.textContent = codeStyles;
-  document.head.appendChild(styleEl);
-}
-
+// Pinned button in sidebar
+document.querySelector('[data-icon="◈"]')?.insertAdjacentHTML('afterend',
+  `<button class="sidebar-btn" data-icon="📌" onclick="openPinned()"><span>Pinned</span></button>`
+);
 </script>
+
 <script>
+// ═══════════════════════════════════════════════════════════
+//  UPDATE POPUP
+// ═══════════════════════════════════════════════════════════
+(function() {
+  const UPDATE_KEY = "indy_memory_update_v2";
+  if (localStorage.getItem(UPDATE_KEY) === "true") return;
 
-// ─────────────────────────────────────────────
-// Stranger Things Upside Down – V7 FINAL LOCKED (red first + consistent red storm)
-// Red loads/fades in BEFORE flip → no hue cycling → storm always red-tinted
-// ─────────────────────────────────────────────
-(function addStrangerThingsEasterEgg() {
-
-  const triggers = [
-    '!strangerthings', '!upsidedown', '!upside-down', '!vecna',
-    '!demogorgon', '!the upside down'
-  ].map(t => t.toLowerCase());
-
-  let isActive = false;
-  let particles = [];
-  let pulseInterval = null;
-
-  // ── Styles ──────────────────────────────────────────────
-  if (!document.getElementById('upsidedown-v7-locked')) {
-    const style = document.createElement('style');
-    style.id = 'upsidedown-v7-locked';
-    style.textContent = `
-      @keyframes chaoticDrift {
-        0%   { transform: translate(0,0) scale(1);   opacity: 0.50; }
-        30%  { opacity: 0.85; }
-        60%  { opacity: 0.35; }
-        100% { transform: translate(var(--dx),var(--dy)) scale(var(--s)); opacity: 0.50; }
-      }
-      @keyframes slowRotate {
-        from { transform: rotate(0deg); }
-        to   { transform: rotate(360deg); }
-      }
-      .upside-particle {
-        position: fixed;
-        background: #ffe6e6;           /* very pale red-tinted white */
-        pointer-events: none;
-        z-index: 9995;
-        border-radius: 1px;
-        box-shadow: 0 0 12px rgba(255,80,80,0.7);
-        animation: 
-          chaoticDrift infinite ease-in-out,
-          slowRotate infinite linear;
-        will-change: transform, opacity;
-      }
-
-      #red-flood {
-        position: fixed;
-        inset: 0;
-        background: #2e0000;
-        pointer-events: none;
-        z-index: 10001;
-        opacity: 0;
-        transition: opacity 5.2s ease-out;
-        box-shadow: inset 0 0 160px rgba(0,0,0,0.98);
-      }
-      #red-flood.fade-in {
-        animation: fadeInRed 0.9s ease-in forwards;
-      }
-      @keyframes fadeInRed {
-        from { opacity: 0; }
-        to   { opacity: 1; }
-      }
-      #red-flood.visible {
-        opacity: 1;
-      }
-
-      #upsidedown-red-tint {
-        position: fixed;
-        inset: 0;
-        background: rgba(80,0,0,0.35);
-        pointer-events: none;
-        z-index: 9000;
-        mix-blend-mode: multiply;
-        opacity: 0;
-        transition: opacity 6s ease-in-out;
-      }
-      body.upsidedown #upsidedown-red-tint {
-        opacity: 1;
-      }
-      body.upsidedown {
-        filter: brightness(0.78) contrast(1.22) sepia(0.15);
-        transition: filter 7s ease-in-out;
-      }
-    `;
-    document.head.appendChild(style);
-  }
-
-  function createParticle() {
-    const size = 1.4 + Math.random() * 5.2;
-    const x = Math.random() * 100;
-    const y = Math.random() * 100;
-
-    const dx = (Math.random() - 0.5) * 1500;
-    const dy = (Math.random() - 0.5) * 1500;
-    const scale = 0.35 + Math.random() * 2.3;
-    const driftDuration = 85 + Math.random() * 170;
-    const rotateDuration = 45 + Math.random() * 90;
-
-    const p = document.createElement('div');
-    p.className = 'upside-particle';
-    p.style.cssText = `
-      width: ${size}px;
-      height: ${size}px;
-      left: ${x}vw;
-      top: ${y}vh;
-      --dx: ${dx}px;
-      --dy: ${dy}px;
-      --s: ${scale};
-      animation-duration: ${driftDuration}s, ${rotateDuration}s;
-      animation-direction: ${Math.random() > 0.5 ? 'normal' : 'reverse'}, normal;
-      animation-delay: -${Math.random() * driftDuration}s, 0s;
-      opacity: 0.50;
-    `;
-    document.body.appendChild(p);
-    particles.push(p);
-  }
-
-  function startParticles() {
-    if (particles.length > 0) return;
-
-    for (let i = 0; i < 90; i++) {
-      setTimeout(createParticle, i * 32);
-    }
-
-    setInterval(() => {
-      if (particles.length < 160) {
-        createParticle();
-      }
-    }, 4500 + Math.random() * 11000);
-  }
-
-  function startRedPulses() {
-    pulseInterval = setInterval(() => {
-      if (Math.random() > 0.4) {
-        const pulse = document.createElement('div');
-        pulse.style.cssText = `
-          position: fixed;
-          inset: 0;
-          background: radial-gradient(circle at ${Math.random()*100}% ${Math.random()*100}%,
-            #ff1a1a 0%, rgba(255,60,60,0.45) 35%, transparent 70%);
-          pointer-events: none;
-          z-index: 9999;
-          opacity: 0;
-        `;
-        document.body.appendChild(pulse);
-
-        pulse.animate([
-          { opacity: 0 },
-          { opacity: 0.95, offset: 0.07 },
-          { opacity: 0.10, offset: 0.70 },
-          { opacity: 0 }
-        ], 2200 + Math.random() * 3600).onfinish = () => pulse.remove();
-      }
-    }, 3400 + Math.random() * 6200);
-  }
-
-  function enterUpsideDown() {
-    if (isActive) return;
-    isActive = true;
-
-    // 1. Red flood starts fading IN first
-    const flood = document.createElement('div');
-    flood.id = 'red-flood';
-    document.body.appendChild(flood);
-    flood.classList.add('fade-in');
-
-    // 2. Flip happens as red reaches near-full (illusion preserved)
-    setTimeout(() => {
-      document.body.style.transform = 'rotate(180deg)';
-      document.body.style.transformOrigin = 'center center';
-      flood.classList.add('visible');
-    }, 600);
-
-    // Start storm during red phase
-    startParticles();
-    startRedPulses();
-
-    // 3. Hold → very slow fade out
-    setTimeout(() => {
-      flood.style.opacity = '0';
-
-      setTimeout(() => {
-        flood.remove();
-
-        document.body.classList.add('upsidedown');
-
-        const tint = document.createElement('div');
-        tint.id = 'upsidedown-red-tint';
-        document.body.appendChild(tint);
-
-        setTimeout(() => {
-          if (typeof addMessage === 'function') {
-            addMessage('bot',
-              "It swallowed everything.<br>" +
-              "<span style='color:#c00; opacity:0.97;'>You’re in the Upside Down.</span><br>" +
-              "<small style='opacity:0.78'>reload if you want to leave</small>"
-            );
-          }
-        }, 1800);
-
-      }, 5200); // slow fade out
-
-    }, 2800); // red holds strong ~2.8s
-  }
-
-  // Hook input
-  const originalSend = window.sendMessage;
-  window.sendMessage = function() {
-    const input = document.getElementById('userInput');
-    if (!input) return originalSend?.();
-
-    const text = input.value.trim().toLowerCase();
-
-    if (triggers.some(t => text === t || text.startsWith(t + ' '))) {
-      input.value = '';
-      enterUpsideDown();
-      return;
-    }
-
-    originalSend?.();
+  const modal = document.createElement("div");
+  modal.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.4s ease;`;
+  const content = document.createElement("div");
+  content.style.cssText = `background:rgba(30,30,40,0.95);border:1px solid rgba(255,255,255,0.12);border-radius:16px;max-width:440px;width:90%;padding:28px 24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.7);transform:scale(0.92);transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);`;
+  content.innerHTML = `
+    <div style="font-size:48px;margin-bottom:12px;">✦</div>
+    <h2 style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:22px;margin-bottom:16px;letter-spacing:0.04em;text-transform:uppercase;">Indy Memory Update</h2>
+    <p style="font-size:14px;color:#ddd;line-height:1.6;margin-bottom:20px;">Indy now remembers your full conversation — no more amnesia mid-chat.</p>
+    <ul style="text-align:left;max-width:380px;margin:0 auto 24px;padding-left:20px;font-size:13px;color:#ccc;line-height:1.8;list-style-type:'→ ';">
+      <li>Full conversation memory (the real fix)</li>
+      <li>Reaction buttons on every reply</li>
+      <li>Pin important messages</li>
+      <li>Regenerate any response</li>
+      <li>Character counter on input</li>
+      <li>History persists between sessions</li>
+    </ul>
+    <button id="acceptUpdateBtn" style="background:linear-gradient(135deg,#ffffff,#e0e0e0);color:#000;border:none;padding:12px 44px;font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;border-radius:50px;cursor:pointer;font-family:'IBM Plex Mono',monospace;">Got it, let's go</button>
+  `;
+  modal.appendChild(content);
+  document.body.appendChild(modal);
+  setTimeout(() => { modal.style.opacity = "1"; content.style.transform = "scale(1)"; }, 50);
+  document.getElementById("acceptUpdateBtn").onclick = () => {
+    localStorage.setItem(UPDATE_KEY, "true");
+    modal.style.opacity = "0";
+    setTimeout(() => modal.remove(), 400);
+    if (typeof addMessage === 'function') addMessage('bot', "Memory's working now — I'll remember everything we talk about 🤠", false);
   };
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && document.activeElement.id === 'userInput') {
-      const text = document.getElementById('userInput').value.trim().toLowerCase();
-      if (triggers.includes(text)) {
-        e.preventDefault();
-        enterUpsideDown();
-        document.getElementById('userInput').value = '';
-      }
-    }
-  });
-
-  console.log("Upside Down V7 LOCKED – red fades in first + consistent red storm + rotating spores");
+  modal.onclick = (e) => {
+    if (e.target === modal) { localStorage.setItem(UPDATE_KEY, "true"); modal.style.opacity = "0"; setTimeout(() => modal.remove(), 400); }
+  };
 })();
 </script>
-  
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  STRANGER THINGS EASTER EGG
+// ═══════════════════════════════════════════════════════════
+if (!document.getElementById('upsidedown-v7-locked')) {
+  const style = document.createElement('style');
+  style.id = 'upsidedown-v7-locked';
+  style.textContent = `
+    @keyframes chaoticDrift { 0%{transform:translate(0,0)scale(1);opacity:.50}30%{opacity:.85}60%{opacity:.35}100%{transform:translate(var(--dx),var(--dy))scale(var(--s));opacity:.50}}
+    @keyframes slowRotate { from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    .upside-particle{position:fixed;background:#ffe6e6;pointer-events:none;z-index:9995;border-radius:1px;box-shadow:0 0 12px rgba(255,80,80,0.7);animation:chaoticDrift infinite ease-in-out,slowRotate infinite linear;will-change:transform,opacity;}
+    #red-flood{position:fixed;inset:0;background:#2e0000;pointer-events:none;z-index:10001;opacity:0;transition:opacity 5.2s ease-out;box-shadow:inset 0 0 160px rgba(0,0,0,0.98);}
+    #red-flood.fade-in{animation:fadeInRed 0.9s ease-in forwards;}
+    @keyframes fadeInRed{from{opacity:0}to{opacity:1}}
+    #red-flood.visible{opacity:1;}
+    body.upsidedown{filter:brightness(0.78)contrast(1.22)sepia(0.15);transition:filter 7s ease-in-out;}
+  `;
+  document.head.appendChild(style);
+}
+
+let _udActive = false;
+let _udParticles = [];
+
+function createUDParticle() {
+  const size = 1.4 + Math.random() * 5.2, x = Math.random()*100, y = Math.random()*100;
+  const dx=(Math.random()-0.5)*1500, dy=(Math.random()-0.5)*1500, scale=0.35+Math.random()*2.3;
+  const drift=85+Math.random()*170, rotate=45+Math.random()*90;
+  const p = document.createElement('div');
+  p.className='upside-particle';
+  p.style.cssText=`width:${size}px;height:${size}px;left:${x}vw;top:${y}vh;--dx:${dx}px;--dy:${dy}px;--s:${scale};animation-duration:${drift}s,${rotate}s;animation-direction:${Math.random()>.5?'normal':'reverse'},normal;animation-delay:-${Math.random()*drift}s,0s;opacity:.50;`;
+  document.body.appendChild(p);
+  _udParticles.push(p);
+}
+
+function enterUpsideDown() {
+  if (_udActive) return;
+  _udActive = true;
+  const flood = document.createElement('div'); flood.id='red-flood'; document.body.appendChild(flood); flood.classList.add('fade-in');
+  setTimeout(() => { document.body.style.transform='rotate(180deg)'; document.body.style.transformOrigin='center center'; flood.classList.add('visible'); }, 600);
+  for (let i=0;i<90;i++) setTimeout(createUDParticle, i*32);
+  setTimeout(() => {
+    flood.style.opacity='0';
+    setTimeout(() => {
+      flood.remove();
+      document.body.classList.add('upsidedown');
+      setTimeout(() => { if (typeof addMessage==='function') addMessage('bot',"It swallowed everything.<br><span style='color:#c00;opacity:0.97;'>You're in the Upside Down.</span><br><small style='opacity:0.78'>reload to leave</small>"); }, 1800);
+    }, 5200);
+  }, 2800);
+}
+</script>
+
 </body>
 </html>
