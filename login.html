@@ -448,7 +448,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;
         <button class="sb-item" data-panel="settings" onclick="switchPanel('settings')"><span class="sb-icon">⚙️</span>Settings</button>
         <button class="sb-item" data-panel="membership" onclick="switchPanel('membership')"><span class="sb-icon">✨</span>Membership</button>
         <div class="sb-divider"></div>
-        <a href="index.html" class="sb-item"><span class="sb-icon">←</span>JVST Home</a>
+        <a href="https://www.shopjust.store" class="sb-item"><span class="sb-icon">←</span>JVST Home</a>
         <a href="indy.html" class="sb-item"><span class="sb-icon">🤖</span>Open Indy 3</a>
         <button class="sb-item sb-danger" onclick="handleSignOut()"><span class="sb-icon">⏏</span>Sign Out</button>
       </div>
@@ -636,7 +636,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;
         <!-- FOOTER -->
         <div style="font-size:.69rem;color:var(--t3);padding-top:8px;border-top:1px solid var(--b);line-height:1.9">
           © 2026 JVST Inc. • Blade Card • Sharing codes is strictly prohibited<br>
-          <a href="index.html" style="color:var(--t2)">Home</a> · <a href="terms.html" style="color:var(--t2)">Terms</a> · <a href="privacy.html" style="color:var(--t2)">Privacy</a>
+          <a href="https://www.shopjust.store" style="color:var(--t2)">Home</a> · <a href="terms.html" style="color:var(--t2)">Terms</a> · <a href="privacy.html" style="color:var(--t2)">Privacy</a>
         </div>
 
       </div>
@@ -654,7 +654,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;
     <input class="code-input" id="act-input" type="text" maxlength="24" placeholder="Enter code here" autocomplete="off" oninput="handleActCode(event)">
     <div class="code-status" id="act-status"></div>
     <div class="form-error" id="act-error"></div>
-    <p class="modal-note">No code? <a href="mailto:hello@shopjust.store" style="color:var(--t2)">Contact us</a> or visit the <a href="index.html#pricing" style="color:var(--t2)">pricing page</a>.</p>
+    <p class="modal-note">No code? <a href="mailto:hello@shopjust.store" style="color:var(--t2)">Contact us</a> or visit the <a href="https://www.shopjust.store#pricing" style="color:var(--t2)">pricing page</a>.</p>
   </div>
 </div>
 
@@ -862,7 +862,7 @@ function buildAccessBtns(all) {
     { icon:'🤖', label:'Indy+', need:'plus', url:'https://www.shopjust.store/indyplus.html' },
     { icon:'✂️', label:'mini-crafts', need:'plus', url:'https://www.mini-crafts.com' },
     { icon:'🤖', label:'Indy 3 (Free)', need:'none', url:'indy.html' },
-    ...(all ? [{ icon:'🏠', label:'JVST Home', need:'none', url:'index.html' }] : [])
+    ...(all ? [{ icon:'🏠', label:'JVST Home', need:'none', url:'https://www.shopjust.store' }] : [])
   ];
   return items.map(it => {
     const ok = it.need==='none'||(it.need==='blade'&&iP)||(it.need==='plus'&&iL);
@@ -1033,11 +1033,11 @@ const SYSTEM_PROMPT = () => {
 CURRENT USER: Nickname: ${nick} | Tier: ${tier} | Email: ${CU?.email||'unknown'} | Tunes: ${iP?'✓':'✗'} | TV Code: ${iP?'✓':'✗'} | Indy+: ${iL?'✓':'✗'} | mini-crafts: ${iL?'✓':'✗'}
 
 JVST SITE MAP:
-HOME (index.html): Hero carousel (JVST × Rainn Blais, Noah & Evan, Barrio Sessions, Indy 3 Live) → Articles shelf → Indy 3 section (Free / Indy+ $0.25 one-time / One $0.50 one-time) → Music player (Bad Bunny previews, iTunes API) → Culture section (Bad Bunny discography) → Collabs (Noah Loke, Evan Duffy, Rainn Blais flip cards) → Barrio Sessions (unsigned artist platform) → Blade Card section → Services (Creative Mode, Voice Mode, Español Mode coming soon) → Values → Instagram caption generator → Youth section → Pricing → Community (LGBTQ+, Hispanic, immigrant) → Footer
+HOME (https://www.shopjust.store): Hero carousel (JVST × Rainn Blais, Noah & Evan, Barrio Sessions, Indy 3 Live) → Articles shelf → Indy 3 section (Free / Indy+ $0.25 one-time / One $0.50 one-time) → Music player (Bad Bunny previews, iTunes API) → Culture section (Bad Bunny discography) → Collabs (Noah Loke, Evan Duffy, Rainn Blais flip cards) → Barrio Sessions (unsigned artist platform) → Blade Card section → Services (Creative Mode, Voice Mode, Español Mode coming soon) → Values → Instagram caption generator → Youth section → Pricing → Community (LGBTQ+, Hispanic, immigrant) → Footer
 
 DASHBOARD (this page): Home panel (welcome, stats, quick access) | Blade Card panel (card visual, 7 color themes: default(grey)/red/gold/blue/green/purple/chrome, display name edit) | Quick Access panel (Tunes, TV, Indy+, mini-crafts, Indy 3 free, JVST Home) | TV Code panel (blurred code, reveal/copy buttons, how-to guide) | Settings panel (photo, nickname, display name) | Membership panel (tier status, upgrade prompts) | Indy chat (that's you)
 
-SERVICES: indy.html (Indy 3 free AI) | shopjust.store/tunes.html (Blade Card req) | shopjust.store/tv.html (Blade Card req) | shopjust.store/indyplus.html (Plus req) | mini-crafts.com (Plus req)
+SERVICES: indy.html (Indy 3 free AI) | https://www.shopjust.store/tunes.html (Blade Card req) | https://www.shopjust.store/tv.html (Blade Card req) | https://www.shopjust.store/indyplus.html (Plus req) | https://www.mini-crafts.com (Plus req)
 
 ACTIVATION: Blade Card = Enter Code modal | Plus = Activate Plus modal | Contact: hello@shopjust.store
 
