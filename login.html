@@ -683,8 +683,10 @@ import { getStorage, ref as sRef, uploadString, getDownloadURL } from "https://w
 
 const FB = { apiKey:"AIzaSyC50_wBK3TfERX1gm35puugCD324SxHJR8", authDomain:"tunesandindy.firebaseapp.com", projectId:"tunesandindy", storageBucket:"tunesandindy.firebasestorage.app", messagingSenderId:"335192973371", appId:"1:335192973371:web:ce69d4b67c765d6aaf7c1e" };
 const CODES = ["cutedrunkraccoons","blade","card5","golds","tv482","ai4me","trash","panda31","rocket","nebul","qubit","zorp9","kryp7","fluxx","vortex","spark","3p#q","goldpass","rynxdog"];
-// ⚠️ Replace with your real Groq API key from console.groq.com (free)
-const GROQ_KEY = "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";
+headers:{ 
+  'Content-Type':'application/json', 
+  'Authorization':`Bearer ${process.env.GROQ_KEY}` 
+},
 const TV_CODE = "3p#q";
 
 const app = initializeApp(FB);
