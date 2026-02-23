@@ -516,7 +516,7 @@ async function generateChatName(msg) {
   try {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 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' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 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' },
       body: JSON.stringify({ model: 'llama-3.1-8b-instant', messages: [{ role: 'system', content: 'Generate a short 3-5 word chat title. Reply ONLY with the title, no quotes.' }, { role: 'user', content: msg }], max_tokens: 20 })
     });
     const d = await res.json();
