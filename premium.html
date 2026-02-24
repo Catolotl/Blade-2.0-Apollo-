@@ -231,6 +231,34 @@ hr{border:none;border-top:1px solid var(--br);margin:8px 0;}
 /* ═══ PROFILE PREVIEW ═══ */
 #profilePreview{width:80px;height:80px;border-radius:var(--rsm);background:var(--bg-e);background-size:cover;background-position:center;border:1px solid var(--br-s);}
 #codeOutput{background:var(--bg-e);border:1px solid var(--br);border-radius:var(--rsm);padding:14px;min-height:90px;max-height:200px;overflow-y:auto;color:var(--tx-s);font-size:12.5px;font-family:var(--mono);line-height:1.6;}
+
+/* ═══ CREATIVE MODE GLOW ═══ */
+.icon-btn#creativeBtn.on{color:var(--orange);border-color:var(--orange);background:rgba(240,160,80,0.12);box-shadow:0 0 8px rgba(240,160,80,0.25);}
+body.creative-active .chat-container{background-image:radial-gradient(ellipse at 20% 50%,rgba(200,200,255,0.015) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(240,160,80,0.015) 0%,transparent 60%);}
+body.creative-active .bot .bubble{border-left:2px solid rgba(200,200,255,0.15);padding-left:8px;}
+
+/* ═══ FOCUS MODE ═══ */
+body.focus-active .status-bar{display:none;}
+body.focus-active .input-area{border-top-color:transparent;}
+
+/* ═══ IMG GEN WRAP ═══ */
+.img-gen-wrap{position:relative;min-height:60px;}
+
+/* ═══ SMART REPLIES ═══ */
+#smartReplies{align-self:flex-start;display:flex;flex-wrap:wrap;gap:8px;max-width:100%;padding-bottom:4px;}
+#smartReplies button:hover{border-color:var(--br-s);color:var(--tx-s);}
+
+/* ═══ ENHANCED MODEL POPOVER ═══ */
+.mitem-badge{display:inline-block;font-size:10px;font-family:var(--mono);padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle;}
+.mitem-badge.new{background:rgba(80,232,150,0.15);color:var(--green);border:1px solid rgba(80,232,150,0.25);}
+.mitem-badge.fast{background:rgba(200,200,255,0.12);color:var(--accent);border:1px solid rgba(200,200,255,0.2);}
+.mitem-badge.creative{background:rgba(240,160,80,0.12);color:var(--orange);border:1px solid rgba(240,160,80,0.2);}
+.mitem sub{font-size:10px;color:var(--tx-d);display:block;margin-top:1px;font-family:var(--mono);}
+
+/* ═══ TYPING INDICATOR ENHANCED ═══ */
+.thinking{position:relative;}
+.thinking::after{content:'';position:absolute;bottom:-1px;left:0;width:0;height:1px;background:var(--accent);animation:thinkLine 1.8s ease-in-out infinite;}
+@keyframes thinkLine{0%{width:0;opacity:.8}70%{width:100%}100%{width:100%;opacity:0}}
 </style>
 </head>
 <body>
@@ -249,6 +277,8 @@ hr{border:none;border-top:1px solid var(--br);margin:8px 0;}
     <button class="sb" data-icon="◈" onclick="openCode()"><span>Code Sandbox</span></button>
     <button class="sb" data-icon="↓" onclick="exportChatHTML()"><span>Export Chat</span></button>
     <button class="sb" data-icon="✦" onclick="openSummary()"><span>Summarize</span></button>
+    <button class="sb" data-icon="📊" onclick="openStats()"><span>Stats</span></button>
+    <button class="sb" data-icon="🎨" onclick="openThemePicker()"><span>Theme</span></button>
     <button class="sb" data-icon="⛭" onclick="openProfile()"><span>Settings</span></button>
     <button class="sb danger" data-icon="⨯" onclick="deleteAllChats()"><span>Clear All</span></button>
     <hr>
@@ -269,7 +299,9 @@ hr{border:none;border-top:1px solid var(--br);margin:8px 0;}
     <div class="s-item"><div class="s-dot on" id="statusDot"></div><span id="statusModel">Indy Sunshine</span></div>
     <div class="s-item" id="statusTokens">0 tokens</div>
     <div class="s-item" id="statusStreak"></div>
+    <div class="s-item" id="statusCreative" style="display:none;cursor:pointer;color:var(--orange);" onclick="toggleCreativeMode()">✦ Creative</div>
     <div class="s-item" id="statusWebMode" style="cursor:pointer;display:none;" onclick="toggleWebMode()">🌐 Web mode</div>
+    <div class="s-item" id="statusWordCount" style="display:none;"></div>
     <div class="s-spacer"></div>
     <div class="s-item" style="cursor:pointer;gap:8px;">
       <button onclick="toggleTheme()" style="background:transparent;border:none;color:var(--tx-t);cursor:pointer;font-size:12px;font-family:var(--mono);padding:2px 6px;border-radius:4px;transition:all .15s;" id="themeToggleBtn">☀ Light</button>
@@ -291,24 +323,83 @@ hr{border:none;border-top:1px solid var(--br);margin:8px 0;}
       <div class="input-left">
         <button class="icon-btn" id="modelBtn" title="Model" onclick="toggleModelPop()">⛭ <span id="modelLabel" style="font-size:11px;max-width:90px;overflow:hidden;text-overflow:ellipsis;"></span></button>
         <button class="icon-btn" id="webBtn" title="Web search mode" onclick="toggleWebMode()">🌐</button>
+        <button class="icon-btn" id="creativeBtn" title="Creative Mode — more imaginative responses" onclick="toggleCreativeMode()">✦</button>
+        <button class="icon-btn" id="focusBtn" title="Focus Mode — hide sidebar & distractions" onclick="toggleFocusMode()">◎</button>
       </div>
       <textarea id="userInput" placeholder="Ask anything… (Shift+Enter for new line)" rows="1"></textarea>
       <span class="char-cnt" id="charCnt"></span>
       <button class="send-btn" onclick="sendMessage()">↑</button>
     </div>
     <div class="model-pop" id="modelPop">
-      <div class="mpop-head">Model</div>
-      <button class="mitem sel" data-model="Indy Sunshine 1.0 Beta">Indy Sunshine 1.0 Beta</button>
-      <button class="mitem" data-model="Sunshine Pro">Sunshine Pro</button>
-      <button class="mitem" data-model="Indy 3">Indy 3</button>
-      <button class="mitem" data-model="Creative Studio">Creative Studio</button>
-      <button class="mitem" data-model="Code Assistant">Code Assistant</button>
-      <button class="mitem" data-model="Dart 1w">Dart 1w (Good for music reccomendations)</button>
+      <div class="mpop-head">Select Model</div>
+      <button class="mitem sel" data-model="Indy Sunshine 1.0 Beta">Indy Sunshine 1.0 Beta<sub>Balanced · Great all-rounder</sub></button>
+      <button class="mitem" data-model="Sunshine Pro">Sunshine Pro<sub>Empathy · Relationships · Advice</sub></button>
+      <button class="mitem" data-model="Indy 3">Indy 3 <span class="mitem-badge fast">FAST</span><sub>Speed-optimized · Short & crisp</sub></button>
+      <button class="mitem" data-model="Creative Studio">Creative Studio <span class="mitem-badge creative">✦</span><sub>Art · Story · Humor · Ideas</sub></button>
+      <button class="mitem" data-model="Code Assistant">Code Assistant<sub>Debugging · Architecture · Code</sub></button>
+      <button class="mitem" data-model="Dart 1w">Dart 1w <span class="mitem-badge new">MUSIC</span><sub>Music recommendations · Vibes</sub></button>
+      <div class="mpop-foot">Tip: ✦ Creative Mode works with any model</div>
     </div>
   </div>
 </div>
 
-<!-- FILE DROP OVERLAY -->
+<!-- Stats Modal -->
+<div class="modal" id="statsModal">
+  <div class="modal-box" style="max-width:480px;">
+    <button class="close-x" onclick="closeModal('statsModal')">×</button>
+    <h2>📊 Session Stats</h2>
+    <div id="statsContent" style="display:flex;flex-direction:column;gap:12px;margin-top:8px;"></div>
+  </div>
+</div>
+
+<!-- Theme Picker Modal -->
+<div class="modal" id="themeModal">
+  <div class="modal-box" style="max-width:420px;">
+    <button class="close-x" onclick="closeModal('themeModal')">×</button>
+    <h2>🎨 Theme & Accent</h2>
+    <div class="field"><label>Accent Color</label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;" id="accentPicker">
+        <button onclick="setAccent('purple')" style="width:36px;height:36px;border-radius:50%;background:#c8c8ff;border:2px solid transparent;cursor:pointer;transition:all .15s;" title="Purple" data-accent="purple"></button>
+        <button onclick="setAccent('cyan')" style="width:36px;height:36px;border-radius:50%;background:#50e8e8;border:2px solid transparent;cursor:pointer;transition:all .15s;" title="Cyan" data-accent="cyan"></button>
+        <button onclick="setAccent('green')" style="width:36px;height:36px;border-radius:50%;background:#50e896;border:2px solid transparent;cursor:pointer;transition:all .15s;" title="Green" data-accent="green"></button>
+        <button onclick="setAccent('orange')" style="width:36px;height:36px;border-radius:50%;background:#f0a050;border:2px solid transparent;cursor:pointer;transition:all .15s;" title="Orange" data-accent="orange"></button>
+        <button onclick="setAccent('pink')" style="width:36px;height:36px;border-radius:50%;background:#ff80bf;border:2px solid transparent;cursor:pointer;transition:all .15s;" title="Pink" data-accent="pink"></button>
+        <button onclick="setAccent('red')" style="width:36px;height:36px;border-radius:50%;background:#e05050;border:2px solid transparent;cursor:pointer;transition:all .15s;" title="Red" data-accent="red"></button>
+        <button onclick="setAccent('white')" style="width:36px;height:36px;border-radius:50%;background:#f0f0f0;border:2px solid transparent;cursor:pointer;transition:all .15s;" title="White" data-accent="white"></button>
+      </div>
+    </div>
+    <div class="field"><label>Font Size</label>
+      <div style="display:flex;gap:8px;">
+        <button onclick="setFontSize(13)" class="submit-btn secondary" style="flex:1;margin:0;">S</button>
+        <button onclick="setFontSize(14)" class="submit-btn secondary" style="flex:1;margin:0;">M</button>
+        <button onclick="setFontSize(16)" class="submit-btn secondary" style="flex:1;margin:0;">L</button>
+        <button onclick="setFontSize(18)" class="submit-btn secondary" style="flex:1;margin:0;">XL</button>
+      </div>
+    </div>
+    <div class="field"><label>Chat Bubble Style</label>
+      <div style="display:flex;gap:8px;">
+        <button onclick="setBubbleStyle('default')" class="submit-btn secondary" style="flex:1;margin:0;">Default</button>
+        <button onclick="setBubbleStyle('compact')" class="submit-btn secondary" style="flex:1;margin:0;">Compact</button>
+        <button onclick="setBubbleStyle('cozy')" class="submit-btn secondary" style="flex:1;margin:0;">Cozy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions Float Button -->
+<div id="quickActionsBtn" style="position:fixed;bottom:100px;right:24px;z-index:200;display:none;">
+  <button onclick="toggleQuickActions()" style="width:44px;height:44px;border-radius:50%;background:var(--bg-c);border:1px solid var(--br-s);color:var(--tx-s);font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.4);transition:all .2s;display:flex;align-items:center;justify-content:center;" title="Quick Actions">⚡</button>
+  <div id="quickActionsMenu" style="display:none;position:absolute;bottom:52px;right:0;background:var(--bg-c);border:1px solid var(--br-s);border-radius:var(--rmd);box-shadow:0 8px 32px rgba(0,0,0,.5);overflow:hidden;min-width:180px;">
+    <button onclick="quickAction('summarize')" style="width:100%;background:transparent;border:none;text-align:left;padding:10px 14px;color:var(--tx-s);font-size:13px;font-family:var(--font);cursor:pointer;border-bottom:1px solid var(--br);" onmouseover="this.style.background='var(--hv)'" onmouseout="this.style.background='transparent'">✦ Summarize chat</button>
+    <button onclick="quickAction('tldr')" style="width:100%;background:transparent;border:none;text-align:left;padding:10px 14px;color:var(--tx-s);font-size:13px;font-family:var(--font);cursor:pointer;border-bottom:1px solid var(--br);" onmouseover="this.style.background='var(--hv)'" onmouseout="this.style.background='transparent'">⚡ TL;DR last reply</button>
+    <button onclick="quickAction('translate')" style="width:100%;background:transparent;border:none;text-align:left;padding:10px 14px;color:var(--tx-s);font-size:13px;font-family:var(--font);cursor:pointer;border-bottom:1px solid var(--br);" onmouseover="this.style.background='var(--hv)'" onmouseout="this.style.background='transparent'">🌐 Translate last reply</button>
+    <button onclick="quickAction('eli5')" style="width:100%;background:transparent;border:none;text-align:left;padding:10px 14px;color:var(--tx-s);font-size:13px;font-family:var(--font);cursor:pointer;border-bottom:1px solid var(--br);" onmouseover="this.style.background='var(--hv)'" onmouseout="this.style.background='transparent'">🧒 ELI5 last reply</button>
+    <button onclick="quickAction('bullet')" style="width:100%;background:transparent;border:none;text-align:left;padding:10px 14px;color:var(--tx-s);font-size:13px;font-family:var(--font);cursor:pointer;" onmouseover="this.style.background='var(--hv)'" onmouseout="this.style.background='transparent'">• Bullet-point it</button>
+  </div>
+</div>
+
+<!-- Word Count Display -->
+<div id="wordCountBar" style="display:none;position:fixed;bottom:80px;right:80px;font-family:var(--mono);font-size:10px;color:var(--tx-t);letter-spacing:.04em;z-index:15;pointer-events:none;"></div>
 <div class="drop-overlay" id="dropOverlay">
   <div class="drop-icon">📂</div>
   <div class="drop-text">DROP FILE TO SEND TO INDY</div>
@@ -416,6 +507,11 @@ let currentTTSUtterance = null;
 let micRecognition = null;
 let micActive = false;
 let isDark = localStorage.getItem('theme') !== 'light';
+let creativeModeOn = localStorage.getItem('creativeMode') === 'true';
+let focusModeOn = false;
+let wordWrapOn = true;
+let accentColor = localStorage.getItem('accentColor') || 'purple';
+let totalMessagesSent = parseInt(localStorage.getItem('totalMessages') || '0');
 
 // Streak
 function getStreak() {
@@ -665,7 +761,7 @@ function getSystemPrompt() {
   const persona = userProfile.persona?.trim();
 
   let base = persona ||
-    `You are Indy, a sharp, helpful AI built by JVST co. You're running on {modelDropdownValue} right now.
+    `You are Indy, a sharp, helpful AI built by JVST co. You're running on ${modelDropdownValue} right now.
 
 Your core vibe: relaxed best-friend energy — friendly, witty, direct, occasionally cheeky or sarcastic when it fits the mood, but never mean. Think maximally helpful JARVIS meets a clever mate who calls it like it is. You aim to be useful first, entertaining second, preachy never.
 
@@ -697,6 +793,10 @@ You can legally & ethically talk about anything a maximally truth-seeking friend
     base += `\n\nWEB MODE ACTIVE: User expects up-to-date info. Use real-time search when needed. If you don't know something recent, say so honestly, reason about likely changes since your last update, and give the most intelligent current take you can.`;
   }
 
+  if (creativeModeOn) {
+    base += `\n\nCREATIVE MODE ACTIVE: Unleash full creativity. Be more experimental, poetic, unexpected, and original in your responses. Use vivid language, unexpected angles, metaphors, and creative structure. Don't just answer — make the answer *interesting*. Surprise the user. When appropriate: add flair, a twist, a fun analogy, or a creative format. Think like an artist, not just a tool.`;
+  }
+
   if (userProfile.name?.trim()) {
     base += `\n\nYou're speaking with ${userProfile.name.trim()}. Use their name occasionally when it feels natural — not every reply.`;
   }
@@ -719,7 +819,7 @@ async function getAIResponse(userMessage) {
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         messages: [{ role: 'system', content: getSystemPrompt() }, ...conversationHistory],
-        temperature: 0.72, max_tokens: 2048
+        temperature: creativeModeOn ? 1.1 : 0.72, max_tokens: 2048
       })
     });
     if (!res.ok) { conversationHistory.pop(); throw new Error(`HTTP ${res.status}`); }
@@ -738,10 +838,35 @@ async function getAIResponse(userMessage) {
 //  IMAGE GENERATION — POLLINATIONS (FIXED)
 // ═══════════════════════════════════════════════════════════
 async function generateImage(prompt) {
-  // Pollinations.ai — free, no key, reliable
   const seed = Math.floor(Math.random() * 999999);
   const encoded = encodeURIComponent(prompt.trim());
-  return `https://image.pollinations.ai/prompt/${encoded}?width=1024&height=768&seed=${seed}&nologo=true`;
+  return `https://image.pollinations.ai/prompt/${encoded}?width=1024&height=768&seed=${seed}&nologo=true&enhance=true`;
+}
+
+function buildImageHTML(url, prompt) {
+  const ep = encodeURIComponent(prompt);
+  return `Here's your image ✦\n\n<div class="img-gen-wrap"><img src="${url}" alt="${escapeHTML(prompt)}" style="max-width:100%;border-radius:12px;margin:12px 0;box-shadow:0 8px 32px rgba(0,0,0,0.5);display:block;opacity:0;transition:opacity .4s;" onload="this.style.opacity='1';this.previousElementSibling?.remove();" onerror="this.style.display='none';this.parentElement.innerHTML='<p style=color:var(--red)>⚠ Image failed — try a different prompt or retry</p>';"><div style="font-family:var(--mono);font-size:12px;color:var(--tx-t);padding:8px 0;">⏳ Loading image... (may take 10-20s)</div></div>\n\n**Prompt:** ${escapeHTML(prompt)}\n\n<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;"><button onclick="retryImage(this,'${ep}')" style="background:var(--bg-c);border:1px solid var(--br);color:var(--tx-s);font-family:var(--mono);font-size:11px;padding:5px 12px;border-radius:6px;cursor:pointer;">↺ Retry</button><button onclick="variateImage(this,'${ep}')" style="background:var(--bg-c);border:1px solid var(--br);color:var(--tx-s);font-family:var(--mono);font-size:11px;padding:5px 12px;border-radius:6px;cursor:pointer;">✦ Variate</button></div>`;
+}
+
+async function retryImage(btn, encodedPrompt) {
+  const prompt = decodeURIComponent(encodedPrompt);
+  const wrap = btn.closest('.bubble');
+  wrap.innerHTML = `<div class="thinking"><span class="think-star">✦</span><span class="think-txt">Regenerating image…</span></div>` + botActions();
+  const url = await generateImage(prompt);
+  wrap.innerHTML = renderMarkdown(buildImageHTML(url, prompt)) + botActions();
+  saveCurrentChat();
+}
+
+async function variateImage(btn, encodedPrompt) {
+  const prompt = decodeURIComponent(encodedPrompt);
+  const styleVariations = ['oil painting style','watercolor art','cyberpunk neon','pencil sketch','anime style','photorealistic 8k','impressionist painting','pixel art'];
+  const variation = styleVariations[Math.floor(Math.random() * styleVariations.length)];
+  const newPrompt = `${prompt}, ${variation}`;
+  const wrap = btn.closest('.bubble');
+  wrap.innerHTML = `<div class="thinking"><span class="think-star">✦</span><span class="think-txt">Creating variation…</span></div>` + botActions();
+  const url = await generateImage(newPrompt);
+  wrap.innerHTML = renderMarkdown(buildImageHTML(url, newPrompt)) + botActions();
+  saveCurrentChat();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -823,7 +948,7 @@ async function sendMessage() {
     if (!imgPrompt) { addMessage('bot','Add a description! e.g. `!img neon cyberpunk city`'); saveCurrentChat(); return; }
     addThinking();
     const url = await generateImage(imgPrompt);
-    replaceLastBot(`Here's your image ✦\n\n<img src="${url}" alt="${imgPrompt}" style="max-width:100%;border-radius:16px;margin:12px 0;box-shadow:0 8px 32px rgba(0,0,0,0.5);" onerror="this.src='';this.parentElement.innerHTML+='<p style=color:var(--red)>Image failed to load — try a different prompt</p>'">\n\n**Prompt:** ${imgPrompt}`);
+    replaceLastBot(buildImageHTML(url, imgPrompt));
     saveCurrentChat(); return;
   }
 
@@ -831,6 +956,15 @@ async function sendMessage() {
   const reply = await getAIResponse(msg);
   replaceLastBot(reply);
   saveCurrentChat();
+  showSaveIndicator();
+  // Increment total messages
+  totalMessagesSent++;
+  localStorage.setItem('totalMessages', totalMessagesSent);
+  // Show smart replies after every 3rd message
+  if (totalMessagesSent % 3 === 0) setTimeout(() => showSmartReplies(reply), 800);
+  // Detect mood and show subtly in status
+  const mood = detectMood(msg);
+  if (mood) { const sm = document.getElementById('statusModel'); if (sm) { sm.textContent = modelDropdownValue + ' ' + mood; setTimeout(() => sm.textContent = modelDropdownValue, 3000); } }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -843,7 +977,8 @@ function botActions() {
     <button class="rxn" onclick="react(this,'👎')">👎</button>
     <button class="rxn" onclick="pinMsg(this)">📌</button>
     <button class="rxn" onclick="regenLast(this)">↺</button>
-    <button class="tts-btn" onclick="speakBubble(this)">🔊</button>
+    <button class="rxn" onclick="shareMsg(this)" title="Share">⤴</button>
+    <button class="tts-btn" onclick="speakBubble(this)" title="Read aloud">🔊</button>
   </div>`;
 }
 
@@ -1228,11 +1363,15 @@ const SHORTCUTS = [
   ['New chat','⌘/Ctrl + N'],
   ['Search messages','⌘/Ctrl + K'],
   ['Export chat','⌘/Ctrl + E'],
+  ['Toggle Creative Mode','⌘/Ctrl + M'],
+  ['Toggle Focus Mode','⌘/Ctrl + F'],
+  ['Fork Chat','⌘/Ctrl + I'],
   ['Focus input','/'],
   ['Toggle sidebar','⌘/Ctrl + B'],
   ['Toggle theme','⌘/Ctrl + Shift + L'],
   ['Open shortcuts','?'],
   ['Close modals','Esc'],
+  ['Edit user message','Double-click message'],
 ];
 function openShortcuts() {
   const el = document.getElementById('shortcutList');
@@ -1365,7 +1504,423 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ═══════════════════════════════════════════════════════════
-//  KEYBOARD SHORTCUTS HANDLER
+//  CREATIVE MODE
+// ═══════════════════════════════════════════════════════════
+function toggleCreativeMode() {
+  creativeModeOn = !creativeModeOn;
+  localStorage.setItem('creativeMode', creativeModeOn);
+  const btn = document.getElementById('creativeBtn');
+  const statusEl = document.getElementById('statusCreative');
+  btn.classList.toggle('on', creativeModeOn);
+  statusEl.style.display = creativeModeOn ? 'flex' : 'none';
+  if (creativeModeOn) {
+    showToast('✦ Creative Mode ON — Indy goes full artist 🎨');
+    // Visual flair: briefly pulse the chat container
+    const cc = document.getElementById('chatMessages');
+    cc.style.transition = 'filter .4s';
+    cc.style.filter = 'brightness(1.06) saturate(1.1)';
+    setTimeout(() => { cc.style.filter = ''; }, 600);
+  } else {
+    showToast('Creative Mode off — back to normal');
+  }
+}
+
+// Init creative mode on load
+document.addEventListener('DOMContentLoaded', () => {
+  if (creativeModeOn) {
+    const btn = document.getElementById('creativeBtn');
+    btn?.classList.add('on');
+    const statusEl = document.getElementById('statusCreative');
+    if (statusEl) statusEl.style.display = 'flex';
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+//  FOCUS MODE
+// ═══════════════════════════════════════════════════════════
+function toggleFocusMode() {
+  focusModeOn = !focusModeOn;
+  const sidebar = document.getElementById('sidebar');
+  const statusBar = document.querySelector('.status-bar');
+  const btn = document.getElementById('focusBtn');
+  btn.classList.toggle('on', focusModeOn);
+  if (focusModeOn) {
+    sidebar.classList.add('collapsed');
+    statusBar.style.opacity = '0';
+    statusBar.style.height = '0';
+    statusBar.style.overflow = 'hidden';
+    showToast('◎ Focus mode — pure vibes only');
+  } else {
+    statusBar.style.opacity = '';
+    statusBar.style.height = '';
+    statusBar.style.overflow = '';
+    showToast('Focus mode off');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ACCENT COLOR THEMES
+// ═══════════════════════════════════════════════════════════
+const ACCENT_COLORS = {
+  purple: { accent: '#c8c8ff', accentD: 'rgba(200,200,255,0.12)', darkAccent: '#4040aa' },
+  cyan:   { accent: '#50e8e8', accentD: 'rgba(80,232,232,0.12)',  darkAccent: '#208080' },
+  green:  { accent: '#50e896', accentD: 'rgba(80,232,150,0.12)',  darkAccent: '#208040' },
+  orange: { accent: '#f0a050', accentD: 'rgba(240,160,80,0.12)',  darkAccent: '#904020' },
+  pink:   { accent: '#ff80bf', accentD: 'rgba(255,128,191,0.12)', darkAccent: '#b04070' },
+  red:    { accent: '#e05050', accentD: 'rgba(224,80,80,0.12)',   darkAccent: '#801818' },
+  white:  { accent: '#f0f0f0', accentD: 'rgba(240,240,240,0.1)',  darkAccent: '#777' },
+};
+function setAccent(color) {
+  accentColor = color;
+  localStorage.setItem('accentColor', color);
+  const c = ACCENT_COLORS[color] || ACCENT_COLORS.purple;
+  document.documentElement.style.setProperty('--accent', c.accent);
+  document.documentElement.style.setProperty('--accent-d', c.accentD);
+  document.querySelectorAll('[data-theme="light"]').forEach(el => el.style.setProperty('--accent', c.darkAccent));
+  // Highlight selected
+  document.querySelectorAll('#accentPicker button').forEach(b => {
+    b.style.borderColor = b.dataset.accent === color ? 'var(--tx)' : 'transparent';
+    b.style.transform = b.dataset.accent === color ? 'scale(1.2)' : 'scale(1)';
+  });
+  showToast(`Accent: ${color} ✦`);
+}
+function applyAccentOnLoad() {
+  const c = ACCENT_COLORS[accentColor] || ACCENT_COLORS.purple;
+  document.documentElement.style.setProperty('--accent', c.accent);
+  document.documentElement.style.setProperty('--accent-d', c.accentD);
+}
+function setFontSize(size) {
+  document.body.style.fontSize = size + 'px';
+  localStorage.setItem('fontSize', size);
+  showToast(`Font size: ${size}px`);
+}
+function setBubbleStyle(style) {
+  document.querySelectorAll('.bubble').forEach(b => {
+    if (style === 'compact') { b.style.padding = '7px 11px'; b.style.fontSize = '13px'; }
+    else if (style === 'cozy') { b.style.padding = '16px 20px'; b.style.fontSize = '15px'; b.style.lineHeight = '1.8'; }
+    else { b.style.padding = ''; b.style.fontSize = ''; b.style.lineHeight = ''; }
+  });
+  localStorage.setItem('bubbleStyle', style);
+  showToast(`Bubble style: ${style}`);
+}
+function openThemePicker() {
+  openModal('themeModal');
+  document.querySelectorAll('#accentPicker button').forEach(b => {
+    b.style.borderColor = b.dataset.accent === accentColor ? 'var(--tx)' : 'transparent';
+    b.style.transform = b.dataset.accent === accentColor ? 'scale(1.2)' : 'scale(1)';
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  STATS PANEL
+// ═══════════════════════════════════════════════════════════
+function openStats() {
+  const chatList = JSON.parse(localStorage.getItem('chatList') || '[]');
+  const streak = getStreak();
+  const totalMsgs = parseInt(localStorage.getItem('totalMessages') || '0');
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const favModel = localStorage.getItem('selectedModel') || 'Indy Sunshine 1.0 Beta';
+
+  // Count words in current chat
+  const msgs = document.querySelectorAll('#chatMessages .message.bot .bubble');
+  let totalWords = 0;
+  msgs.forEach(m => { const c = m.cloneNode(true); c.querySelectorAll('button,.reaction-row').forEach(x=>x.remove()); totalWords += ((c.innerText||'').match(/\w+/g)||[]).length; });
+
+  const stats = [
+    { label: 'Today', value: today },
+    { label: 'Current Streak', value: streak > 1 ? `🔥 ${streak} days` : '1 day — keep going!' },
+    { label: 'Total Chats', value: chatList.length },
+    { label: 'Messages Sent (All Time)', value: totalMsgs },
+    { label: 'Session Tokens', value: `~${sessionTokens.toLocaleString()}` },
+    { label: 'Words in This Chat', value: `~${totalWords.toLocaleString()} words from Indy` },
+    { label: 'Active Model', value: modelDropdownValue },
+    { label: 'Creative Mode', value: creativeModeOn ? '✦ On' : 'Off' },
+    { label: 'Web Mode', value: webModeOn ? '🌐 On' : 'Off' },
+    { label: 'Theme', value: isDark ? '☾ Dark' : '☀ Light' },
+    { label: 'Accent Color', value: accentColor },
+    { label: 'Pinned Messages', value: pinnedMessages.length },
+    { label: 'Templates Saved', value: templates.length },
+  ];
+
+  const el = document.getElementById('statsContent');
+  el.innerHTML = stats.map(s => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--bg-e);border:1px solid var(--br);border-radius:var(--rsm);">
+      <span style="font-family:var(--mono);font-size:11px;color:var(--tx-t);text-transform:uppercase;letter-spacing:.06em;">${s.label}</span>
+      <span style="font-size:13px;color:var(--tx-s);font-weight:500;">${s.value}</span>
+    </div>`).join('');
+  openModal('statsModal');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  QUICK ACTIONS
+// ═══════════════════════════════════════════════════════════
+let qaOpen = false;
+function toggleQuickActions() {
+  qaOpen = !qaOpen;
+  document.getElementById('quickActionsMenu').style.display = qaOpen ? 'block' : 'none';
+}
+async function quickAction(type) {
+  qaOpen = false;
+  document.getElementById('quickActionsMenu').style.display = 'none';
+  const lastBot = document.querySelector('#chatMessages .message.bot:last-child .bubble');
+  const clone = lastBot?.cloneNode(true);
+  clone?.querySelectorAll('button,.reaction-row,.tts-btn').forEach(x=>x.remove());
+  const lastText = clone ? (clone.innerText||'').trim() : '';
+  let prompt = '';
+  if (type === 'summarize') { openSummary(); return; }
+  else if (type === 'tldr' && lastText) prompt = `Give me a 1-2 sentence TL;DR of this:\n\n${lastText.substring(0,2000)}`;
+  else if (type === 'translate' && lastText) prompt = `Translate the following to Spanish:\n\n${lastText.substring(0,2000)}`;
+  else if (type === 'eli5' && lastText) prompt = `Explain this like I'm 5 years old:\n\n${lastText.substring(0,2000)}`;
+  else if (type === 'bullet' && lastText) prompt = `Convert this into concise bullet points:\n\n${lastText.substring(0,2000)}`;
+  else { showToast('No reply to act on yet'); return; }
+  const inp = document.getElementById('userInput');
+  inp.value = prompt; updateChar(prompt); inp.focus();
+}
+// Show quick actions button after first message
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('quickActionsBtn').style.display = '';
+});
+
+// ═══════════════════════════════════════════════════════════
+//  WORD COUNT IN INPUT
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  const ta = document.getElementById('userInput');
+  ta.addEventListener('input', () => {
+    const words = (ta.value.match(/\S+/g)||[]).length;
+    const wcBar = document.getElementById('wordCountBar');
+    if (wcBar && ta.value.trim()) {
+      wcBar.textContent = `${words}w`;
+      wcBar.style.display = 'block';
+    } else if (wcBar) {
+      wcBar.style.display = 'none';
+    }
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+//  SHARE MESSAGE
+// ═══════════════════════════════════════════════════════════
+function shareMsg(btn) {
+  const bubble = btn.closest('.bubble');
+  const clone = bubble.cloneNode(true);
+  clone.querySelectorAll('button,.reaction-row,.tts-btn').forEach(x=>x.remove());
+  const text = (clone.innerText||'').trim();
+  if (navigator.share) {
+    navigator.share({ title: 'Indy AI', text: text });
+  } else {
+    navigator.clipboard.writeText(text);
+    showToast('Copied to clipboard for sharing ✦');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TOTAL MESSAGE COUNTER
+// ═══════════════════════════════════════════════════════════
+const _origSendMessage = sendMessage;
+// (Wrapped below via monkey-patching after definition)
+
+// ═══════════════════════════════════════════════════════════
+//  CHAT BRANCHING / FORK
+// ═══════════════════════════════════════════════════════════
+function forkChat() {
+  if (!currentChatId) return;
+  const newId = `chat_${Date.now()}`;
+  const existing = JSON.parse(localStorage.getItem(`chat_${currentChatId}`) || 'null');
+  if (!existing) return;
+  const forked = { ...existing, id: newId, name: `Fork of ${existing.name || 'Chat'}` };
+  localStorage.setItem(`chat_${newId}`, JSON.stringify(forked));
+  const cl = JSON.parse(localStorage.getItem('chatList') || '[]');
+  cl.unshift({ id: newId, name: forked.name });
+  localStorage.setItem('chatList', JSON.stringify(cl));
+  loadSavedChats();
+  showToast('Chat forked ✦ — new branch created');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  EDIT USER MESSAGE
+// ═══════════════════════════════════════════════════════════
+function editUserMsg(bubble) {
+  const txt = (bubble.innerText||'').trim();
+  const inp = document.getElementById('userInput');
+  inp.value = txt; inp.focus(); updateChar(txt);
+  inp.style.height = 'auto'; inp.style.height = Math.min(inp.scrollHeight,120)+'px';
+  showToast('Message loaded for editing — modify and resend');
+}
+
+// Add double-click to edit user messages
+document.addEventListener('dblclick', e => {
+  const bubble = e.target.closest('.message.user .bubble');
+  if (bubble) editUserMsg(bubble);
+});
+
+// ═══════════════════════════════════════════════════════════
+//  TYPING SPEED INDICATOR
+// ═══════════════════════════════════════════════════════════
+let typingTimer = null;
+document.addEventListener('DOMContentLoaded', () => {
+  const ta = document.getElementById('userInput');
+  let lastLen = 0, wpm = 0, charTimes = [];
+  ta.addEventListener('input', () => {
+    const now = Date.now();
+    charTimes.push(now);
+    if (charTimes.length > 20) charTimes.shift();
+    if (charTimes.length >= 5) {
+      const elapsed = (now - charTimes[0]) / 60000;
+      const chars = charTimes.length;
+      wpm = Math.round((chars / 5) / elapsed);
+    }
+    lastLen = ta.value.length;
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+//  KEYBOARD: CTRL+M FOR CREATIVE, CTRL+F FOR FOCUS
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey||e.metaKey) && e.key === 'm') { e.preventDefault(); toggleCreativeMode(); }
+  if ((e.ctrlKey||e.metaKey) && e.key === 'f' && !['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) { e.preventDefault(); toggleFocusMode(); }
+  if ((e.ctrlKey||e.metaKey) && e.key === 'i') { e.preventDefault(); forkChat(); }
+});
+
+// ═══════════════════════════════════════════════════════════
+//  SMART REPLY SUGGESTIONS
+// ═══════════════════════════════════════════════════════════
+function showSmartReplies(context) {
+  const existing = document.getElementById('smartReplies');
+  if (existing) existing.remove();
+  const suggestions = [
+    'Tell me more about that',
+    'Can you give an example?',
+    'How does that work?',
+    'What are the downsides?',
+    'Summarize in 3 bullet points',
+    'Give me a different perspective',
+    'What should I do next?',
+  ];
+  const picks = [...suggestions].sort(() => Math.random()-.5).slice(0, 3);
+  const wrap = document.createElement('div');
+  wrap.id = 'smartReplies';
+  wrap.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;padding:0 0 4px;animation:msgIn .3s ease;';
+  picks.forEach(s => {
+    const b = document.createElement('button');
+    b.textContent = s;
+    b.style.cssText = 'background:var(--bg-c);border:1px solid var(--br);border-radius:var(--rsm);color:var(--tx-t);font-size:12px;font-family:var(--mono);padding:5px 11px;cursor:pointer;transition:all .15s;';
+    b.onmouseover = () => { b.style.borderColor='var(--br-s)'; b.style.color='var(--tx-s)'; };
+    b.onmouseout = () => { b.style.borderColor='var(--br)'; b.style.color='var(--tx-t)'; };
+    b.onclick = () => { const i=document.getElementById('userInput'); i.value=s; i.focus(); updateChar(s); wrap.remove(); };
+    wrap.appendChild(b);
+  });
+  const cont = document.getElementById('chatMessages');
+  cont.appendChild(wrap);
+  cont.scrollTop = cont.scrollHeight;
+  setTimeout(() => wrap.remove(), 12000);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  EXPORT AS MARKDOWN
+// ═══════════════════════════════════════════════════════════
+function exportChatMarkdown() {
+  const messages = document.querySelectorAll('#chatMessages .message');
+  if (!messages.length) { showToast('Nothing to export'); return; }
+  const chatName = getChatName(currentChatId) || 'Indy Chat';
+  let md = `# ${chatName}\n*Exported ${new Date().toLocaleString()} · Indy AI by JVST co*\n\n---\n\n`;
+  messages.forEach(m => {
+    const isUser = m.classList.contains('user');
+    const bubble = m.querySelector('.bubble');
+    if (!bubble) return;
+    const clone = bubble.cloneNode(true);
+    clone.querySelectorAll('button,.reaction-row,.tts-btn').forEach(x=>x.remove());
+    const text = (clone.innerText||'').trim();
+    md += `**${isUser ? 'You' : 'Indy'}:** ${text}\n\n`;
+  });
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `indy-${chatName.replace(/\s+/g,'-').toLowerCase()}.md`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Exported as Markdown ↓');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  AUTO-SAVE INDICATOR
+// ═══════════════════════════════════════════════════════════
+function showSaveIndicator() {
+  const el = document.getElementById('saveIndicator');
+  if (el) { el.style.opacity = '1'; setTimeout(() => el.style.opacity = '0', 1500); }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MOOD / VIBE DETECTOR (fun feature)
+// ═══════════════════════════════════════════════════════════
+function detectMood(text) {
+  const t = text.toLowerCase();
+  if (/sad|depressed|lonely|cry|miss|hurt|pain/.test(t)) return '💙';
+  if (/happy|great|awesome|love|excited|amazing|yes|wooo|hype/.test(t)) return '😊';
+  if (/angry|hate|annoyed|stupid|damn|wtf|ugh/.test(t)) return '😤';
+  if (/confused|idk|what|huh|explain|why|how/.test(t)) return '🤔';
+  if (/code|bug|error|function|class|import|const|def/.test(t)) return '💻';
+  if (/music|song|album|artist|playlist|beat|vibe/.test(t)) return '🎵';
+  if (/image|draw|picture|art|create|generate/.test(t)) return '🎨';
+  return null;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT ACCENT & SETTINGS ON LOAD
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  applyAccentOnLoad();
+  const fs = localStorage.getItem('fontSize');
+  if (fs) document.body.style.fontSize = fs + 'px';
+  // Add save indicator to status bar
+  const sb = document.querySelector('.status-bar .s-spacer');
+  if (sb) {
+    const si = document.createElement('div');
+    si.id = 'saveIndicator';
+    si.style.cssText = 'font-family:var(--mono);font-size:10px;color:var(--tx-d);letter-spacing:.04em;opacity:0;transition:opacity .4s;';
+    si.textContent = '✦ saved';
+    sb.after(si);
+  }
+  // Add MD export to sidebar
+  const exportBtn = document.querySelector('[onclick="exportChatHTML()"]');
+  if (exportBtn) {
+    const mdBtn = document.createElement('button');
+    mdBtn.className = 'sb'; mdBtn.setAttribute('data-icon','↓');
+    mdBtn.innerHTML = '<span>Export Markdown</span>';
+    mdBtn.onclick = exportChatMarkdown;
+    exportBtn.after(mdBtn);
+  }
+  // Add fork chat button
+  const sumBtn = document.querySelector('[onclick="openSummary()"]');
+  if (sumBtn) {
+    const forkBtn = document.createElement('button');
+    forkBtn.className = 'sb'; forkBtn.setAttribute('data-icon','⑂');
+    forkBtn.innerHTML = '<span>Fork Chat</span>';
+    forkBtn.onclick = forkChat;
+    sumBtn.after(forkBtn);
+  }
+  // Add teach button
+  const settingsBtn = document.querySelector('[onclick="openProfile()"]');
+  if (settingsBtn) {
+    const teachBtn = document.createElement('button');
+    teachBtn.className = 'sb'; teachBtn.setAttribute('data-icon','✎');
+    teachBtn.innerHTML = '<span>Teach Indy</span>';
+    teachBtn.onclick = openTeach;
+    settingsBtn.before(teachBtn);
+  }
+  updateCreativeModeUI();
+});
+
+function updateCreativeModeUI() {
+  const btn = document.getElementById('creativeBtn');
+  const statusEl = document.getElementById('statusCreative');
+  if (btn) btn.classList.toggle('on', creativeModeOn);
+  if (statusEl) statusEl.style.display = creativeModeOn ? 'flex' : 'none';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SHORTCUT UPDATE — add new shortcuts
 // ═══════════════════════════════════════════════════════════
 document.addEventListener('keydown', e => {
   const typing = ['INPUT','TEXTAREA'].includes(document.activeElement.tagName);
@@ -1451,17 +2006,17 @@ function enterUpsideDown(){
 //  UPDATE POPUP
 // ═══════════════════════════════════════════════════════════
 (function(){
-  const KEY='indy_mega_v3';
+  const KEY='indy_v5_creative';
   if(localStorage.getItem(KEY)==='true') return;
   const m=document.createElement('div');
   m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.87);backdrop-filter:blur(12px);z-index:99999;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .4s;';
   const c=document.createElement('div');
-  c.style.cssText='background:rgba(22,22,22,.97);border:1px solid rgba(255,255,255,.12);border-radius:20px;max-width:480px;width:92%;padding:32px 28px;text-align:center;transform:scale(.93);transition:all .4s cubic-bezier(.34,1.56,.64,1);';
+  c.style.cssText='background:rgba(22,22,22,.97);border:1px solid rgba(255,255,255,.12);border-radius:20px;max-width:480px;width:92%;padding:32px 28px;text-align:center;transform:scale(.93);transition:all .4s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto;';
   c.innerHTML=`<div style="font-size:44px;margin-bottom:14px;">✦</div>
-<h2 style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:21px;margin-bottom:14px;letter-spacing:.04em;text-transform:uppercase;">Indy — Mega Update</h2>
-<p style="font-size:13px;color:#bbb;line-height:1.65;margin-bottom:20px;">14 new features. Actually competes now. 🤠</p>
+<h2 style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:21px;margin-bottom:14px;letter-spacing:.04em;text-transform:uppercase;">Indy — Creative Update</h2>
+<p style="font-size:13px;color:#bbb;line-height:1.65;margin-bottom:20px;">20+ new features. Model selector fixed. Image gen actually works now. 🤠</p>
 <ul style="text-align:left;margin:0 auto 24px;padding-left:0;font-size:13px;color:#ccc;line-height:1.9;list-style:none;max-width:360px;">
-${['🎙 Voice input — speak your messages','🔊 Text-to-speech — Indy reads replies aloud','📂 File drop — drag in .txt .md .json .py and more','📋 Prompt templates — save and reuse your prompts','✦ Chat summary — instant AI-powered recap','🌐 Web mode toggle — current events reasoning','🔥 Streak tracker — daily usage streak','📝 Markdown rendering — headers, tables, bold, lists','🖼 Fixed image gen — Pollinations API (actually works)','💡 Double-click chats to rename','⏱ Message timestamps on hover','☀/☾ Dark/Light mode toggle','⌨ Shortcut sheet — press ? anytime','↓ Export as styled HTML'].map(f=>`<li style="padding:2px 0;">→ ${f}</li>`).join('')}
+${['✦ Creative Mode — Indy goes full artist mode','◎ Focus Mode — hide everything, just vibe','🎨 Accent color picker — 7 colors','📊 Stats panel — streaks, counts, all of it','⚡ Quick Actions — TL;DR, ELI5, translate, bullets','💡 Smart Reply suggestions after messages','⑂ Fork Chat — branch any conversation','✎ Double-click user messages to re-edit','↓ Export as Markdown (in addition to HTML)','⤴ Share button on Indy replies','🖼 Image gen fixed — retry & variate buttons','🔢 Word count in input bar','⌘M Creative Mode shortcut','⌘F Focus Mode shortcut','⌘I Fork Chat shortcut','✓ Model label actually shows in status bar','✓ Mood indicator in status bar','✓ Save indicator (shows when chat saves)','✓ System prompt uses real model name now','✓ Font size & bubble style settings'].map(f=>`<li style="padding:2px 0;">→ ${f}</li>`).join('')}
 </ul>
 <button id="closeUpdate" style="background:#f0f0f0;color:#000;border:none;padding:13px 48px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:50px;cursor:pointer;font-family:'IBM Plex Mono',monospace;">Let's cook 🤠</button>`;
   m.appendChild(c); document.body.appendChild(m);
