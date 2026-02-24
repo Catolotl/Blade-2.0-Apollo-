@@ -273,14 +273,7 @@ body.focus-active .input-area{border-top-color:transparent;}
     <button class="sb" data-icon="+" onclick="newChat()"><span>New Chat</span></button>
     <button class="sb" data-icon="⌕" onclick="openSearch()"><span>Search</span></button>
     <button class="sb" data-icon="📌" onclick="openPinned()"><span>Pinned</span></button>
-    <button class="sb" data-icon="📋" onclick="openTemplates()"><span>Templates</span></button>
-    <button class="sb" data-icon="◈" onclick="openCode()"><span>Code Sandbox</span></button>
-    <button class="sb" data-icon="↓" onclick="exportChatHTML()"><span>Export Chat</span></button>
-    <button class="sb" data-icon="✦" onclick="openSummary()"><span>Summarize</span></button>
-    <button class="sb" data-icon="📊" onclick="openStats()"><span>Stats</span></button>
-    <button class="sb" data-icon="🎨" onclick="openThemePicker()"><span>Theme</span></button>
-    <button class="sb" data-icon="⛭" onclick="openProfile()"><span>Settings</span></button>
-    <button class="sb danger" data-icon="⨯" onclick="deleteAllChats()"><span>Clear All</span></button>
+    <button class="sb" data-icon="•••" onclick="openToolsMenu()"><span>Tools</span></button>
     <hr>
     <div id="chatList"></div>
   </div>
@@ -303,10 +296,16 @@ body.focus-active .input-area{border-top-color:transparent;}
     <div class="s-item" id="statusWebMode" style="cursor:pointer;display:none;" onclick="toggleWebMode()">🌐 Web mode</div>
     <div class="s-item" id="statusWordCount" style="display:none;"></div>
     <div class="s-spacer"></div>
-    <div class="s-item" style="cursor:pointer;gap:8px;">
+    <div class="s-item" style="gap:4px;">
+      <button id="creativeBtnSb" onclick="toggleCreativeMode()" title="Creative Mode" style="background:transparent;border:1px solid transparent;color:var(--tx-t);cursor:pointer;font-size:13px;font-family:var(--mono);padding:2px 7px;border-radius:4px;transition:all .15s;line-height:1.6;" onmouseover="this.style.borderColor='var(--br-s)'" onmouseout="this.style.borderColor='transparent'">✦</button>
+      <button id="focusBtnSb" onclick="toggleFocusMode()" title="Focus Mode" style="background:transparent;border:1px solid transparent;color:var(--tx-t);cursor:pointer;font-size:13px;font-family:var(--mono);padding:2px 7px;border-radius:4px;transition:all .15s;line-height:1.6;" onmouseover="this.style.borderColor='var(--br-s)'" onmouseout="this.style.borderColor='transparent'">◎</button>
+      <button id="musicBtnSb" onclick="toggleMusicPlayer()" title="Music Player" style="background:transparent;border:1px solid transparent;color:var(--tx-t);cursor:pointer;font-size:13px;font-family:var(--mono);padding:2px 7px;border-radius:4px;transition:all .15s;line-height:1.6;" onmouseover="this.style.borderColor='var(--br-s)'" onmouseout="this.style.borderColor='transparent'">🎵</button>
+      <span style="color:var(--tx-d);">|</span>
       <button onclick="toggleTheme()" style="background:transparent;border:none;color:var(--tx-t);cursor:pointer;font-size:12px;font-family:var(--mono);padding:2px 6px;border-radius:4px;transition:all .15s;" id="themeToggleBtn">☀ Light</button>
       <span style="color:var(--tx-d);">|</span>
       <button onclick="openShortcuts()" style="background:transparent;border:none;color:var(--tx-t);cursor:pointer;font-size:12px;font-family:var(--mono);padding:2px 6px;border-radius:4px;transition:all .15s;">? Keys</button>
+      <span style="color:var(--tx-d);">|</span>
+      <button onclick="openToolsMenu()" style="background:transparent;border:none;color:var(--tx-t);cursor:pointer;font-size:12px;font-family:var(--mono);padding:2px 6px;border-radius:4px;transition:all .15s;" title="Tools & Settings">⚙ Tools</button>
     </div>
   </div>
 
@@ -321,10 +320,12 @@ body.focus-active .input-area{border-top-color:transparent;}
   <div class="input-area">
     <div class="input-wrapper" id="inputWrapper">
       <div class="input-left">
-        <button class="icon-btn" id="modelBtn" title="Model" onclick="toggleModelPop()">⛭ <span id="modelLabel" style="font-size:11px;max-width:90px;overflow:hidden;text-overflow:ellipsis;"></span></button>
-        <button class="icon-btn" id="webBtn" title="Web search mode" onclick="toggleWebMode()">🌐</button>
-        <button class="icon-btn" id="creativeBtn" title="Creative Mode — more imaginative responses" onclick="toggleCreativeMode()">✦</button>
-        <button class="icon-btn" id="focusBtn" title="Focus Mode — hide sidebar & distractions" onclick="toggleFocusMode()">◎</button>
+        <button class="icon-btn" id="modelBtn" title="Select Model" onclick="toggleModelPop()" style="font-size:15px;padding:0 8px;">⛭</button>
+        <button class="icon-btn" id="webBtn" title="Web Search Mode — Indy will search DuckDuckGo" onclick="toggleWebMode()" style="font-size:15px;">🌐</button>
+
+        <div id="inputDivider" style="width:1px;height:18px;background:var(--br-s);margin:0 2px;align-self:center;"></div>
+        <button class="icon-btn" id="attachBtn" title="Attach file" onclick="document.getElementById('fileInput').click()" style="font-size:15px;">📎</button>
+        <input type="file" id="fileInput" accept=".txt,.md,.csv,.json,.html,.js,.py,.ts,.css,.xml" style="display:none;" onchange="handleFileInput(this)">
       </div>
       <textarea id="userInput" placeholder="Ask anything… (Shift+Enter for new line)" rows="1"></textarea>
       <span class="char-cnt" id="charCnt"></span>
@@ -913,6 +914,94 @@ async function sendMessage() {
   const msg = inp.value.trim();
   if (!msg) return;
 
+  // ── Command intercepts ──
+  // /play or !play
+  if (/^(\/play|!play)\s+/i.test(msg)) {
+    const query = msg.replace(/^(\/play|!play)\s+/i, '').trim();
+    inp.value = ''; inp.style.height = 'auto'; updateChar('');
+    addMessage('user', msg);
+    openModal('musicModal');
+    const si = document.getElementById('musicSearchIn');
+    if (si) { si.value = query; searchMusicDeezer(query); }
+    addMessage('bot', `🎵 Here are some results for **${escapeHTML(query)}** — pick one to play!`);
+    return;
+  }
+  // /weather
+  if (/^(\/weather|!weather)\s+/i.test(msg)) {
+    const city = msg.replace(/^(\/weather|!weather)\s+/i, '').trim();
+    inp.value = ''; inp.style.height = 'auto'; updateChar('');
+    addMessage('user', msg);
+    addThinking();
+    try {
+      const geoRes = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://wttr.in/${encodeURIComponent(city)}?format=j1`)}`);
+      const geoData = await geoRes.json();
+      const weather = JSON.parse(geoData.contents);
+      const cur = weather.current_condition[0];
+      const area = weather.nearest_area[0];
+      const cityName = area.areaName[0].value + ', ' + area.country[0].value;
+      const temp = cur.temp_C; const feelsLike = cur.FeelsLikeC;
+      const desc = cur.weatherDesc[0].value;
+      const humidity = cur.humidity; const wind = cur.windspeedKmph;
+      replaceLastBot(`**Weather in ${cityName}** 🌤\n\n- **Temperature:** ${temp}°C (feels like ${feelsLike}°C)\n- **Condition:** ${desc}\n- **Humidity:** ${humidity}%\n- **Wind:** ${wind} km/h\n\n*Data from wttr.in*`);
+    } catch { replaceLastBot(`Couldn't fetch weather for **${escapeHTML(city)}** — check the city name and try again.`); }
+    saveCurrentChat(); return;
+  }
+  // /gif
+  if (/^(\/gif|!gif)\s+/i.test(msg)) {
+    const query = msg.replace(/^(\/gif|!gif)\s+/i, '').trim();
+    inp.value = ''; inp.style.height = 'auto'; updateChar('');
+    addMessage('user', msg);
+    addThinking();
+    try {
+      const url2 = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(query)}&key=AIzaSyAyimkuYQYF_FXVALexPzpuxuYm3qjwQbI&limit=1`)}`;
+      const res2 = await fetch(url2);
+      const wrapper2 = await res2.json();
+      const data2 = JSON.parse(wrapper2.contents);
+      const gif = data2.results?.[0]?.media_formats?.gif?.url || data2.results?.[0]?.url;
+      if (gif) replaceLastBot(`Here's a **${escapeHTML(query)}** GIF ✦\n\n<img src="${gif}" alt="${escapeHTML(query)}" style="max-width:100%;border-radius:10px;margin:8px 0;">`);
+      else replaceLastBot(`Couldn't find a GIF for **${escapeHTML(query)}** — try different keywords!`);
+    } catch { replaceLastBot(`GIF search failed. Try again!`); }
+    saveCurrentChat(); return;
+  }
+  // /define
+  if (/^(\/define|!define)\s+/i.test(msg)) {
+    const word = msg.replace(/^(\/define|!define)\s+/i, '').trim().split(' ')[0];
+    inp.value = ''; inp.style.height = 'auto'; updateChar('');
+    addMessage('user', msg);
+    addThinking();
+    try {
+      const res3 = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+      const data3 = await res3.json();
+      if (Array.isArray(data3) && data3[0]) {
+        const entry = data3[0];
+        let reply = `**${entry.word}**`;
+        if (entry.phonetics?.[0]?.text) reply += ` /${entry.phonetics[0].text}/`;
+        reply += '\n\n';
+        entry.meanings?.slice(0,3).forEach(m => {
+          reply += `**${m.partOfSpeech}**\n`;
+          m.definitions?.slice(0,2).forEach((d,i2) => {
+            reply += `${i2+1}. ${d.definition}\n`;
+            if (d.example) reply += `   *"${d.example}"*\n`;
+          });
+          reply += '\n';
+        });
+        replaceLastBot(reply.trim());
+      } else { replaceLastBot(`Couldn't find a definition for **${escapeHTML(word)}**. Check spelling?`); }
+    } catch { replaceLastBot(`Dictionary lookup failed — try again!`); }
+    saveCurrentChat(); return;
+  }
+  // /calc
+  if (/^(\/calc|!calc)\s+/i.test(msg)) {
+    const expr = msg.replace(/^(\/calc|!calc)\s+/i,'').trim();
+    inp.value = ''; inp.style.height='auto'; updateChar('');
+    addMessage('user', msg);
+    try {
+      const result4 = Function('"use strict";return(' + expr.replace(/×/g,'*').replace(/÷/g,'/').replace(/\^/g,'**') + ')')();
+      addMessage('bot', `**${escapeHTML(expr)}** = **${result4}**`);
+    } catch { addMessage('bot', `Couldn't evaluate **${escapeHTML(expr)}** — use standard math notation`); }
+    saveCurrentChat(); return;
+  }
+
   if (!currentChatId) {
     currentChatId = `chat_${Date.now()}`;
     conversationHistory = [];
@@ -1488,7 +1577,6 @@ document.addEventListener('DOMContentLoaded', () => {
     item.classList.add('sel');
     modelDropdownValue = item.dataset.model;
     localStorage.setItem('selectedModel', modelDropdownValue);
-    document.getElementById('modelLabel').textContent = modelDropdownValue;
     pop.classList.remove('open');
     updateStatusBar();
     showToast(`Model: ${modelDropdownValue}`);
@@ -1500,7 +1588,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const el = pop.querySelector(`[data-model="${saved}"]`);
     if(el){pop.querySelectorAll('.mitem').forEach(i=>i.classList.remove('sel'));el.classList.add('sel');}
   }
-  document.getElementById('modelLabel').textContent = modelDropdownValue;
+  document.getElementById('modelLabel')?.remove(); // label was moved to status bar
+  const labelEl = document.createElement('span'); labelEl.id='modelLabel'; labelEl.style.display='none';
+  document.body.appendChild(labelEl);
+  labelEl.textContent = modelDropdownValue;
 });
 
 // ═══════════════════════════════════════════════════════════
@@ -1543,7 +1634,13 @@ function toggleFocusMode() {
   const sidebar = document.getElementById('sidebar');
   const statusBar = document.querySelector('.status-bar');
   const btn = document.getElementById('focusBtn');
-  btn.classList.toggle('on', focusModeOn);
+  const sbBtn = document.getElementById('focusBtnSb');
+  if (btn) btn.classList.toggle('on', focusModeOn);
+  if (sbBtn) {
+    sbBtn.style.color = focusModeOn ? 'var(--accent)' : 'var(--tx-t)';
+    sbBtn.style.borderColor = focusModeOn ? 'var(--accent)' : 'transparent';
+    sbBtn.style.background = focusModeOn ? 'var(--accent-d)' : 'transparent';
+  }
   if (focusModeOn) {
     sidebar.classList.add('collapsed');
     statusBar.style.opacity = '0';
@@ -1882,41 +1979,23 @@ document.addEventListener('DOMContentLoaded', () => {
     si.textContent = '✦ saved';
     sb.after(si);
   }
-  // Add MD export to sidebar
-  const exportBtn = document.querySelector('[onclick="exportChatHTML()"]');
-  if (exportBtn) {
-    const mdBtn = document.createElement('button');
-    mdBtn.className = 'sb'; mdBtn.setAttribute('data-icon','↓');
-    mdBtn.innerHTML = '<span>Export Markdown</span>';
-    mdBtn.onclick = exportChatMarkdown;
-    exportBtn.after(mdBtn);
-  }
-  // Add fork chat button
-  const sumBtn = document.querySelector('[onclick="openSummary()"]');
-  if (sumBtn) {
-    const forkBtn = document.createElement('button');
-    forkBtn.className = 'sb'; forkBtn.setAttribute('data-icon','⑂');
-    forkBtn.innerHTML = '<span>Fork Chat</span>';
-    forkBtn.onclick = forkChat;
-    sumBtn.after(forkBtn);
-  }
-  // Add teach button
-  const settingsBtn = document.querySelector('[onclick="openProfile()"]');
-  if (settingsBtn) {
-    const teachBtn = document.createElement('button');
-    teachBtn.className = 'sb'; teachBtn.setAttribute('data-icon','✎');
-    teachBtn.innerHTML = '<span>Teach Indy</span>';
-    teachBtn.onclick = openTeach;
-    settingsBtn.before(teachBtn);
-  }
   updateCreativeModeUI();
 });
 
 function updateCreativeModeUI() {
+  // Input bar button
   const btn = document.getElementById('creativeBtn');
   const statusEl = document.getElementById('statusCreative');
   if (btn) btn.classList.toggle('on', creativeModeOn);
   if (statusEl) statusEl.style.display = creativeModeOn ? 'flex' : 'none';
+  // Status bar mini button
+  const sbBtn = document.getElementById('creativeBtnSb');
+  if (sbBtn) {
+    sbBtn.style.color = creativeModeOn ? 'var(--orange)' : 'var(--tx-t)';
+    sbBtn.style.borderColor = creativeModeOn ? 'var(--orange)' : 'transparent';
+    sbBtn.style.background = creativeModeOn ? 'rgba(240,160,80,0.1)' : 'transparent';
+    sbBtn.title = creativeModeOn ? 'Creative Mode ON — click to disable' : 'Creative Mode';
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -2023,6 +2102,672 @@ ${['✦ Creative Mode — Indy goes full artist mode','◎ Focus Mode — hide e
   setTimeout(()=>{m.style.opacity='1';c.style.transform='scale(1)';},60);
   document.getElementById('closeUpdate').onclick=()=>{localStorage.setItem(KEY,'true');m.style.opacity='0';setTimeout(()=>m.remove(),400);};
   m.onclick=e=>{if(e.target===m){localStorage.setItem(KEY,'true');m.style.opacity='0';setTimeout(()=>m.remove(),400);}};
+})();
+</script>
+<!-- ═══ TOOLS POPOVER ═══ -->
+<div id="toolsPopover" style="display:none;position:fixed;top:38px;right:8px;z-index:500;background:var(--bg-c);border:1px solid var(--br-s);border-radius:var(--rlg);box-shadow:0 8px 32px rgba(0,0,0,.55);width:210px;overflow:hidden;animation:mSlideIn .18s cubic-bezier(.2,.8,.4,1);">
+  <div style="padding:8px 12px 6px;font-size:10px;font-family:var(--mono);font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--tx-t);border-bottom:1px solid var(--br);">Tools</div>
+  <div style="padding:5px 6px;">
+    <button class="tp-btn" onclick="openTemplates();closeToolsMenu()">📋 Templates</button>
+    <button class="tp-btn" onclick="openCode();closeToolsMenu()">◈ Code Sandbox</button>
+    <button class="tp-btn" onclick="openSummary();closeToolsMenu()">✦ Summarize Chat</button>
+    <button class="tp-btn" onclick="forkChat();closeToolsMenu()">⑂ Fork Chat</button>
+    <button class="tp-btn" onclick="openTeach();closeToolsMenu()">✎ Teach Indy</button>
+    <button class="tp-btn" onclick="importChat();closeToolsMenu()">⤴ Import Chat</button>
+  </div>
+  <div style="padding:0 6px 2px;border-top:1px solid var(--br);margin-top:2px;padding-top:5px;">
+    <button class="tp-btn" onclick="exportChatHTML();closeToolsMenu()">↓ Export HTML</button>
+    <button class="tp-btn" onclick="exportChatMarkdown();closeToolsMenu()">↓ Export Markdown</button>
+  </div>
+  <div style="padding:0 6px 2px;border-top:1px solid var(--br);margin-top:2px;padding-top:5px;">
+    <button class="tp-btn" onclick="openStats();closeToolsMenu()">📊 Stats</button>
+    <button class="tp-btn" onclick="openThemePicker();closeToolsMenu()">🎨 Theme & Accent</button>
+    <button class="tp-btn" onclick="openProfile();closeToolsMenu()">⛭ Settings</button>
+    <button class="tp-btn" onclick="showLastWebResults();closeToolsMenu()">🔍 Web Results</button>
+  </div>
+  <div style="padding:0 6px 6px;border-top:1px solid var(--br);margin-top:2px;padding-top:5px;">
+    <button class="tp-btn" style="color:var(--red);" onclick="deleteAllChats();closeToolsMenu()">⨯ Clear All Chats</button>
+  </div>
+</div>
+<style>
+.tp-btn{width:100%;background:transparent;border:none;text-align:left;padding:7px 10px;color:var(--tx-s);font-size:13px;font-family:var(--font);cursor:pointer;border-radius:var(--rsm);transition:all .12s;display:block;}
+.tp-btn:hover{background:var(--hv);color:var(--tx);}
+</style>
+<div id="musicPlayerBar" style="display:none;position:fixed;bottom:0;right:0;left:260px;transition:left .3s cubic-bezier(.4,0,.2,1);z-index:11;background:var(--bg-e);border-top:1px solid var(--br);padding:10px 20px;align-items:center;gap:14px;backdrop-filter:blur(8px);">
+  <div id="musicAlbumArt" style="width:42px;height:42px;border-radius:6px;background:var(--bg-c);border:1px solid var(--br);flex-shrink:0;overflow:hidden;"><img id="musicAlbumImg" src="" style="width:100%;height:100%;object-fit:cover;display:none;"></div>
+  <div style="flex:1;min-width:0;">
+    <div id="musicTrackName" style="font-size:13px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">No track playing</div>
+    <div id="musicArtistName" style="font-size:11px;color:var(--tx-t);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
+  </div>
+  <audio id="musicAudio" preload="none" onended="musicEnded()"></audio>
+  <button onclick="toggleMusicPlayback()" id="musicPlayBtn" style="background:var(--tx);color:var(--bg);border:none;border-radius:50%;width:36px;height:36px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;">▶</button>
+  <div id="musicProgress" style="flex:2;height:3px;background:var(--br-s);border-radius:2px;cursor:pointer;position:relative;min-width:60px;" onclick="seekMusic(event)">
+    <div id="musicProgressFill" style="height:100%;background:var(--accent);border-radius:2px;width:0%;transition:width .5s linear;"></div>
+  </div>
+  <span id="musicTime" style="font-family:var(--mono);font-size:10px;color:var(--tx-t);flex-shrink:0;">0:00</span>
+  <a id="musicDeezerLink" href="#" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--accent);text-decoration:none;flex-shrink:0;" title="Open on Deezer">↗</a>
+  <button onclick="closeMusicPlayer()" style="background:transparent;border:none;color:var(--tx-d);cursor:pointer;font-size:16px;font-family:var(--mono);padding:4px;line-height:1;">×</button>
+</div>
+
+<!-- ═══ MUSIC SEARCH MODAL ═══ -->
+<div class="modal" id="musicModal">
+  <div class="modal-box" style="max-width:520px;">
+    <button class="close-x" onclick="closeModal('musicModal')">×</button>
+    <h2>🎵 Music Search</h2>
+    <div class="field">
+      <label>Search tracks, artists, albums</label>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="musicSearchIn" placeholder="e.g. Bruno Mars, Doja Cat, lo-fi chill…" onkeydown="if(event.key==='Enter')searchMusicDeezer()">
+        <button class="submit-btn" style="width:auto;padding:10px 18px;margin:0;" onclick="searchMusicDeezer()">Search</button>
+      </div>
+    </div>
+    <div id="musicResults" style="display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;margin-top:4px;"></div>
+    <p style="font-family:var(--mono);font-size:10px;color:var(--tx-d);margin-top:12px;text-align:center;">30s previews via Deezer · Use /play [song] or !play [song] in chat</p>
+  </div>
+</div>
+
+<!-- ═══ WEB SEARCH RESULTS MODAL ═══ -->
+<div class="modal" id="webResultsModal">
+  <div class="modal-box" style="max-width:600px;">
+    <button class="close-x" onclick="closeModal('webResultsModal')">×</button>
+    <h2>🌐 Web Search Results</h2>
+    <div id="webSearchQuery" style="font-family:var(--mono);font-size:11px;color:var(--tx-t);margin-bottom:12px;"></div>
+    <div id="webResultsList" style="display:flex;flex-direction:column;gap:10px;max-height:400px;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- ═══ SCROLL TO TOP BTN ═══ -->
+<button id="scrollTopBtn" onclick="scrollToTop()" title="Scroll to top" style="display:none;position:fixed;bottom:160px;right:24px;z-index:200;width:38px;height:38px;border-radius:50%;background:var(--bg-c);border:1px solid var(--br-s);color:var(--tx-s);font-size:16px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.4);transition:all .2s;align-items:center;justify-content:center;">↑</button>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  NEW FEATURES BLOCK
+// ═══════════════════════════════════════════════════════════
+
+// ── Sidebar left offset for music bar ──
+const sidebar2 = document.getElementById('sidebar');
+function updateMusicBarOffset() {
+  const bar = document.getElementById('musicPlayerBar');
+  if (bar && bar.style.display !== 'none') {
+    bar.style.left = sidebar2.classList.contains('collapsed') ? '60px' : '260px';
+  }
+}
+const _origToggleSidebar = toggleSidebar;
+// patch toggleSidebar to also update music bar
+document.getElementById('sidebar').addEventListener('transitionend', updateMusicBarOffset);
+
+// ── FILE INPUT ATTACH ──
+function handleFileInput(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const ext = '.' + file.name.split('.').pop().toLowerCase();
+  const ALLOWED = ['.txt','.md','.csv','.json','.html','.js','.py','.ts','.css','.xml'];
+  if (!ALLOWED.includes(ext)) { showToast(`File type ${ext} not supported`); input.value=''; return; }
+  if (file.size > 500000) { showToast('File too large — max 500KB'); input.value=''; return; }
+  file.text().then(text => {
+    const truncated = text.length > 8000 ? text.substring(0, 8000) + '\n\n[…file truncated at 8000 chars]' : text;
+    const prompt = `I've attached a file called "${file.name}". Here's its contents:\n\n\`\`\`\n${truncated}\n\`\`\`\n\nPlease analyze it and tell me what this file is and anything notable about it.`;
+    document.getElementById('userInput').value = prompt;
+    updateChar(prompt);
+    document.getElementById('userInput').focus();
+    showToast(`📎 "${file.name}" attached — hit send!`);
+    input.value = '';
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DUCKDUCKGO WEB SEARCH (real search when web mode is on)
+// ═══════════════════════════════════════════════════════════
+async function duckDuckGoSearch(query) {
+  try {
+    // DuckDuckGo Instant Answer API (no-cors workaround via allorigins)
+    const encoded = encodeURIComponent(query);
+    const url = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://api.duckduckgo.com/?q=${encoded}&format=json&no_redirect=1&no_html=1`)}`;
+    const res = await fetch(url);
+    const wrapper = await res.json();
+    const data = JSON.parse(wrapper.contents);
+    
+    let results = [];
+    // Abstract (main result)
+    if (data.AbstractText) {
+      results.push({ title: data.Heading || query, snippet: data.AbstractText, url: data.AbstractURL || data.AbstractSource || '#', source: data.AbstractSource });
+    }
+    // Related topics
+    if (data.RelatedTopics) {
+      data.RelatedTopics.slice(0, 5).forEach(t => {
+        if (t.Text && t.FirstURL) {
+          results.push({ title: t.Text.substring(0, 60), snippet: t.Text, url: t.FirstURL, source: 'DuckDuckGo' });
+        }
+      });
+    }
+    // Answer (e.g. calculations, definitions)
+    if (data.Answer) {
+      results.unshift({ title: 'Answer', snippet: data.Answer, url: '#', source: 'DuckDuckGo Answer' });
+    }
+    // Infobox
+    if (data.Infobox?.content) {
+      data.Infobox.content.slice(0, 3).forEach(item => {
+        if (item.label && item.value) results.push({ title: item.label, snippet: item.value, url: '#', source: 'Infobox' });
+      });
+    }
+    return results.slice(0, 6);
+  } catch(e) {
+    console.error('DDG search error:', e);
+    return [];
+  }
+}
+
+function extractSearchQuery(userMsg) {
+  // Remove common conversational prefixes
+  let q = userMsg
+    .replace(/^(hi indy[,!]?\s*|hey indy[,!]?\s*|indy[,!]?\s*|hello[,!]?\s*)/i, '')
+    .replace(/^(can you (tell me|find|search|look up|check|what is|who is|when did|where is|how do)\s*)/i, '')
+    .replace(/^(what('?s| is| are)\s+)/i, '')
+    .replace(/^(who('?s| is)\s+)/i, '')
+    .replace(/^(when (did|was|is)\s+)/i, '')
+    .replace(/^(where (is|was|are)\s+)/i, '')
+    .replace(/^(how (do|does|did|is|are|to)\s+)/i, '')
+    .replace(/\?+$/, '')
+    .trim();
+  // If still long, take first ~60 chars up to natural break
+  if (q.length > 60) {
+    const shortened = q.substring(0, 60);
+    const lastSpace = shortened.lastIndexOf(' ');
+    q = lastSpace > 20 ? shortened.substring(0, lastSpace) : shortened;
+  }
+  return q || userMsg.substring(0, 50);
+}
+
+// Web-search-enhanced getAIResponse (replaces original above)
+async function getAIResponse(userMessage) {
+  let messageToSend = userMessage;
+  
+  if (webModeOn) {
+    const query = extractSearchQuery(userMessage);
+    showToast(`🔍 Searching: "${query}"…`, 2000);
+    const results = await duckDuckGoSearch(query);
+    if (results.length > 0) {
+      const searchContext = results.map((r, i) => `[${i+1}] **${r.title}**\n${r.snippet}\nSource: ${r.source || r.url}`).join('\n\n');
+      messageToSend = `${userMessage}\n\n[WEB SEARCH RESULTS for "${query}":\n${searchContext}\n\nUse these results to give an accurate, up-to-date answer. Cite sources naturally. If results aren't relevant, use your own knowledge.]`;
+      lastWebResults = results; lastWebQuery = query;
+    }
+  }
+  
+  // --- Core Groq API call (inlined from original) ---
+  conversationHistory.push({ role: 'user', content: messageToSend });
+  if (conversationHistory.length > 40) conversationHistory = conversationHistory.slice(-40);
+  addTokens(messageToSend);
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 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' },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'system', content: getSystemPrompt() }, ...conversationHistory],
+        temperature: creativeModeOn ? 1.1 : 0.72, max_tokens: 2048
+      })
+    });
+    if (!res.ok) { conversationHistory.pop(); throw new Error(`HTTP ${res.status}`); }
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content?.trim() || '…';
+    conversationHistory.push({ role: 'assistant', content: reply });
+    addTokens(reply);
+    return reply;
+  } catch (err) {
+    console.error(err);
+    return 'Indy is taking a breather — try again in a moment ✦';
+  }
+}
+let lastWebResults = [], lastWebQuery = '';
+
+function showLastWebResults() {
+  if (!lastWebResults.length) { showToast('No web results yet'); return; }
+  const el = document.getElementById('webResultsList');
+  document.getElementById('webSearchQuery').textContent = `Query: "${lastWebQuery}"`;
+  el.innerHTML = lastWebResults.map(r => `
+    <div style="background:var(--bg-e);border:1px solid var(--br);border-radius:8px;padding:12px 14px;">
+      <div style="font-size:13px;font-weight:500;color:var(--tx);margin-bottom:4px;">${escapeHTML(r.title)}</div>
+      <div style="font-size:12.5px;color:var(--tx-s);line-height:1.5;margin-bottom:6px;">${escapeHTML(r.snippet.substring(0,200))}${r.snippet.length>200?'…':''}</div>
+      ${r.url && r.url !== '#' ? `<a href="${r.url}" target="_blank" rel="noopener" style="font-family:var(--mono);font-size:10px;color:var(--accent);">${escapeHTML(r.source||r.url).substring(0,60)}</a>` : `<span style="font-family:var(--mono);font-size:10px;color:var(--tx-d);">${escapeHTML(r.source||'DuckDuckGo')}</span>`}
+    </div>`).join('');
+  openModal('webResultsModal');
+}
+
+// Add web results button to status bar web mode item
+document.addEventListener('DOMContentLoaded', () => {
+  const webModeStatus = document.getElementById('statusWebMode');
+  if (webModeStatus) {
+    webModeStatus.title = 'Click to view last search results';
+    webModeStatus.onclick = () => { if (lastWebResults.length) showLastWebResults(); else toggleWebMode(); };
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+//  DEEZER MUSIC PLAYER
+// ═══════════════════════════════════════════════════════════
+let currentTrack = null, musicPlaying = false;
+
+async function searchMusicDeezer(query) {
+  if (!query) query = document.getElementById('musicSearchIn')?.value?.trim();
+  if (!query) return;
+  const resultsEl = document.getElementById('musicResults');
+  if (resultsEl) resultsEl.innerHTML = '<div style="color:var(--tx-t);font-family:var(--mono);font-size:13px;text-align:center;padding:20px;">Searching…</div>';
+  
+  try {
+    const url = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=8`)}`;
+    const res = await fetch(url);
+    const wrapper = await res.json();
+    const data = JSON.parse(wrapper.contents);
+    
+    if (!data.data || !data.data.length) {
+      if (resultsEl) resultsEl.innerHTML = '<div style="color:var(--tx-t);font-family:var(--mono);font-size:13px;text-align:center;padding:20px;">No results found</div>';
+      return;
+    }
+    
+    if (resultsEl) {
+      resultsEl.innerHTML = data.data.map((track, i) => `
+        <div class="music-result-item" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;border:1px solid var(--br);cursor:pointer;transition:all .15s;" 
+             onclick="playTrack('${track.preview||''}','${escapeAttr(track.title)}','${escapeAttr(track.artist?.name||'Unknown')}','${track.album?.cover_medium||''}','${track.link||'#'}')"
+             onmouseover="this.style.background='var(--hv)';this.style.borderColor='var(--br-s)'"
+             onmouseout="this.style.background='';this.style.borderColor='var(--br)'">
+          <img src="${track.album?.cover_small||''}" style="width:40px;height:40px;border-radius:4px;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(track.title)}</div>
+            <div style="font-size:11px;color:var(--tx-t);font-family:var(--mono);">${escapeHTML(track.artist?.name||'Unknown')} · ${escapeHTML(track.album?.title||'')}</div>
+          </div>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--tx-d);">${track.preview ? '▶ 30s' : 'no preview'}</span>
+        </div>`).join('');
+    }
+  } catch(e) {
+    if (resultsEl) resultsEl.innerHTML = '<div style="color:var(--red);font-family:var(--mono);font-size:13px;text-align:center;padding:20px;">Search failed — check connection</div>';
+  }
+}
+
+function escapeAttr(s) { return (s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+
+function playTrack(preview, title, artist, albumArt, deezerLink) {
+  if (!preview) { showToast('No preview available for this track'); return; }
+  currentTrack = { preview, title, artist, albumArt, deezerLink };
+  
+  const bar = document.getElementById('musicPlayerBar');
+  bar.style.display = 'flex';
+  updateMusicBarOffset();
+  
+  document.getElementById('musicTrackName').textContent = title;
+  document.getElementById('musicArtistName').textContent = artist;
+  const img = document.getElementById('musicAlbumImg');
+  if (albumArt) { img.src = albumArt; img.style.display = 'block'; } else { img.style.display = 'none'; }
+  document.getElementById('musicDeezerLink').href = deezerLink;
+  
+  const audio = document.getElementById('musicAudio');
+  audio.src = preview;
+  audio.play();
+  musicPlaying = true;
+  document.getElementById('musicPlayBtn').textContent = '⏸';
+  
+  audio.ontimeupdate = () => {
+    const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+    document.getElementById('musicProgressFill').style.width = pct + '%';
+    const mins = Math.floor(audio.currentTime/60), secs = Math.floor(audio.currentTime%60);
+    document.getElementById('musicTime').textContent = `${mins}:${secs.toString().padStart(2,'0')}`;
+  };
+  
+  // Also update chat padding
+  document.querySelector('.chat-container').style.paddingBottom = '210px';
+  document.querySelector('.input-area').style.bottom = '54px';
+  
+  closeModal('musicModal');
+  showToast(`🎵 Now playing: ${title} — ${artist}`);
+  _syncMusicBtn(true);
+}
+
+function toggleMusicPlayback() {
+  const audio = document.getElementById('musicAudio');
+  if (!audio.src) return;
+  if (musicPlaying) { audio.pause(); musicPlaying = false; document.getElementById('musicPlayBtn').textContent = '▶'; }
+  else { audio.play(); musicPlaying = true; document.getElementById('musicPlayBtn').textContent = '⏸'; }
+}
+
+function musicEnded() {
+  musicPlaying = false;
+  document.getElementById('musicPlayBtn').textContent = '▶';
+  document.getElementById('musicProgressFill').style.width = '0%';
+  document.getElementById('musicTime').textContent = '0:00';
+  showToast('Track ended ✦');
+}
+
+function seekMusic(e) {
+  const audio = document.getElementById('musicAudio');
+  if (!audio.duration) return;
+  const bar = e.currentTarget;
+  const pct = e.offsetX / bar.offsetWidth;
+  audio.currentTime = pct * audio.duration;
+}
+
+function _syncMusicBtn(active) {
+  const sbBtn = document.getElementById('musicBtnSb');
+  if (!sbBtn) return;
+  sbBtn.style.color = active ? 'var(--green)' : 'var(--tx-t)';
+  sbBtn.style.borderColor = active ? 'var(--green)' : 'transparent';
+  sbBtn.style.background = active ? 'rgba(80,232,150,0.1)' : 'transparent';
+}
+
+function closeMusicPlayer() {
+  const audio = document.getElementById('musicAudio');
+  audio.pause(); audio.src = '';
+  musicPlaying = false;
+  document.getElementById('musicPlayerBar').style.display = 'none';
+  document.querySelector('.chat-container').style.paddingBottom = '';
+  document.querySelector('.input-area').style.bottom = '';
+  _syncMusicBtn(false);
+}
+
+function toggleMusicPlayer() {
+  const bar = document.getElementById('musicPlayerBar');
+  if (bar.style.display === 'flex') {
+    closeMusicPlayer();
+  } else {
+    openModal('musicModal');
+    document.getElementById('musicSearchIn')?.focus();
+  }
+}
+
+// Build "Play Song" button for Dart 1w responses
+function buildPlaySongButton(songQuery) {
+  const enc = encodeURIComponent(songQuery).replace(/'/g,"\\'");
+  return `<button onclick="openMusicSearch('${enc}')" style="display:inline-flex;align-items:center;gap:6px;background:var(--bg-c);border:1px solid var(--br-s);color:var(--accent);font-family:var(--mono);font-size:12px;padding:5px 12px;border-radius:20px;cursor:pointer;margin-top:8px;transition:all .15s;" onmouseover="this.style.background='var(--accent-d)'" onmouseout="this.style.background='var(--bg-c)'">🎵 Play Song</button>`;
+}
+function openMusicSearch(encodedQuery) {
+  const q = decodeURIComponent(encodedQuery);
+  openModal('musicModal');
+  const inp = document.getElementById('musicSearchIn');
+  if (inp) { inp.value = q; searchMusicDeezer(q); }
+}
+
+// ── Patch replaceLastBot to inject Play button for Dart 1w ──
+// Dart 1w music button injection + original replaceLastBot logic
+function replaceLastBot(text) {
+  // --- Original replaceLastBot logic ---
+  const last = document.querySelector('.message.bot:last-child .bubble');
+  if (!last) return;
+  const rendered = renderMarkdown(text);
+  last.innerHTML = rendered + botActions();
+  processCodeBlocks(last);
+  document.getElementById('chatMessages').scrollTop = 99999;
+  saveCurrentChat();
+  // --- Dart 1w: inject Play Song button ---
+  if (modelDropdownValue === 'Dart 1w') {
+    const songMatch = text.match(/["""]([^"""]+)["""]\s*(?:by|—|-)\s*([A-Za-z\s]+)/i) ||
+                      text.match(/(?:song|track|album|listen to)\s+["""]?([A-Za-z0-9\s&',-]{3,40})["""]?\s*(?:by\s+([A-Za-z\s]+))?/i);
+    if (songMatch) {
+      const songTitle = songMatch[1]?.trim();
+      const artist = songMatch[2]?.trim() || '';
+      const query = artist ? `${songTitle} ${artist}` : songTitle;
+      const lastBubble = document.querySelector('.message.bot:last-child .bubble');
+      if (lastBubble && query) {
+        const playDiv = document.createElement('div');
+        playDiv.innerHTML = buildPlaySongButton(query);
+        lastBubble.appendChild(playDiv);
+      }
+    }
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════════
+//  SCROLL TO TOP BUTTON
+// ═══════════════════════════════════════════════════════════
+function scrollToTop() {
+  const cont = document.getElementById('chatMessages');
+  cont.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const cont = document.getElementById('chatMessages');
+  const btn = document.getElementById('scrollTopBtn');
+  if (cont && btn) {
+    cont.addEventListener('scroll', () => {
+      btn.style.display = cont.scrollTop > 400 ? 'flex' : 'none';
+    });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+//  INPUT HISTORY (up/down arrows to navigate)
+// ═══════════════════════════════════════════════════════════
+const inputHistory = JSON.parse(localStorage.getItem('inputHistory') || '[]');
+let inputHistoryIdx = -1;
+// ── Input history navigation (up/down arrow)
+const _origSendMessage3_unused = null; // placeholder removed
+const _patchedForHistory_unused = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  const ta = document.getElementById('userInput');
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'ArrowUp' && !e.shiftKey && ta.value === '') {
+      e.preventDefault();
+      if (inputHistoryIdx < inputHistory.length - 1) {
+        inputHistoryIdx++;
+        ta.value = inputHistory[inputHistoryIdx] || '';
+        updateChar(ta.value);
+        ta.style.height = 'auto';
+        ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+      }
+    } else if (e.key === 'ArrowDown' && inputHistoryIdx >= 0) {
+      e.preventDefault();
+      inputHistoryIdx--;
+      ta.value = inputHistoryIdx >= 0 ? (inputHistory[inputHistoryIdx] || '') : '';
+      updateChar(ta.value);
+    } else {
+      inputHistoryIdx = -1;
+    }
+  });
+});
+
+// ── Patch addMessage: input history + unread badge + reading time notify
+// NOTE: This function declaration replaces the original addMessage above.
+// The original logic is inlined here to avoid recursion.
+function addMessage(sender, text, save=true, ts='') {
+  // Save to input history
+  if (sender === 'user' && text) {
+    inputHistory.unshift(text);
+    if (inputHistory.length > 50) inputHistory.pop();
+    localStorage.setItem('inputHistory', JSON.stringify(inputHistory.slice(0,50)));
+  }
+  // --- Original addMessage logic ---
+  const cont = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `message ${sender}`;
+  div.dataset.ts = ts || new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const rendered = sender === 'bot' ? renderMarkdown(text) : escapeHTML(text).replace(/\n/g,'<br>');
+  if (sender === 'bot') {
+    div.innerHTML = `<div class="bubble">${rendered}${botActions()}</div><div class="ts">${div.dataset.ts}</div>`;
+    processCodeBlocks(div.querySelector('.bubble'));
+  } else {
+    div.innerHTML = `<div class="bubble">${rendered}</div><div class="ts">${div.dataset.ts}</div>`;
+  }
+  cont.appendChild(div);
+  cont.scrollTop = cont.scrollHeight;
+  if (save) saveCurrentChat();
+  // --- End original logic ---
+  // Unread badge
+  if (sender === 'bot' && document.visibilityState !== 'visible') {
+    unreadCount++;
+    document.title = `(${unreadCount}) INDY AI`;
+  }
+}
+const COMMANDS = [
+  { cmd: '/play', desc: 'Play music — /play [song or artist]' },
+  { cmd: '/weather', desc: 'Get weather — /weather [city]' },
+  { cmd: '/gif', desc: 'Search GIFs — /gif [keyword]' },
+  { cmd: '/define', desc: 'Define a word — /define [word]' },
+  { cmd: '/calc', desc: 'Calculate — /calc [expression]' },
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+  const ta = document.getElementById('userInput');
+  let hintBox = null;
+  ta.addEventListener('input', () => {
+    const val = ta.value;
+    if (val.startsWith('/') || val.startsWith('!')) {
+      const matches = COMMANDS.filter(c => c.cmd.startsWith(val.split(' ')[0].replace('!','/')));
+      if (matches.length && !val.includes(' ')) {
+        if (!hintBox) {
+          hintBox = document.createElement('div');
+          hintBox.id = 'cmdHints';
+          hintBox.style.cssText = 'position:absolute;bottom:100%;left:0;right:0;background:var(--bg-c);border:1px solid var(--br-s);border-radius:10px 10px 0 0;overflow:hidden;z-index:20;';
+          document.querySelector('.input-wrapper').style.position = 'relative';
+          document.querySelector('.input-wrapper').appendChild(hintBox);
+        }
+        hintBox.innerHTML = matches.map(m => `
+          <div onclick="fillCommand('${m.cmd}')" style="padding:9px 14px;cursor:pointer;border-bottom:1px solid var(--br);display:flex;gap:10px;align-items:center;" onmouseover="this.style.background='var(--hv)'" onmouseout="this.style.background=''">
+            <span style="font-family:var(--mono);font-size:13px;color:var(--accent);min-width:80px;">${m.cmd}</span>
+            <span style="font-size:12px;color:var(--tx-t);">${m.desc.split('—')[1]||''}</span>
+          </div>`).join('');
+      } else { hintBox?.remove(); hintBox = null; }
+    } else { hintBox?.remove(); hintBox = null; }
+  });
+});
+function fillCommand(cmd) {
+  const ta = document.getElementById('userInput');
+  ta.value = cmd + ' '; ta.focus();
+  document.getElementById('cmdHints')?.remove();
+  updateChar(ta.value);
+}
+
+// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+//  NOTIFICATION BADGE - unread count
+// ═══════════════════════════════════════════════════════════
+let unreadCount = 0;
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    unreadCount = 0; document.title = 'INDY AI';
+  }
+});
+
+// Note: addMessage is already patched above to handle unread + history
+
+// ═══════════════════════════════════════════════════════════
+//  CHAT IMPORT (JSON)
+// ═══════════════════════════════════════════════════════════
+function importChat() {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = '.json';
+  input.onchange = async () => {
+    const file = input.files[0]; if (!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (!data.messages) { showToast('Invalid chat JSON format'); return; }
+      const newId = `chat_${Date.now()}`;
+      data.id = newId;
+      data.name = data.name || 'Imported Chat';
+      localStorage.setItem(`chat_${newId}`, JSON.stringify(data));
+      const cl = JSON.parse(localStorage.getItem('chatList') || '[]');
+      cl.unshift({ id: newId, name: data.name });
+      localStorage.setItem('chatList', JSON.stringify(cl));
+      loadSavedChats();
+      loadChat(newId);
+      showToast('Chat imported ✦');
+    } catch { showToast('Import failed — invalid file'); }
+  };
+  input.click();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  WORD COUNT ON BOT MESSAGES (reading time)
+// ═══════════════════════════════════════════════════════════
+// Inject reading time after bot message renders
+const _mutObs = new MutationObserver(mutations => {
+  mutations.forEach(m => {
+    m.addedNodes.forEach(node => {
+      if (node.classList?.contains('message') && node.classList.contains('bot')) {
+        const bubble = node.querySelector('.bubble');
+        if (!bubble) return;
+        const clone = bubble.cloneNode(true);
+        clone.querySelectorAll('button,.reaction-row').forEach(x => x.remove());
+        const words = ((clone.innerText||'').match(/\w+/g)||[]).length;
+        if (words > 50) {
+          const readTime = Math.max(1, Math.round(words / 200));
+          const ts = node.querySelector('.ts');
+          if (ts) ts.textContent = `${ts.textContent} · ~${readTime} min read`;
+        }
+      }
+    });
+  });
+});
+document.addEventListener('DOMContentLoaded', () => {
+  const cont = document.getElementById('chatMessages');
+  if (cont) _mutObs.observe(cont, { childList: true });
+});
+
+// ═══════════════════════════════════════════════════════════
+//  TOOLS POPOVER MENU
+// ═══════════════════════════════════════════════════════════
+function openToolsMenu() {
+  const pop = document.getElementById('toolsPopover');
+  if (!pop) return;
+  const isOpen = pop.style.display === 'block';
+  pop.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    // close on outside click
+    setTimeout(() => {
+      document.addEventListener('click', _closeToolsOnOutside, { once: true });
+    }, 10);
+  }
+}
+function closeToolsMenu() {
+  const pop = document.getElementById('toolsPopover');
+  if (pop) pop.style.display = 'none';
+}
+function _closeToolsOnOutside(e) {
+  const pop = document.getElementById('toolsPopover');
+  if (pop && !pop.contains(e.target)) pop.style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ADD IMPORT CHAT + sidebar cleanup (no more dynamic injection)
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  const modelBtn = document.getElementById('modelBtn');
+  if (modelBtn) {
+    modelBtn.setAttribute('title', `Model: ${modelDropdownValue}\nClick to change`);
+  }
+  
+  // Add cmd hint helper text to input placeholder dynamically
+  const ta = document.getElementById('userInput');
+  if (ta) ta.placeholder = 'Ask anything… or try /play /weather /gif /define (Shift+Enter for new line)';
+  
+  // Update shortcuts list with new commands
+  if (typeof SHORTCUTS !== 'undefined') {
+    SHORTCUTS.push(['Play music', '/play [song]'], ['Weather', '/weather [city]'], ['GIF search', '/gif [keyword]'], ['Define word', '/define [word]'], ['Calculate', '/calc [expr]']);
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+//  UPDATE POPUP — patch to include new features
+// ═══════════════════════════════════════════════════════════
+// Clears old version key so popup shows again with new features listed
+(function(){
+  const NEW_KEY = 'indy_v6_supercharged';
+  const OLD_KEY = 'indy_v5_creative';
+  if (localStorage.getItem(NEW_KEY) === 'true') return;
+  // Only show if they've seen v5 already (existing user) or is new
+  const m = document.createElement('div');
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.87);backdrop-filter:blur(12px);z-index:99999;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .4s;';
+  const c = document.createElement('div');
+  c.style.cssText = 'background:rgba(22,22,22,.97);border:1px solid rgba(255,255,255,.12);border-radius:20px;max-width:500px;width:92%;padding:32px 28px;text-align:center;transform:scale(.93);transition:all .4s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto;';
+  c.innerHTML = `<div style="font-size:44px;margin-bottom:14px;">🎵</div>
+<h2 style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:21px;margin-bottom:14px;letter-spacing:.04em;text-transform:uppercase;">Indy — Supercharged Update</h2>
+<p style="font-size:13px;color:#bbb;line-height:1.65;margin-bottom:20px;">Music, real web search, commands, and 20+ more new features 🤠</p>
+<ul style="text-align:left;margin:0 auto 24px;padding-left:0;font-size:13px;color:#ccc;line-height:1.9;list-style:none;max-width:380px;">
+${['🎵 Music player — Deezer 30s previews','🎵 /play [song] command to search music','🎵 Play Song button when Dart 1w recommends','🌐 Real DuckDuckGo web search (actually searches!)', '🔍 Query extraction — Indy understands questions','📊 View web results panel','⌘ /weather [city] — live weather data','📖 /define [word] — dictionary definitions','🎬 /gif [keyword] — GIF search via Tenor','🧮 /calc [expr] — quick calculator','⌨ Command hints popup when typing /','📎 File attach button in toolbar','📁 Import chats from JSON','⬆ Input history — up/down arrow to navigate','↑ Scroll to top button','📚 Reading time on long responses','🔔 Unread count in tab title','✦ Decluttered input bar — icon-only','⚡ Toolbar now fits more without overflow'].map(f=>`<li style="padding:2px 0;">→ ${f}</li>`).join('')}
+</ul>
+<button id="closeUpdate2" style="background:#f0f0f0;color:#000;border:none;padding:13px 48px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:50px;cursor:pointer;font-family:'IBM Plex Mono',monospace;">Let's vibe 🎵</button>`;
+  m.appendChild(c); document.body.appendChild(m);
+  setTimeout(() => { m.style.opacity = '1'; c.style.transform = 'scale(1)'; }, 60);
+  document.getElementById('closeUpdate2').onclick = () => { localStorage.setItem(NEW_KEY, 'true'); localStorage.setItem(OLD_KEY, 'true'); m.style.opacity = '0'; setTimeout(() => m.remove(), 400); };
+  m.onclick = e => { if (e.target === m) { localStorage.setItem(NEW_KEY, 'true'); m.style.opacity = '0'; setTimeout(() => m.remove(), 400); } };
 })();
 </script>
 </body>
