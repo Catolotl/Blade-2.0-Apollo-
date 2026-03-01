@@ -613,7 +613,7 @@ async function generateChatName(msg) {
   try {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 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' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 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' },
       body: JSON.stringify({ model: 'llama-3.1-8b-instant', messages: [{ role: 'system', content: 'Generate a short 3-5 word chat title. Reply ONLY with the title, no quotes.' }, { role: 'user', content: msg }], max_tokens: 20 })
     });
     const d = await res.json();
@@ -816,7 +816,7 @@ async function getAIResponse(userMessage) {
   try {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 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' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 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' },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         messages: [{ role: 'system', content: getSystemPrompt() }, ...conversationHistory],
@@ -1350,7 +1350,7 @@ async function openSummary() {
   try {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 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' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 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' },
       body: JSON.stringify({
         model: 'llama-3.1-8b-instant',
         messages: [
@@ -2300,7 +2300,7 @@ async function getAIResponse(userMessage) {
   try {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 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' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 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' },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         messages: [{ role: 'system', content: getSystemPrompt() }, ...conversationHistory],
