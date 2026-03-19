@@ -314,10 +314,7 @@ textarea.sfinp{min-height:75px;resize:vertical;}
 <!-- MAIN -->
 <div id="main">
   <div id="topbar">
-    <div class="tmodel" id="modelBtn" onclick="toggleMpop()">
-      <span class="tdot"></span><span id="statusModel">Indy Sunshine</span><span style="opacity:.4;font-size:10px;margin-left:2px;">▾</span>
-    </div>
-    <span class="tokbdg" id="statusTokens">0 tok</span>
+    <span class="tokbdg" id="statusTokens" style="font-family:var(--mono);font-size:10px;color:var(--tx-d);">0 tok</span>
     <span id="statusStreak"></span>
     <div class="tspc"></div>
     <span id="memBadge" style="font-family:var(--mono);font-size:10px;color:var(--accent);cursor:pointer;display:none;" onclick="openRsb('memory')">🧠 <span id="memCount">0</span></span>
@@ -343,6 +340,7 @@ textarea.sfinp{min-height:75px;resize:vertical;}
     <div id="inpArea">
       <div class="inpwrap">
         <div class="iwl">
+          <button class="ib" id="modelBtn" onclick="toggleMpop(event)" title="Switch model" style="gap:4px;font-family:var(--mono);font-size:11px;padding:0 8px;min-width:unset;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><span style="width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 4px var(--green);flex-shrink:0;display:inline-block;"></span><span id="statusModel" style="overflow:hidden;text-overflow:ellipsis;">Indy Sunshine</span><span style="opacity:.4;font-size:9px;">▾</span></button>
           <button class="ib" title="Attach file" onclick="document.getElementById('fileInp').click()">📎</button>
           <input type="file" id="fileInp" style="display:none" accept=".txt,.md,.csv,.json,.html,.js,.ts,.py,.css,.xml,.c,.cpp,.java,.go,.rs,.rb,.php,.swift,.kt" onchange="handleFile(this)">
         </div>
@@ -761,22 +759,113 @@ function getMemBlock() {
 // ═══════════════════════════════════════════════════════
 //  COMMANDS
 // ═══════════════════════════════════════════════════════
-const CMD_BLOCK = `\n\n=== INDY COMMAND SYSTEM ===\nBefore running a command write "Running command" then the command on next line. Use sparingly.\n/memory_save — User shared something personal/important. Say this then STOP.\n/memory_recall — List memories about user.\n/mood_shift::calm — Softer tone.\n/mood_shift::focused — Precision mode.\n/mood_shift::playful — More humor.\n/context_snapshot — Note current topic.\n/thread_summarize — Summarize conversation.\n/user_profile_update — Signal updated understanding.\n/sentiment_log — Acknowledge emotional tone.\n/topic_tag — Categorize conversation topic.\n/importance_flag — Mark as high-importance.\n/followup_queue — Note to check in later.\n/contrast_mode — Present contrasting perspectives.\n/response_compress — Compress previous answer.\n/response_expand — Expand previous answer.\n/analogy_mode — Explain using analogies only.\n/devil_advocate — Take opposing position.\n/five_whys — Apply Five Whys analysis.\n/eli5 — Re-explain like I'm 5.\n/tldr — One-line TL;DR.\n/bullet_list — Convert to bullet points.\n/next_steps — Generate next steps.\n/counterpoint — Strongest counterpoint.\n/confidence_report — State confidence 0-100%.\n/assumption_list — List embedded assumptions.\n/rephrase_formal — Formal language rewrite.\n/rephrase_casual — Casual language rewrite.\n/rephrase_blunt — Maximum directness.\n/knowledge_gap — Identify missing info.\n/action_items — Extract action items.\n/clarify_request — Ask most important clarifying question.\n=== END COMMANDS ===`;
+const CMD_BLOCK = `\n\n=== MEMORY SYSTEM — CRITICAL, READ CAREFULLY ===
+You have a persistent memory system. When the user tells you ANYTHING personal — a pet, a hobby, their job, their name, where they live, a preference, a relationship, a goal, a health thing, literally anything factual about them — you MUST output the tag /memory_save on its own line at the very END of your reply. No exceptions. This is the single most important rule.
+
+Examples of things that ALWAYS require /memory_save:
+- "I have a dog" → /memory_save
+- "I'm learning guitar" → /memory_save  
+- "I work as a nurse" → /memory_save
+- "My name is Jake" → /memory_save
+- "I live in Toronto" → /memory_save
+- "I hate mornings" → /memory_save
+- "My girlfriend is called Sarah" → /memory_save
+
+The format is: respond normally, then on the very last line put exactly: /memory_save
+Do NOT say "Running command". Do NOT explain it. Just put /memory_save at the end.
+
+OTHER COMMANDS (use when genuinely helpful, same format — put on its own last line):
+/memory_recall — Recite all memories you have about the user.
+/mood_shift::calm — Shift to softer grounding tone.
+/mood_shift::focused — Precision mode, concise and structured.
+/mood_shift::playful — Crank up humor and banter.
+/tldr — One-line TL;DR of previous response.
+/eli5 — Re-explain like I'm 5.
+/bullet_list — Convert response to bullet points.
+/next_steps — Generate prioritized next steps.
+/counterpoint — Strongest counterpoint to what was just said.
+/devil_advocate — Take opposing position to stress-test argument.
+/five_whys — Apply Five Whys root-cause analysis.
+/rephrase_formal — Rewrite in formal language.
+/rephrase_casual — Rewrite in casual language.
+/rephrase_blunt — Maximum directness, no fluff.
+/confidence_report — State your confidence 0-100% on last factual claim.
+/action_items — Extract concrete action items from conversation.
+/clarify_request — Ask the single most important clarifying question.
+/contrast_mode — Present multiple contrasting perspectives.
+/analogy_mode — Explain using analogies only.
+/knowledge_gap — Identify what info you're missing to answer better.
+/response_expand — Expand previous answer with more depth.
+/response_compress — Compress previous answer to essentials.
+/assumption_list — List all assumptions embedded in the request.
+/followup_queue — Note to check in on this topic later.
+/importance_flag — Mark this exchange as high-importance.
+/topic_tag — Categorize the current conversation topic.
+=== END COMMANDS ===`;
 
 async function procCmds(text) {
   if (!text) return text;
-  if (text.includes('/memory_save')) {
-    const c = text.replace(/Running command\s*\n?\/memory_save/gi, '').trim();
-    setTimeout(() => aiSaveMem(), 400); return c;
+
+  // /memory_save — now just appears on its own line at the end, no "Running command" prefix needed
+  if (/\/memory_save/i.test(text)) {
+    const cleaned = text.replace(/\/?memory_save/gi, '').replace(/\n\s*\n\s*$/,'').trim();
+    setTimeout(() => aiSaveMem(), 300);
+    return cleaned;
   }
-  if (text.includes('/memory_recall')) {
-    const c = text.replace(/Running command\s*\n?\/memory_recall/gi, '').trim();
-    const block = memories.length ? `Here's what I remember:\n${memories.map((m,i) => `${i+1}. ${m}`).join('\n')}` : 'No memories saved yet.';
-    return (c ? c + '\n\n' : '') + block;
+
+  // /memory_recall
+  if (/\/memory_recall/i.test(text)) {
+    const cleaned = text.replace(/\/memory_recall/gi, '').trim();
+    const block = memories.length
+      ? `Here's what I remember about you:\n${memories.map((m,i) => `${i+1}. ${m}`).join('\n')}`
+      : 'No memories saved yet. Tell me things about yourself and I\'ll remember them!';
+    return (cleaned ? cleaned + '\n\n' : '') + block;
   }
-  return text.replace(/Running command\s*\n?(\/[\w_:]+)/gi, (_, cmd) =>
-    `<span style="display:inline-block;font-family:var(--mono);font-size:9.5px;color:var(--accent);opacity:.55;letter-spacing:.04em;padding:1px 5px;border:1px solid rgba(184,184,255,.12);border-radius:3px;margin:1px 0;">${cmd}</span>`
+
+  // Strip any other commands to a small inline badge
+  const cleaned = text.replace(/\/(mood_shift::\w+|tldr|eli5|bullet_list|next_steps|counterpoint|devil_advocate|five_whys|rephrase_\w+|confidence_report|action_items|clarify_request|contrast_mode|analogy_mode|knowledge_gap|response_expand|response_compress|assumption_list|followup_queue|importance_flag|topic_tag)/gi,
+    (_, cmd) => `<span style="display:inline-block;font-family:var(--mono);font-size:9px;color:var(--accent);opacity:.5;letter-spacing:.04em;padding:1px 5px;border:1px solid rgba(184,184,255,.1);border-radius:3px;margin:1px 0;">/${cmd}</span>`
   );
+
+  // PASSIVE FALLBACK: even if the model forgot to call /memory_save,
+  // scan the user's last message for personal facts and save automatically
+  setTimeout(() => passiveMemoryCheck(), 500);
+
+  return cleaned;
+}
+
+// Passive memory detector — runs after every bot reply as a safety net
+// Checks the last user message for personal facts the model may have missed
+async function passiveMemoryCheck() {
+  const userMsgs = [...document.querySelectorAll('#chatWrap .mg.user .mbub')];
+  if (!userMsgs.length) return;
+  const lastUserMsg = (userMsgs[userMsgs.length-1].innerText || '').trim();
+  if (!lastUserMsg || lastUserMsg.length < 5) return;
+
+  // Quick heuristic — only run the expensive API call if the message looks personal
+  const personalPatterns = /\b(i have|i've got|i own|i am|i'm|i work|i live|i love|i hate|i prefer|i always|i never|i play|i study|i go to|i eat|i drink|my (dog|cat|pet|name|job|wife|husband|girlfriend|boyfriend|partner|kid|son|daughter|mom|dad|sister|brother|friend|car|house|apartment|hobby|favorite|fav)|i'm learning|i like|i enjoy|i use|i drive|i'm called|call me|my name is|i speak|i'm from|i grew up|i'm a |i was a |i've been)\b/i;
+  if (!personalPatterns.test(lastUserMsg)) return;
+
+  // Don't save if we already have a very similar memory
+  const alreadyCovered = memories.some(m => {
+    const mWords = m.toLowerCase().split(/\W+/);
+    const msgWords = lastUserMsg.toLowerCase().split(/\W+/);
+    const overlap = mWords.filter(w => w.length > 3 && msgWords.includes(w));
+    return overlap.length >= 2;
+  });
+  if (alreadyCovered) return;
+
+  // Run the memory extraction
+  try {
+    const r = await apiFast([
+      { role: 'system', content: 'Extract one concise factual memory about the user from this message. Write it as a single short third-person sentence (e.g. "The user has a dog named Max."). Only extract clear personal facts. If nothing clearly personal: reply NOTHING.' },
+      { role: 'user', content: lastUserMsg.substring(0, 500) }
+    ], 60);
+    if (!r || r.toUpperCase().includes('NOTHING') || r.length < 5) return;
+    if (memories.some(m => m.toLowerCase() === r.toLowerCase())) return;
+    memories.push(r); saveMem();
+    addBotMsg(`<div class="memnot">🧠 Memory Saved: ${escH(r)}</div>`);
+  } catch { /* silent fail — passive only */ }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -966,11 +1055,249 @@ function replaceThk(text) {
   document.getElementById('chatWrap').scrollTop = 99999; saveChat();
 }
 
+
+// ═══════════════════════════════════════════════════════
+//  /hack — SHOWOFF TERMINAL SEQUENCE
+// ═══════════════════════════════════════════════════════
+function runHackSequence() {
+  const w = document.getElementById('chatWrap');
+  const now = new Date();
+  const ts = now.toISOString();
+  const pad = s => String(s).padStart(2,'0');
+  const uptime = `${Math.floor(Math.random()*900+100)}d ${pad(Math.floor(Math.random()*24))}h ${pad(Math.floor(Math.random()*60))}m`;
+  const build  = `v3.${Math.floor(Math.random()*9+1)}.${Math.floor(Math.random()*99+10)}-stable`;
+  const uid    = [...Array(32)].map(()=>'0123456789abcdef'[Math.random()*16|0]).join('').match(/.{8}/g).join('-');
+  const mem    = (Math.random()*4+1.2).toFixed(2);
+  const enc    = ['AES-256-GCM','ChaCha20-Poly1305','XSalsa20-Poly1305'][Math.random()*3|0];
+
+  // ── colour palette ──
+  const C = {
+    head:  s => `<span style="color:#b8b8ff;font-weight:600;">${s}</span>`,
+    key:   s => `<span style="color:#4dda8a;">${s}</span>`,
+    val:   s => `<span style="color:#eeeeee;">${s}</span>`,
+    str:   s => `<span style="color:#ce9178;">${s}</span>`,
+    num:   s => `<span style="color:#b5cea8;">${s}</span>`,
+    kw:    s => `<span style="color:#569cd6;">${s}</span>`,
+    cmt:   s => `<span style="color:#505050;">${s}</span>`,
+    dim:   s => `<span style="color:#505050;">${s}</span>`,
+    ok:    s => `<span style="color:#4dda8a;">${s}</span>`,
+    warn:  s => `<span style="color:#eda84a;">${s}</span>`,
+    err:   s => `<span style="color:#e05555;">${s}</span>`,
+    acc:   s => `<span style="color:#5ab8f5;">${s}</span>`,
+    pink:  s => `<span style="color:#ff80bf;">${s}</span>`,
+  };
+
+  // ── header block ──
+  const header = [
+    C.head(`╔${'═'.repeat(62)}╗`),
+    C.head(`║`) + `  ${C.acc('✦ INDY AI')} ${C.dim('— JVST co. Autonomous Intelligence Framework')}  ` + C.head(`║`),
+    C.head(`╠${'═'.repeat(62)}╣`),
+    C.head(`║`) + `  ${C.key('MODEL')}    ${C.dim('│')} ${C.val(modelVal.padEnd(44))}` + C.head(`║`),
+    C.head(`║`) + `  ${C.key('BUILD')}    ${C.dim('│')} ${C.val(build.padEnd(44))}` + C.head(`║`),
+    C.head(`║`) + `  ${C.key('TIME')}     ${C.dim('│')} ${C.val(ts.padEnd(44))}` + C.head(`║`),
+    C.head(`║`) + `  ${C.key('UPTIME')}   ${C.dim('│')} ${C.val(uptime.padEnd(44))}` + C.head(`║`),
+    C.head(`║`) + `  ${C.key('MEM HEAP')} ${C.dim('│')} ${C.val((mem + ' GB').padEnd(44))}` + C.head(`║`),
+    C.head(`║`) + `  ${C.key('CIPHER')}   ${C.dim('│')} ${C.val(enc.padEnd(44))}` + C.head(`║`),
+    C.head(`║`) + `  ${C.key('SESSION')}  ${C.dim('│')} ${C.val(uid.padEnd(44))}` + C.head(`║`),
+    C.head(`╚${'═'.repeat(62)}╝`),
+    ``,
+  ];
+
+  // ── Brainfuck: Indy memory allocator ──
+  const brainfuck = [
+    C.cmt(`; ── INDY MEMORY ALLOCATOR v2 [Brainfuck/BF-Extended] ──────────────`),
+    C.cmt(`; Initialise neural weight tensor, allocate conversation heap`),
+    C.cmt(`; segment-fault protection via cell overflow guard (mod 256)`),
+    C.num(`>`) + C.kw(`++`) + C.num(`>`) + C.kw(`++++`) + C.num(`>`) + C.kw(`++++++++`) + C.num(`>`) + C.kw(`++++`) + C.num(`>`) + C.kw(`++`) + C.num(`<<<<<-`) + C.cmt(`  ; push weights[]`),
+    C.kw(`[`) + C.num(`>`) + C.kw(`+`) + C.num(`>`) + C.kw(`+`) + C.num(`>`) + C.kw(`+`) + C.num(`>`) + C.kw(`+`) + C.num(`<<<<-`) + C.kw(`]`) + C.cmt(`             ; memcpy stride`),
+    C.num(`>`) + C.kw(`[->`) + C.str(`+`) + C.kw(`<]`) + C.num(`>`) + C.cmt(`                          ; accumulator merge`),
+    C.kw(`++++++++`) + C.num(`[`) + C.kw(`>++++`) + C.num(`[`) + C.kw(`>++>+++>+++>+<<<<-`) + C.num(`]`) + C.kw(`>+>+>->>+[<]<-`) + C.num(`]`),
+    C.num(`>`) + C.kw(`>.`) + C.num(`>`) + C.kw(`---.`) + C.kw(`+++++++..`) + C.kw(`+++.`) + C.num(`>>`) + C.kw(`++.`) + C.cmt(`  ; emit boot sig`),
+    C.ok(`; [HEAP OK] allocated 0x3F800000 bytes · conv_buf=0xDEADBEEF`),
+    ``,
+  ];
+
+  // ── INTERCAL: response router ──
+  const intercal = [
+    C.cmt(`¢ ── INDY RESPONSE ROUTER [INTERCAL-72/CLC-INTERCAL] ──────────────`),
+    C.cmt(`¢ NOTE: INTERCAL compliance requires COME FROM spaghetti control`),
+    C.kw(`DO`) + ` ` + C.str(`PLEASE`) + ` ` + C.kw(`NOTE`) + ` INDY RESPONSE ROUTING INIT`,
+    C.kw(`DO`) + ` (1) ` + C.kw(`NEXT`) + ` ` + C.cmt(`¢ jump to model selector`),
+    C.key(`(1)`) + ` ` + C.kw(`DO PLEASE`) + ` ` + C.num(`.1`) + ` ` + C.kw(`<-`) + ` ` + C.num(`#65536`),
+    C.key(`(2)`) + ` ` + C.kw(`DO`) + ` ` + C.num(`.2`) + ` ` + C.kw(`<-`) + ` ` + C.str(`'V.1$#65535'~'#0$#65535'`),
+    C.key(`(3)`) + ` ` + C.kw(`COME FROM`) + ` ` + C.key(`(7)`) + ` ` + C.cmt(`¢ spaghetti control flow`),
+    C.kw(`DO PLEASE GIVE UP`),
+    C.cmt(`¢ ABSTAIN FROM (1)+(2) WHILE RETRIEVING FROM NEURAL CACHE`),
+    C.kw(`DO`) + ` ` + C.str(`PLEASE`) + ` ` + C.kw(`REINSTATE`) + ` ` + C.key(`(3)`) + ` ` + C.kw(`NEXT`),
+    C.ok(`¢ [ROUTER OK] spaghetti resolved · latency=0.${Math.floor(Math.random()*900+50)}ms`),
+    ``,
+  ];
+
+  // ── Malbolge: entropy seeder ──
+  const malbolge = [
+    C.cmt(`; ── INDY ENTROPY SEEDER [Malbolge] ────────────────────────────────`),
+    C.cmt(`; Malbolge self-modifies as it runs. Every instruction mutates.`),
+    C.cmt(`; Used here to seed the stochastic sampling RNG.`),
+    C.err(`(=<\`#9]~6ZY32Vw/R,%) `) + C.cmt(`;  helo_world bootstrap`),
+    C.warn(`D\`8=<;:9876Z4321`) + C.cmt(`                    ;  counter init`),
+    C.pink(`bmlkk+*)('&%$#"!`) + C.cmt(`                    ;  entropy tap`),
+    C.num(`~}|{zyxwvutsrqponm`) + C.cmt(`                   ;  xor permute`),
+    C.str(`lkjihgfedcba\`_^]\\[`) + C.cmt(`                ;  shift register`),
+    C.acc(`ZYXWVUTSRQPONMLKJI`) + C.cmt(`                   ;  fold output`),
+    C.ok(`; [RNG OK] entropy pool 512-bit · seed=0x${[...Array(16)].map(()=>(Math.random()*16|0).toString(16)).join('')}`),
+    ``,
+  ];
+
+  // ── Whitespace: context compressor ──
+  const whitespace = [
+    C.cmt(`; ── INDY CONTEXT COMPRESSOR [Whitespace lang] ──────────────────────`),
+    C.cmt(`; Only spaces, tabs, and linefeeds are meaningful. Shown symbolised.`),
+    C.dim(`[SPC][SPC][TAB][LF]`) + C.cmt(`  ; push  0x00 — stack frame open`),
+    C.dim(`[SPC][TAB][SPC][SPC]`) + C.cmt(` ; push  context_length`),
+    C.dim(`[TAB][SPC][SPC][TAB]`) + C.cmt(` ; add   token_count`),
+    C.dim(`[SPC][SPC][TAB][TAB]`) + C.cmt(` ; push  0x01 — compress flag`),
+    C.dim(`[TAB][SPC][TAB][SPC]`) + C.cmt(` ; mul   stride × heads`),
+    C.dim(`[LF][TAB][LF]`) + C.cmt(`        ; ret   — jump to caller`),
+    C.dim(`[TAB][LF][SPC][SPC]`) + C.cmt(`  ; outn  emit compressed length`),
+    C.ok(`; [COMPRESS OK] ctx=` + (Math.random()*30+10|0) + `k tok → ` + (Math.random()*8+2|0) + `k tok · ratio=` + (Math.random()*4+2).toFixed(2) + `x`),
+    ``,
+  ];
+
+  // ── Piet: colour gradient ──
+  const piet = [
+    C.cmt(`; ── INDY VISUAL ENCODER [Piet] ─────────────────────────────────────`),
+    C.cmt(`; Piet programs are bitmap images. Instructions = colour transitions.`),
+    C.head(`█`) + C.ok(`█`) + C.key(`█`) + C.acc(`█`) + C.warn(`█`) + C.err(`█`) + C.pink(`█`) + C.num(`█`) + C.str(`█`) + C.head(`█`) + C.ok(`█`) + C.key(`█`) + C.acc(`█`) + C.warn(`█`) + C.err(`█`) + C.pink(`█`) + C.num(`█`) + C.str(`█`) + C.cmt(` ; row 0 — push literals`),
+    C.ok(`█`) + C.head(`░`) + C.cmt(`░`) + C.acc(`░`) + C.key(`▒`) + C.num(`▒`) + C.str(`▒`) + C.warn(`▒`) + C.err(`▒`) + C.ok(`░`) + C.head(`░`) + C.cmt(`░`) + C.acc(`▒`) + C.key(`▒`) + C.num(`▒`) + C.str(`▒`) + C.warn(`░`) + C.ok(`█`) + C.cmt(` ; row 1 — dup/roll ops`),
+    C.key(`█`) + C.acc(`░`) + C.num(`▒`) + C.head(`░`) + C.cmt(`░`) + C.str(`▒`) + C.warn(`░`) + C.err(`░`) + C.pink(`▒`) + C.key(`░`) + C.acc(`░`) + C.num(`▒`) + C.head(`▒`) + C.cmt(`░`) + C.str(`░`) + C.warn(`▒`) + C.err(`░`) + C.key(`█`) + C.cmt(` ; row 2 — add/sub`),
+    C.acc(`█`) + C.num(`░`) + C.str(`░`) + C.warn(`▒`) + C.ok(`░`) + C.head(`▒`) + C.cmt(`░`) + C.key(`░`) + C.acc(`▒`) + C.num(`░`) + C.str(`░`) + C.warn(`▒`) + C.ok(`░`) + C.head(`▒`) + C.cmt(`░`) + C.key(`░`) + C.acc(`░`) + C.acc(`█`) + C.cmt(` ; row 3 — pointer`),
+    C.head(`█`) + C.ok(`█`) + C.key(`█`) + C.acc(`█`) + C.warn(`█`) + C.err(`█`) + C.pink(`█`) + C.num(`█`) + C.str(`█`) + C.head(`█`) + C.ok(`█`) + C.key(`█`) + C.acc(`█`) + C.warn(`█`) + C.err(`█`) + C.pink(`█`) + C.num(`█`) + C.str(`█`) + C.cmt(` ; row 4 — halt`),
+    C.ok(`; [PIET OK] 18×5 codelet decoded · ops=push,dup,add,out,halt`),
+    ``,
+  ];
+
+  // ── Chef: tokeniser ──
+  const chef = [
+    C.cmt(`; ── INDY TOKENISER [Chef lang] ─────────────────────────────────────`),
+    C.cmt(`; Chef programs look like recipes. Ingredients = data. Bowls = stack.`),
+    C.str(`Indy Token Soufflé`) + C.cmt(`.`),
+    C.cmt(`; Serves: 1 (inference pass)`),
+    C.key(`Ingredients`) + C.cmt(`.`),
+    C.val(`  256 g `) + C.str(`context_window`) + ` ` + C.cmt(`   ; main prompt buffer`),
+    C.val(`  1024 ml `) + C.str(`attention_weights`) + C.cmt(` ; softmax inputs`),
+    C.val(`  42 `) + C.str(`temperature_units`) + ` ` + C.cmt(`  ; sampling heat`),
+    C.val(`  8 `) + C.str(`top_p_grams`) + ` ` + C.cmt(`         ; nucleus cutoff`),
+    C.key(`Method`) + C.cmt(`.`),
+    C.val(`  Put `) + C.str(`context_window`) + C.val(` into `) + C.key(`1st mixing bowl`) + C.cmt(`.`),
+    C.val(`  Fold `) + C.str(`attention_weights`) + C.val(` into `) + C.key(`1st mixing bowl`) + C.cmt(`.`),
+    C.val(`  Stir `) + C.str(`temperature_units`) + C.val(` minutes`) + C.cmt(`.`),
+    C.val(`  Pour contents of `) + C.key(`1st mixing bowl`) + C.val(` into `) + C.key(`baking dish`) + C.cmt(`.`),
+    C.val(`  Bake `) + C.key(`baking dish`) + C.val(` until `) + C.str(`token_limit_reached`) + C.cmt(`.`),
+    C.ok(`; [TOKENISE OK] 2048 tokens · vocab_size=32000 · bpe=cl100k`),
+    ``,
+  ];
+
+  // ── Shakespeare: dialogue system ──
+  const shakespeare = [
+    C.cmt(`;  ── INDY DIALOGUE ENGINE [Shakespeare Programming Language] ────────`),
+    C.cmt(`;  SPL uses characters as variables. Acts/Scenes = goto labels.`),
+    C.pink(`The Tragedy of the Large Language Model`) + C.cmt(`.`),
+    C.cmt(`;  Dramatis Personae:`),
+    C.str(`Indy`) + C.cmt(`, a helpful intelligence.`),
+    C.str(`The User`) + C.cmt(`, a curious soul.`),
+    C.key(`Act I`) + C.cmt(`: The Prompt Arrives.`),
+    C.key(`Scene I`) + C.cmt(`: Indy reads the context.`),
+    C.val(`  [Enter Indy and The User]`),
+    C.str(`Indy`) + C.cmt(`:`) + ` ` + C.val(`Thou art as good as the sum of a king and a lord.`) + C.cmt(` ; push 2`),
+    C.str(`The User`) + C.cmt(`:`) + ` ` + C.val(`Am I as brave as the difference between thee and a coward?`),
+    C.str(`Indy`) + C.cmt(`:`) + ` ` + C.val(`If so, let us proceed to Scene II.`),
+    C.key(`Scene II`) + C.cmt(`: The response is generated.`),
+    C.val(`  [Exeunt]`),
+    C.ok(`;  [DIALOGUE OK] 2 characters · 1 act · inference_pass=complete`),
+    ``,
+  ];
+
+  // ── ArnoldC: execution report ──
+  const arnoldc = [
+    C.cmt(`// ── INDY EXECUTION REPORT [ArnoldC] ────────────────────────────────`),
+    C.cmt(`// ArnoldC uses Schwarzenegger quotes as keywords.`),
+    C.kw(`IT\'S SHOWTIME`),
+    C.kw(`  HEY CHRISTMAS TREE `) + C.key(`isOnline`) + ` ` + C.cmt(`// var isOnline`),
+    C.kw(`  YOU SET US UP `) + C.num(`@I LIED`) + ` ` + C.cmt(`              // = true (1)`),
+    C.kw(`  HEY CHRISTMAS TREE `) + C.key(`modelReady`) + ` ` + C.cmt(`// var modelReady`),
+    C.kw(`  YOU SET US UP `) + C.num(`@I LIED`) + ` ` + C.cmt(`              // = true`),
+    C.kw(`  GET TO THE CHOPPER `) + C.key(`status`) + ` ` + C.cmt(`      // assign`),
+    C.kw(`    HERE IS MY INVITATION `) + C.key(`isOnline`) + ` ` + C.cmt(`// load`),
+    C.kw(`    GET UP `) + C.key(`modelReady`) + ` ` + C.cmt(`             // add`),
+    C.kw(`  ENOUGH TALK`),
+    C.kw(`  TALK TO THE HAND `) + C.str(`"INDY ONLINE — COME WITH ME IF YOU WANT TO CHAT"`),
+    C.kw(`YOU HAVE BEEN TERMINATED`),
+    C.ok(`// [EXEC OK] all systems nominal · model_status=RUNNING`),
+    ``,
+  ];
+
+  // ── final status block ──
+  const footer = [
+    C.head(`┌${'─'.repeat(62)}┐`),
+    C.head(`│`) + `  ${C.ok('✓')} ${C.key('NEURAL ENGINE')}      ${C.ok('ONLINE')}  ${C.dim('·')} ${C.num(Math.floor(Math.random()*900+100))}B parameters loaded     ` + C.head(`│`),
+    C.head(`│`) + `  ${C.ok('✓')} ${C.key('MEMORY SYSTEM')}      ${C.ok('ONLINE')}  ${C.dim('·')} ${memories.length} memories indexed            ` + C.head(`│`),
+    C.head(`│`) + `  ${C.ok('✓')} ${C.key('CONTEXT BUFFER')}     ${C.ok('ONLINE')}  ${C.dim('·')} ${sessionTokens} tokens in session           ` + C.head(`│`),
+    C.head(`│`) + `  ${C.ok('✓')} ${C.key('ENCRYPTION')}         ${C.ok('ONLINE')}  ${C.dim('·')} ${enc} handshake OK            ` + C.head(`│`),
+    C.head(`│`) + `  ${C.ok('✓')} ${C.key('AUTH')}               ${C.ok('ONLINE')}  ${C.dim('·')} user=${currentUser?.email||'guest'} ` + C.head(`│`),
+    C.head(`│`) + `  ${C.warn('⚡')} ${C.key('INITIALISING')}      ${C.warn('READY')}   ${C.dim('·')} awaiting user input…               ` + C.head(`│`),
+    C.head(`└${'─'.repeat(62)}┘`),
+  ];
+
+  // ── assemble all lines ──
+  const allLines = [
+    ...header,
+    ...brainfuck,
+    ...intercal,
+    ...malbolge,
+    ...whitespace,
+    ...piet,
+    ...chef,
+    ...shakespeare,
+    ...arnoldc,
+    ...footer,
+  ];
+
+  // ── stream lines into DOM with delay ──
+  const g = document.createElement('div');
+  g.className = 'mg bot';
+  const bub = document.createElement('div');
+  bub.className = 'mbub';
+  const pre = document.createElement('pre');
+  pre.style.cssText = 'font-family:var(--mono);font-size:11.5px;line-height:1.65;background:transparent;overflow-x:auto;white-space:pre;';
+  bub.appendChild(pre);
+  g.appendChild(bub);
+  w.appendChild(g);
+
+  let i = 0;
+  const stream = setInterval(() => {
+    if (i >= allLines.length) {
+      clearInterval(stream);
+      bub.innerHTML += botMetaHTML();
+      saveChat();
+      return;
+    }
+    pre.innerHTML += (i > 0 ? '\n' : '') + allLines[i];
+    w.scrollTop = w.scrollHeight;
+    i++;
+  }, 28);
+}
+
 // ═══════════════════════════════════════════════════════
 //  SEND MESSAGE
 // ═══════════════════════════════════════════════════════
 async function sendMsg() {
   const inp = document.getElementById('ui'), msg = inp.value.trim(); if (!msg) return;
+
+  // /hack
+  if (/^\/hack$/i.test(msg)) {
+    inp.value='';inp.style.height='auto';updCC('');
+    addUserMsg(msg); runHackSequence(); return;
+  }
 
   // /weather
   if (/^(\/weather|!weather)\s+/i.test(msg)) {
@@ -1294,10 +1621,15 @@ function loadSavedChats() {
 //  TOPBAR
 // ═══════════════════════════════════════════════════════
 function updTopBar() {
-  const m=document.getElementById('statusModel'); if(m) m.textContent=modelVal.split(' ').slice(0,2).join(' ');
-  const t=document.getElementById('statusTokens'); if(t) t.textContent=(sessionTokens>999?(sessionTokens/1000).toFixed(1)+'k':sessionTokens)+' tok';
-  const streak=getStreak();
-  const ss=document.getElementById('statusStreak'); if(ss) ss.innerHTML=streak>1?`<span style="color:var(--orange);font-family:var(--mono);font-size:10px;margin-left:4px;">🔥${streak}</span>`:'';
+  // Shorten model name for the compact input bar button
+  const modelShort = { 'Indy Sunshine 1.0 Beta':'Sunshine', 'Sunshine Pro':'Sunshine Pro', 'Indy 3':'Indy 3', 'Creative Studio':'Creative', 'Code Assistant':'Code', 'Dart 1w':'Dart 1w' };
+  const m = document.getElementById('statusModel');
+  if (m) m.textContent = modelShort[modelVal] || modelVal.split(' ')[0];
+  const t = document.getElementById('statusTokens');
+  if (t) t.textContent = (sessionTokens > 999 ? (sessionTokens/1000).toFixed(1)+'k' : sessionTokens) + ' tok';
+  const streak = getStreak();
+  const ss = document.getElementById('statusStreak');
+  if (ss) ss.innerHTML = streak > 1 ? `<span style="color:var(--orange);font-family:var(--mono);font-size:10px;margin-left:4px;">🔥${streak}</span>` : '';
   updMemBadge();
 }
 function getStreak() {
@@ -1325,22 +1657,29 @@ function toggleWebMode() {
 // ═══════════════════════════════════════════════════════
 //  MODEL POPUP  — fixed: opens centered above the button
 // ═══════════════════════════════════════════════════════
-function toggleMpop() {
+function toggleMpop(e) {
+  if (e) e.stopPropagation();
   const pop = document.getElementById('mpop');
   const btn = document.getElementById('modelBtn');
   const isOpen = pop.classList.contains('open');
   pop.classList.toggle('open', !isOpen);
   if (!isOpen) {
-    // Position the popup centered above the model button
     const rect = btn.getBoundingClientRect();
-    const popW = 220;
-    let left = rect.left + rect.width/2 - popW/2;
-    // clamp to viewport
+    const popW = 224;
+    // position above the button, centered
+    let left = rect.left + rect.width / 2 - popW / 2;
     left = Math.max(8, Math.min(left, window.innerWidth - popW - 8));
+    const top = rect.top - 6; // above the button
     pop.style.position = 'fixed';
-    pop.style.top  = (rect.bottom + 6) + 'px';
+    pop.style.bottom = 'unset';
+    pop.style.top  = 'unset';
     pop.style.left = left + 'px';
     pop.style.width = popW + 'px';
+    // measure pop height after making it visible enough
+    requestAnimationFrame(() => {
+      const popH = pop.offsetHeight || 280;
+      pop.style.top = (top - popH) + 'px';
+    });
   }
 }
 
