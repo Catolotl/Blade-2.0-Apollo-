@@ -207,6 +207,18 @@ hr{border:none;border-top:1px solid var(--br);margin:5px 0;}
 .sp-source-dom{font-family:var(--mono);font-size:9.5px;color:var(--tx-t);margin-bottom:2px;}
 .sp-source-title{font-size:13px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sp-source-snip{font-size:11.5px;color:var(--tx-s);line-height:1.45;margin-top:2px;}
+/* source as link */
+a.sp-source{display:flex;text-decoration:none;align-items:flex-start;gap:10px;background:var(--bg-c);border:1px solid var(--br);border-radius:var(--r8);padding:10px 12px;margin-bottom:6px;cursor:pointer;transition:all .15s;}
+a.sp-source:hover{border-color:var(--br-s);background:var(--bg-h);}
+.sp-source-arrow{font-size:11px;color:var(--tx-t);flex-shrink:0;align-self:center;transition:color .12s;}
+a.sp-source:hover .sp-source-arrow{color:var(--accent);}
+/* infobox */
+.sp-infobox{background:var(--bg-c);border:1px solid var(--br-s);border-radius:var(--r8);padding:12px 14px;margin-bottom:12px;}
+.sp-infobox-inner{display:flex;gap:12px;align-items:flex-start;}
+.sp-infobox-facts{flex:1;display:flex;flex-direction:column;gap:5px;}
+.sp-fact{display:flex;gap:8px;font-size:12px;line-height:1.4;}
+.sp-fact-k{font-family:var(--mono);font-size:9.5px;color:var(--tx-t);letter-spacing:.04em;text-transform:uppercase;flex-shrink:0;min-width:80px;padding-top:1px;}
+.sp-fact-v{color:var(--tx-s);}
 /* search input fixed at bottom of panel */
 #sp-input-area{padding:10px 14px 14px;border-top:1px solid var(--br);flex-shrink:0;background:var(--bg);}
 .sp-input-wrap{display:flex;gap:6px;align-items:flex-end;background:var(--bg-c);border:1px solid var(--br-s);border-radius:var(--r12);padding:6px 6px 6px 14px;transition:border-color .2s;}
@@ -999,27 +1011,50 @@ function renderMemList() {
     `<div class="memacts"><button class="memact del" onclick="deleteMem(${i})">⨯</button></div></div>`
   ).join('');
 }
+// ── Semantic similarity check — prevents saving rephrased duplicates ──
+function memSemanticDupe(candidate) {
+  if (!memories.length) return false;
+  const cWords = new Set(candidate.toLowerCase().match(/\w{4,}/g) || []);
+  // strip filler words
+  const fillers = new Set(['user','they','their','have','been','that','this','with','from','also','just']);
+  cWords.forEach(w => fillers.has(w) && cWords.delete(w));
+  for (const m of memories) {
+    const mWords = new Set(m.toLowerCase().match(/\w{4,}/g) || []);
+    fillers.forEach(w => mWords.delete(w));
+    // if more than 40% of meaningful words overlap → likely duplicate
+    const overlap = [...cWords].filter(w => mWords.has(w));
+    const ratio = overlap.length / Math.max(cWords.size, mWords.size, 1);
+    if (ratio > 0.4) return true;
+  }
+  return false;
+}
+
+// ── Block saving during a memory recall response ──
+let _isRecalling = false;
+
 async function aiSaveMem() {
+  if (_isRecalling) return; // never save during a recall
   const grps = [...document.querySelectorAll('#chatWrap .mg')];
   const last2 = [];
   grps.forEach(g => {
     const b = g.querySelector('.mbub'); if (!b) return;
-    const cl = b.cloneNode(true); cl.querySelectorAll('.mmeta,.macts,.mts,.mab').forEach(x => x.remove());
-    const t = (cl.innerText || '').trim(); if (t) last2.push({ s: g.classList.contains('user') ? 'User' : 'Indy', t });
+    const cl = b.cloneNode(true); cl.querySelectorAll('.mmeta,.macts,.mts,.mab,.memnot').forEach(x => x.remove());
+    const t = (cl.innerText || '').trim();
+    // skip memory notice messages and very short ones
+    if (t && t.length > 8 && !t.startsWith('🧠')) last2.push({ s: g.classList.contains('user') ? 'User' : 'Indy', t });
   });
   const recent = last2.slice(-2).map(x => `${x.s}: ${x.t}`).join('\n\n');
-  if (!recent) { showToast('Nothing to save'); return; }
-  showToast('🧠 Analyzing…');
+  if (!recent) return;
   try {
     const r = await apiFast([
-      { role: 'system', content: 'Extract one concise factual memory about the user. Single short third-person sentence (e.g. "The user owns a cat."). If nothing worth saving: reply NOTHING.' },
-      { role: 'user', content: recent.substring(0, 3000) }
+      { role: 'system', content: 'Extract one concise factual memory about the USER ONLY (not about Indy or the AI). Single short third-person sentence (e.g. "The user owns a cat named Luna." or "The user works as a nurse."). IMPORTANT: If the message is about recalling memories, asking what Indy knows, or is a response FROM Indy listing memories — reply NOTHING. If nothing clearly personal about the user: reply NOTHING.' },
+      { role: 'user', content: recent.substring(0, 2000) }
     ], 80);
-    if (!r || r === 'NOTHING' || r.toUpperCase().includes('NOTHING')) { return; }
-    if (memories.some(m => m.toLowerCase() === r.toLowerCase())) { return; }
-    memories.push(r); saveMem(); showToast('Memory Saved 🧠');
+    if (!r || r.toUpperCase().includes('NOTHING') || r.length < 8) return;
+    if (memSemanticDupe(r)) return; // semantic duplicate check
+    memories.push(r); saveMem();
     addBotMsg(`<div class="memnot">🧠 Memory Saved: ${escH(r)}</div>`);
-  } catch { showToast('Memory save failed'); }
+  } catch { /* silent */ }
 }
 function getMemBlock() {
   if (!memories.length) return '';
@@ -1127,6 +1162,7 @@ async function procCmds(text) {
   // /memory_save — now just appears on its own line at the end, no "Running command" prefix needed
   if (/\/memory_save/i.test(text)) {
     const cleaned = text.replace(/\/?memory_save/gi, '').replace(/\n\s*\n\s*$/,'').trim();
+    _memorySavedThisTurn = true; // block passive check this turn
     setTimeout(() => aiSaveMem(), 300);
     return cleaned;
   }
@@ -1134,9 +1170,11 @@ async function procCmds(text) {
   // /memory_recall
   if (/\/memory_recall/i.test(text)) {
     const cleaned = text.replace(/\/memory_recall/gi, '').trim();
+    _isRecalling = true;
+    setTimeout(() => { _isRecalling = false; }, 3000); // unlock after 3s
     const block = memories.length
       ? `Here's what I remember about you:\n${memories.map((m,i) => `${i+1}. ${m}`).join('\n')}`
-      : 'No memories saved yet. Tell me things about yourself and I\'ll remember them!';
+      : "No memories saved yet. Tell me things about yourself and I'll remember them!";
     return (cleaned ? cleaned + '\n\n' : '') + block;
   }
 
@@ -1152,38 +1190,40 @@ async function procCmds(text) {
   return cleaned;
 }
 
-// Passive memory detector — runs after every bot reply as a safety net
-// Checks the last user message for personal facts the model may have missed
+// Passive memory detector — runs after every bot reply, only for user messages
+// ONLY runs if /memory_save did NOT already run (avoids double-saving)
+let _memorySavedThisTurn = false;
+
 async function passiveMemoryCheck() {
+  if (_isRecalling) return; // never save during recall
+  if (_memorySavedThisTurn) { _memorySavedThisTurn = false; return; } // already saved via command
+
   const userMsgs = [...document.querySelectorAll('#chatWrap .mg.user .mbub')];
   if (!userMsgs.length) return;
   const lastUserMsg = (userMsgs[userMsgs.length-1].innerText || '').trim();
-  if (!lastUserMsg || lastUserMsg.length < 5) return;
+  if (!lastUserMsg || lastUserMsg.length < 8) return;
 
-  // Quick heuristic — only run the expensive API call if the message looks personal
-  const personalPatterns = /\b(i have|i've got|i own|i am|i'm|i work|i live|i love|i hate|i prefer|i always|i never|i play|i study|i go to|i eat|i drink|my (dog|cat|pet|name|job|wife|husband|girlfriend|boyfriend|partner|kid|son|daughter|mom|dad|sister|brother|friend|car|house|apartment|hobby|favorite|fav)|i'm learning|i like|i enjoy|i use|i drive|i'm called|call me|my name is|i speak|i'm from|i grew up|i'm a |i was a |i've been)\b/i;
+  // Skip if it looks like the user is asking about memories (not sharing personal info)
+  const recallPatterns = /\b(what do you (know|remember)|your memor|recall|forget|memory|do you know (about|my)|what('s| is) (saved|stored)|list (my|your)|show me)/i;
+  if (recallPatterns.test(lastUserMsg)) return;
+
+  // Only run if message contains personal disclosure patterns
+  const personalPatterns = /\b(i have|i('ve| have) got|i own|i am|i'm|i work(ed)?|i live|i love|i hate|i prefer|i always|i never|i play|i study|my (dog|cat|pet|name|job|wife|husband|girlfriend|boyfriend|partner|kid|son|daughter|mom|dad|sister|brother|friend|car|house|hobby|favorite)|i('m| am) learning|i('m| am) called|call me|my name is|i speak|i('m| am) from|i grew up|i('m| am) a |i was a )\b/i;
   if (!personalPatterns.test(lastUserMsg)) return;
 
-  // Don't save if we already have a very similar memory
-  const alreadyCovered = memories.some(m => {
-    const mWords = m.toLowerCase().split(/\W+/);
-    const msgWords = lastUserMsg.toLowerCase().split(/\W+/);
-    const overlap = mWords.filter(w => w.length > 3 && msgWords.includes(w));
-    return overlap.length >= 2;
-  });
-  if (alreadyCovered) return;
+  // Semantic duplicate check before even calling the API
+  if (memSemanticDupe(lastUserMsg)) return;
 
-  // Run the memory extraction
   try {
     const r = await apiFast([
-      { role: 'system', content: 'Extract one concise factual memory about the user from this message. Write it as a single short third-person sentence (e.g. "The user has a dog named Max."). Only extract clear personal facts. If nothing clearly personal: reply NOTHING.' },
-      { role: 'user', content: lastUserMsg.substring(0, 500) }
+      { role: 'system', content: 'Extract one concise factual memory about the user from this single message. Third-person sentence (e.g. "The user has a dog named Max."). ONLY extract new facts not already known. If nothing clearly new and personal: reply NOTHING.' },
+      { role: 'user', content: `Known memories: ${memories.slice(-5).join('; ') || 'none'}\n\nNew message: ${lastUserMsg.substring(0, 400)}` }
     ], 60);
-    if (!r || r.toUpperCase().includes('NOTHING') || r.length < 5) return;
-    if (memories.some(m => m.toLowerCase() === r.toLowerCase())) return;
+    if (!r || r.toUpperCase().includes('NOTHING') || r.length < 8) return;
+    if (memSemanticDupe(r)) return;
     memories.push(r); saveMem();
     addBotMsg(`<div class="memnot">🧠 Memory Saved: ${escH(r)}</div>`);
-  } catch { /* silent fail — passive only */ }
+  } catch { /* silent */ }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2513,17 +2553,46 @@ async function doSearch() {
 
   // Clear input
   document.getElementById('spinp').value = '';
-  let webSnippets = '', webResults = [];
+  let webSnippets = '', webResults = [], ddgData = null;
   try {
-    const ddg = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1&skip_disambig=1`)}`);
-    const ddgD = await ddg.json(); const ddgJ = JSON.parse(ddgD.contents);
-    if (ddgJ.AbstractText) webSnippets += ddgJ.AbstractText + '\n\n';
-    if (ddgJ.Answer) webSnippets = ddgJ.Answer + '\n\n' + webSnippets;
-    if (ddgJ.RelatedTopics?.length) {
-      ddgJ.RelatedTopics.slice(0,5).forEach(t => {
-        if (t.Text) { webSnippets += t.Text + '\n'; webResults.push({ dom:'duckduckgo.com', title:t.Text.substring(0,60), snip:t.Text.substring(0,140) }); }
+    const ddgR = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1&skip_disambig=1`)}`);
+    const ddgD = await ddgR.json();
+    ddgData = JSON.parse(ddgD.contents);
+    const d = ddgData;
+
+    // Instant answer (calculator, facts, definitions etc)
+    if (d.Answer)        webSnippets += d.Answer + '\n\n';
+    // Abstract (Wikipedia etc)
+    if (d.AbstractText)  webSnippets += d.AbstractText + '\n\n';
+    // Definition
+    if (d.Definition)    webSnippets += d.Definition + '\n\n';
+
+    // Pull clean results from RelatedTopics (they have actual URLs)
+    const seen = new Set();
+    const addResult = (text, url, icon) => {
+      if (!text || seen.has(url)) return;
+      seen.add(url);
+      let domain = '';
+      try { domain = new URL(url).hostname.replace('www.',''); } catch { domain = 'duckduckgo.com'; }
+      const title = text.split(' - ')[0] || text.substring(0, 70);
+      const snip  = text.substring(0, 180);
+      webResults.push({ title, snip, url, domain, icon: icon || '' });
+      webSnippets += text + '\n';
+    };
+
+    if (d.RelatedTopics?.length) {
+      d.RelatedTopics.forEach(t => {
+        if (t.Text && t.FirstURL) addResult(t.Text, t.FirstURL, t.Icon?.URL || '');
+        // handle nested topics
+        if (t.Topics) t.Topics.forEach(st => { if (st.Text && st.FirstURL) addResult(st.Text, st.FirstURL, st.Icon?.URL || ''); });
       });
     }
+    // Official result
+    if (d.AbstractURL) addResult(d.AbstractText || d.Heading, d.AbstractURL, d.Image || '');
+    // Infobox entities
+    if (d.Results?.length) d.Results.forEach(r => { if (r.Text && r.FirstURL) addResult(r.Text, r.FirstURL, ''); });
+
+    webResults = webResults.slice(0, 8); // max 8 sources
   } catch(e) { console.warn('DDG search:', e); }
   let summary = '';
   try {
@@ -2533,11 +2602,58 @@ async function doSearch() {
     ], 400);
   } catch { summary = 'Could not generate summary — check your connection.'; }
 
+  // Remove thinking
+  document.getElementById('spThinking')?.remove();
+
   const hasR = webResults.length > 0;
-  body.innerHTML =
-    `<div class="spcard"><div class="spalbl">✦ AI SUMMARY</div><div class="spatxt mdb">${renderMD(summary)}</div>` +
-    `<button class="spdive" data-q="${escH(q)}" onclick="diveDeeper(this)">↗ Dive Deeper — Open in Chat</button></div>` +
-    (hasR ? `<div class="sprlbl">RELATED RESULTS</div>${webResults.map(r=>`<div class="sprr"><div class="spdom">${r.dom}</div><div class="sptitle">${escH(r.title)}</div><div class="spsnip">${escH(r.snip)}</div></div>`).join('')}` : '');
+  const ts = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+
+  // Infobox card (entity image + quick facts)
+  if (ddgData && (ddgData.Image || (ddgData.Infobox?.content?.length > 0))) {
+    const infoEl = document.createElement('div');
+    infoEl.className = 'sp-infobox';
+    const img = ddgData.Image ? `<img src="https://duckduckgo.com${ddgData.Image}" onerror="this.parentElement.style.display='none'" style="width:56px;height:56px;object-fit:cover;border-radius:var(--r4);flex-shrink:0;border:1px solid var(--br);">` : '';
+    const facts = (ddgData.Infobox?.content||[]).slice(0,4).map(f=>`<div class="sp-fact"><span class="sp-fact-k">${escH(f.label)}</span><span class="sp-fact-v">${escH(String(f.value).substring(0,80))}</span></div>`).join('');
+    if (img || facts) { infoEl.innerHTML=`<div class="sp-infobox-inner">${img}<div class="sp-infobox-facts">${facts}</div></div>`; feed.appendChild(infoEl); }
+  }
+
+  // AI answer bubble
+  const answerEl = document.createElement('div');
+  answerEl.className = 'sp-answer';
+  answerEl.innerHTML = `
+    <div class="sp-answer-head">
+      <div class="sp-answer-avatar">✦</div>
+      <span class="sp-answer-name">Indy Search</span>
+    </div>
+    <div class="sp-answer-body mdb">${renderMD(summary)}</div>
+    <div class="sp-answer-actions">
+      <button class="sp-dive" data-q="${escH(q)}" onclick="diveDeeper(this)">↗ Dive Deeper in Chat</button>
+    </div>
+    <div class="sp-meta">${ts}${hasR ? ' · ' + webResults.length + ' sources' : ''}</div>`;
+  feed.appendChild(answerEl);
+
+  // Sources — clickable, with favicons
+  if (hasR) {
+    const srcEl = document.createElement('div');
+    srcEl.className = 'sp-sources';
+    srcEl.innerHTML = `<div class="sp-sources-lbl">${webResults.length} Sources</div>` +
+      webResults.map((r,i) => {
+        const fav = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(r.domain)}&sz=16`;
+        return `<a class="sp-source" href="${r.url}" target="_blank" rel="noopener">
+          <span class="sp-source-num">${i+1}</span>
+          <div class="sp-source-body">
+            <div class="sp-source-dom"><img src="${fav}" width="12" height="12" style="margin-right:4px;vertical-align:middle;opacity:.7;" onerror="this.style.display='none'">${escH(r.domain)}</div>
+            <div class="sp-source-title">${escH(r.title)}</div>
+            <div class="sp-source-snip">${escH(r.snip.substring(0,130))}</div>
+          </div>
+          <span class="sp-source-arrow">↗</span>
+        </a>`;
+      }).join('');
+    feed.appendChild(srcEl);
+  }
+
+  feed.scrollTop = feed.scrollHeight;
+  document.getElementById('spMeta').textContent = `${ts} · search complete`;
 }
 function diveDeeper(btn) {
   const q = btn.dataset.q || document.getElementById('spinp').value.trim(); if (!q) return;
@@ -3866,8 +3982,8 @@ function initApp() {
 
       <div class="wn-section">
         <div class="wn-section-title">Terminal Commands</div>
-        <div class="wn-item"><div class="wn-icon">💻</div><div class="wn-item-body"><div class="wn-item-title">Showoff Commands<span class="wn-item-tag cmd">CMD</span></div><div class="wn-item-desc">Type <code style="font-family:var(--mono);font-size:11px;color:var(--accent);background:var(--bg-h);padding:1px 4px;border-radius:3px;">/hack</code> <code style="font-family:var(--mono);font-size:11px;color:var(--accent);background:var(--bg-h);padding:1px 4px;border-radius:3px;">/execute</code> <code style="font-family:var(--mono);font-size:11px;color:var(--accent);background:var(--bg-h);padding:1px 4px;border-radius:3px;">/kill [name]</code> <code style="font-family:var(--mono);font-size:11px;color:var(--accent);background:var(--bg-h);padding:1px 4px;border-radius:3px;">/info</code> <code style="font-family:var(--mono);font-size:11px;color:var(--accent);background:var(--bg-h);padding:1px 4px;border-radius:3px;">/drain</code> for dramatic terminal output in Brainfuck, Malbolge, INTERCAL and more.</div></div></div>
-        <div class="wn-item"><div class="wn-icon">🕵️</div><div class="wn-item-body"><div class="wn-item-title">/fetch — Network Recon<span class="wn-item-tag cmd">CMD</span></div><div class="wn-item-desc">Looks up your public IP, city, ISP, coordinates, does a fake port scan. Offers to upload "Cloud Files" to the IDE.</div></div></div>
+        <div class="wn-item"><div class="wn-icon">💻</div><div class="wn-item-body"><div class="wn-item-title">Commands<span class="wn-item-tag cmd">CMD</span></div><div class="wn-item-desc">Type <code style="font-family:var(--mono);font-size:11px;color:var(--accent);background:var(--bg-h);padding:1px 4px;border-radius:3px;">/hack</code> <code style="font-family:var(--mono);font-size:11px;color:var(--accent);background:var(--bg-h);padding:1px 4px;border-radius:3px;">/execute</code> <code style="font-family:var(--mono);font-size:11px;color:var(--accent);background:var(--bg-h);padding:1px 4px;border-radius:3px;">/kill [name]</code> <code style="font-family:var(--mono);font-size:11px;color:var(--accent);background:var(--bg-h);padding:1px 4px;border-radius:3px;">/info</code> <code style="font-family:var(--mono);font-size:11px;color:var(--accent);background:var(--bg-h);padding:1px 4px;border-radius:3px;">/drain</code> for dramatic terminal output in Brainfuck, Malbolge, INTERCAL and more.</div></div></div>
+        <div class="wn-item"><div class="wn-icon">🕵️</div><div class="wn-item-body"><div class="wn-item-title">/fetch — Network Recon<span class="wn-item-tag cmd">CMD</span></div><div class="wn-item-desc">Looks up your public IP, city, ISP, coordinates, does a port scan. Offers to upload "Cloud Files" to the IDE.</div></div></div>
         <div class="wn-item"><div class="wn-icon">📡</div><div class="wn-item-body"><div class="wn-item-title">/sysinfo — Device Recon<span class="wn-item-tag cmd">CMD</span></div><div class="wn-item-desc">Reads your OS, browser, GPU, CPU cores, RAM, battery, network type, storage usage, screen resolution and more.</div></div></div>
       </div>
 
