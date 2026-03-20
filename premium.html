@@ -288,6 +288,16 @@ textarea.sfinp{min-height:75px;resize:vertical;}
 /* TOAST */
 #toast{position:fixed;bottom:82px;left:50%;transform:translateX(-50%) translateY(6px);background:var(--bg-h);border:1px solid var(--br-s);color:var(--tx-s);font-size:12px;font-family:var(--mono);letter-spacing:.04em;padding:6px 16px;border-radius:99px;z-index:9999;opacity:0;transition:all .2s cubic-bezier(.2,.8,.4,1);pointer-events:none;white-space:nowrap;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* WELCOME SCREEN */
+#welcomeScreen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;pointer-events:none;padding-bottom:80px;transition:opacity .4s ease, transform .4s cubic-bezier(.2,.8,.4,1);}
+#welcomeScreen.hidden{opacity:0;transform:translateY(-12px);pointer-events:none;}
+#welcomeScreen.gone{display:none;}
+.wc-greeting{font-family:var(--mono);font-size:clamp(22px,3.5vw,36px);font-weight:600;color:var(--tx);letter-spacing:.02em;text-align:center;line-height:1.2;}
+.wc-sub{font-family:var(--mono);font-size:13px;color:var(--tx-t);letter-spacing:.06em;text-align:center;}
+.wc-starters{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:560px;pointer-events:all;margin-top:8px;}
+.wc-btn{background:var(--bg-c);border:1px solid var(--br);border-radius:var(--r4);color:var(--tx-s);font-size:12px;font-family:var(--mono);padding:7px 14px;cursor:pointer;transition:all .18s;}
+.wc-btn:hover{border-color:var(--br-s);color:var(--tx);background:var(--bg-h);}
 </style></head>
 <body>
 <!-- LEFT SIDEBAR -->
@@ -335,7 +345,12 @@ textarea.sfinp{min-height:75px;resize:vertical;}
   </div>
 
   <!-- CHAT VIEW -->
-  <div id="viewChat">
+  <div id="viewChat" style="position:relative;">
+    <div id="welcomeScreen">
+      <div class="wc-greeting" id="wcGreeting">Good evening ✦</div>
+      <div class="wc-sub" id="wcSub">What's on your mind?</div>
+      <div class="wc-starters" id="wcStarters"></div>
+    </div>
     <div id="chatWrap"></div>
     <div id="inpArea">
       <div class="inpwrap">
@@ -745,8 +760,8 @@ async function aiSaveMem() {
       { role: 'system', content: 'Extract one concise factual memory about the user. Single short third-person sentence (e.g. "The user owns a cat."). If nothing worth saving: reply NOTHING.' },
       { role: 'user', content: recent.substring(0, 3000) }
     ], 80);
-    if (!r || r === 'NOTHING' || r.toUpperCase().includes('NOTHING')) { showToast('Nothing memorable'); return; }
-    if (memories.some(m => m.toLowerCase() === r.toLowerCase())) { showToast('Already saved ✦'); return; }
+    if (!r || r === 'NOTHING' || r.toUpperCase().includes('NOTHING')) { return; }
+    if (memories.some(m => m.toLowerCase() === r.toLowerCase())) { return; }
     memories.push(r); saveMem(); showToast('Memory Saved 🧠');
     addBotMsg(`<div class="memnot">🧠 Memory Saved: ${escH(r)}</div>`);
   } catch { showToast('Memory save failed'); }
@@ -1853,7 +1868,7 @@ async function sendMsg() {
   // /weather
   if (/^(\/weather|!weather)\s+/i.test(msg)) {
     const city = msg.replace(/^(\/weather|!weather)\s+/i,'').trim();
-    inp.value='';inp.style.height='auto';updCC('');addUserMsg(msg);addThk();
+    inp.value='';inp.style.height='auto';updCC('');dismissWelcome();addUserMsg(msg);addThk();
     try {
       const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://wttr.in/${encodeURIComponent(city)}?format=j1`)}`);
       const d = await r.json(); const w = JSON.parse(d.contents);
@@ -1865,7 +1880,7 @@ async function sendMsg() {
   // /gif
   if (/^(\/gif|!gif)\s+/i.test(msg)) {
     const q = msg.replace(/^(\/gif|!gif)\s+/i,'').trim();
-    inp.value='';inp.style.height='auto';updCC('');addUserMsg(msg);addThk();
+    inp.value='';inp.style.height='auto';updCC('');dismissWelcome();addUserMsg(msg);addThk();
     try {
       const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(q)}&key=AIzaSyAyimkuYQYF_FXVALexPzpuxuYm3qjwQbI&limit=1`)}`);
       const d = await r.json(); const data = JSON.parse(d.contents);
@@ -1878,7 +1893,7 @@ async function sendMsg() {
   // /define
   if (/^(\/define|!define)\s+/i.test(msg)) {
     const word = msg.replace(/^(\/define|!define)\s+/i,'').trim().split(' ')[0];
-    inp.value='';inp.style.height='auto';updCC('');addUserMsg(msg);addThk();
+    inp.value='';inp.style.height='auto';updCC('');dismissWelcome();addUserMsg(msg);addThk();
     try {
       const r = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
       const d = await r.json();
@@ -1901,8 +1916,8 @@ async function sendMsg() {
     return;
   }
   // memory cmds
-  if (/^\/memory_save$/i.test(msg))   { inp.value='';inp.style.height='auto';updCC('');addUserMsg(msg);await aiSaveMem();return; }
-  if (/^\/memory_recall$/i.test(msg)) { inp.value='';inp.style.height='auto';updCC('');addUserMsg(msg);addBotMsg(memories.length?`Here's what I remember:\n${memories.map((m,i)=>`${i+1}. ${m}`).join('\n')}`:"No memories yet.");return; }
+  if (/^\/memory_save$/i.test(msg))   { inp.value='';inp.style.height='auto';updCC('');dismissWelcome();addUserMsg(msg);await aiSaveMem();return; }
+  if (/^\/memory_recall$/i.test(msg)) { inp.value='';inp.style.height='auto';updCC('');dismissWelcome();addUserMsg(msg);addBotMsg(memories.length?`Here's what I remember:\n${memories.map((m,i)=>`${i+1}. ${m}`).join('\n')}`:"No memories yet.");return; }
   // upside down easter egg
   if (['!strangerthings','!upsidedown','!vecna','!demogorgon'].some(t=>msg.toLowerCase().startsWith(t))) { inp.value='';inp.style.height='auto';updCC('');addUserMsg(msg);enterUD();return; }
   // image gen
@@ -1916,6 +1931,7 @@ async function sendMsg() {
   }
   // normal chat
   if (!currentChatId) startNewChatId();
+  dismissWelcome();
   addUserMsg(msg); inp.value='';inp.style.height='auto';updCC('');
   document.getElementById('starters')?.remove(); document.getElementById('sreplies')?.remove();
   const uc = document.querySelectorAll('#chatWrap .mg.user').length;
@@ -2026,17 +2042,95 @@ function showSR() {
   });
   w.appendChild(d); w.scrollTop=w.scrollHeight; setTimeout(() => d.remove(), 10000);
 }
-const STARTERS = ['Explain something complex simply','Help me debug code','Write a short story about…','Pros and cons of…','Give me 5 ideas for…','Help me write an email'];
-function renderStarters() {
-  const w = document.getElementById('chatWrap'); if (document.getElementById('starters')) return;
-  const d = document.createElement('div'); d.id='starters';
-  [...STARTERS].sort(()=>Math.random()-.5).slice(0,4).forEach(s => {
-    const b = document.createElement('button'); b.className='stbtn'; b.textContent=s;
-    b.onclick = () => { const i=document.getElementById('ui'); i.value=s.replace('…',''); i.focus(); updCC(i.value); d.remove(); };
-    d.appendChild(b);
+// ═══════════════════════════════════════════════════════
+//  WELCOME SCREEN
+// ═══════════════════════════════════════════════════════
+const GREETINGS = [
+  h => `Good morning, ${h} ☀️`,
+  h => `Good afternoon, ${h} ✦`,
+  h => `Good evening, ${h} 🌙`,
+  h => `Late night session, ${h} 🌙`,
+  h => `Epic day, ${h}?`,
+  h => `Chill vibes, ${h}? ☕️`,
+  h => `Back again, ${h} ✦`,
+  h => `What's good, ${h}?`,
+  h => `Ready when you are, ${h}`,
+  h => `Let's cook, ${h} 🔥`,
+  h => `Big brain time, ${h}`,
+  h => `Alright ${h}, let's go`,
+];
+const GREETING_SUBS = [
+  'What\'s on your mind?',
+  'Ask me anything.',
+  'Let\'s figure something out.',
+  'I\'m all ears.',
+  'What are we working on?',
+  'Start typing and I\'ll follow.',
+  'No dumb questions here.',
+];
+const WC_STARTERS = [
+  'Explain something complex simply',
+  'Help me debug some code',
+  'Give me 5 ideas for…',
+  'Write a short story about…',
+  'Pros and cons of…',
+  'Help me write an email',
+  'What should I know about…',
+  'Roast my idea:',
+];
+
+function showWelcome() {
+  const ws = document.getElementById('welcomeScreen');
+  if (!ws) return;
+  ws.classList.remove('hidden','gone');
+
+  // Pick greeting based on time of day
+  const hour = new Date().getHours();
+  let greetingFn;
+  if      (hour >= 5  && hour < 12) greetingFn = GREETINGS[0];
+  else if (hour >= 12 && hour < 17) greetingFn = GREETINGS[1];
+  else if (hour >= 17 && hour < 22) greetingFn = GREETINGS[2];
+  else if (hour >= 22 || hour < 2)  greetingFn = GREETINGS[3];
+  else {
+    greetingFn = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
+  }
+  // Occasionally use a fun one regardless of time
+  if (Math.random() < 0.35) greetingFn = GREETINGS[4 + Math.floor(Math.random() * (GREETINGS.length - 4))];
+
+  const name = userProfile.name?.trim() || currentUser?.displayName?.split(' ')[0] || '';
+  document.getElementById('wcGreeting').textContent = greetingFn(name).replace(', ,',' —').replace(', ?','?');
+  document.getElementById('wcSub').textContent = GREETING_SUBS[Math.floor(Math.random() * GREETING_SUBS.length)];
+
+  // Starter chips
+  const sc = document.getElementById('wcStarters'); sc.innerHTML = '';
+  [...WC_STARTERS].sort(() => Math.random()-.5).slice(0,4).forEach(s => {
+    const b = document.createElement('button'); b.className = 'wc-btn'; b.textContent = s;
+    b.onclick = () => {
+      const inp = document.getElementById('ui');
+      inp.value = s.replace('…','').replace(':','');
+      inp.focus(); updCC(inp.value);
+      dismissWelcome();
+    };
+    sc.appendChild(b);
   });
-  w.appendChild(d);
 }
+
+function dismissWelcome(instant) {
+  const ws = document.getElementById('welcomeScreen');
+  if (!ws || ws.classList.contains('gone')) return;
+  if (instant) { ws.classList.add('gone'); return; }
+  ws.classList.add('hidden');
+  setTimeout(() => ws.classList.add('gone'), 420);
+}
+
+async function newChat() {
+  startNewChatId();
+  const w = document.getElementById('chatWrap'); w.innerHTML = '';
+  loadSavedChats(); updTopBar();
+  showWelcome();
+}
+
+function renderStarters() { /* replaced by welcome screen — no-op */ }
 
 // ═══════════════════════════════════════════════════════
 //  MARKDOWN
@@ -2111,18 +2205,15 @@ function loadChat(id) {
   });
   w.scrollTop=w.scrollHeight; updTopBar();
   document.querySelectorAll('.ci').forEach(b=>b.classList.toggle('cur',b.dataset.id===id));
+  // show welcome if this chat has no messages yet
+  if (!d.messages || d.messages.length === 0) showWelcome();
+  else dismissWelcome(true);
 }
 function startNewChatId() {
   currentChatId=`chat_${Date.now()}`; convHist=[]; sessionTokens=0;
   const cl=JSON.parse(localStorage.getItem('chatList')||'[]');
   cl.unshift({id:currentChatId,name:'New Chat'});
   localStorage.setItem('chatList',JSON.stringify(cl));
-}
-async function newChat() {
-  startNewChatId();
-  const w=document.getElementById('chatWrap'); w.innerHTML='';
-  addBotMsg(`${rand(["Howdy 🤠! I'm Indy","Indy here! 🤠","Sup! I'm Indy"])} — what can I help you with?`,false);
-  loadSavedChats(); updTopBar(); setTimeout(renderStarters,120);
 }
 async function renameChatAfterFirst(id, msg) {
   const name = await genChatName(msg);
@@ -2532,6 +2623,8 @@ function initApp() {
 
   updTopBar(); updMemBadge(); getStreak();
   switchView('chat');
+  // Show welcome if chat is empty on load
+  setTimeout(() => { const w=document.getElementById('chatWrap'); if(!w||!w.children.length) showWelcome(); }, 200);
 }
 </script>
 
