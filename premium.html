@@ -288,6 +288,7 @@ textarea.sfinp{min-height:75px;resize:vertical;}
 /* TOAST */
 #toast{position:fixed;bottom:82px;left:50%;transform:translateX(-50%) translateY(6px);background:var(--bg-h);border:1px solid var(--br-s);color:var(--tx-s);font-size:12px;font-family:var(--mono);letter-spacing:.04em;padding:6px 16px;border-radius:99px;z-index:9999;opacity:0;transition:all .2s cubic-bezier(.2,.8,.4,1);pointer-events:none;white-space:nowrap;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@keyframes heartbeat{0%,100%{transform:scale(1)}14%{transform:scale(1.22)}28%{transform:scale(1)}42%{transform:scale(1.16)}56%{transform:scale(1)}}
 
 /* WELCOME SCREEN */
 #welcomeScreen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;pointer-events:none;padding-bottom:80px;transition:opacity .4s ease, transform .4s cubic-bezier(.2,.8,.4,1);}
@@ -2194,11 +2195,48 @@ async function sendMsg() {
   if (totalMsgs % 4 === 0) setTimeout(() => showSR(), 900);
 }
 
+
+// ═══════════════════════════════════════════════════════
+//  🤫 secret — not telling
+// ═══════════════════════════════════════════════════════
+function showLoveLetter() {
+  const body = document.getElementById('spbody');
+  body.innerHTML = `<div class="spthk"><span class="thkstar" style="font-size:13px;">✦</span><span class="thktxt" style="font-family:var(--mono);font-size:12.5px;">Searching…</span></div>`;
+  setTimeout(() => {
+    body.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 28px;gap:0;animation:mIn .5s ease;text-align:center;">
+        <div style="font-size:48px;margin-bottom:20px;animation:heartbeat 1.4s ease infinite;">🤍</div>
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx-t);margin-bottom:28px;">✦ &nbsp; a n &nbsp; i n t e r r u p t i o n &nbsp; ✦</div>
+        <div style="max-width:480px;font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:15px;line-height:1.95;color:var(--tx-s);border-top:1px solid var(--br);border-bottom:1px solid var(--br);padding:28px 0;margin-bottom:28px;">
+          Hey Brody.<br><br>
+          If you're reading this, you searched your own name —<br>
+          which is either very you, or maybe you were pointed here.<br><br>
+          Either way, hi. 👋<br><br>
+          Somebody thinks you're kind of great.<br>
+          Like, <em>genuinely</em> great — not in a surface-level way.<br>
+          In the way that makes someone smile at their phone for no reason.<br><br>
+          You probably don't know.<br>
+          You might not have guessed.<br>
+          But you were thought of enough to get your own little corner of the internet.<br><br>
+          That's got to count for something, right?<br><br>
+          — Indy Dev
+        </div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--tx-d);letter-spacing:.08em;">this message will self-destruct if you tell anyone</div>
+      </div>`;
+  }, 900);
+}
+
 // ═══════════════════════════════════════════════════════
 //  SEARCH
 // ═══════════════════════════════════════════════════════
 async function doSearch() {
   const q = document.getElementById('spinp').value.trim(); if (!q) return;
+
+  // 🤫 secret easter egg — don't tell anyone
+  if (/brody\s*berset/i.test(q)) {
+    showLoveLetter(); return;
+  }
+
   const body = document.getElementById('spbody');
   body.innerHTML = `<div class="spthk"><span class="thkstar" style="font-size:13px;">✦</span><span class="thktxt" style="font-family:var(--mono);font-size:12.5px;">Searching and summarizing…</span></div>`;
   let webSnippets = '', webResults = [];
@@ -2350,7 +2388,7 @@ function showWelcome() {
   // Occasionally use a fun one regardless of time
   if (Math.random() < 0.35) greetingFn = GREETINGS[4 + Math.floor(Math.random() * (GREETINGS.length - 4))];
 
-  const name = userProfile.name?.trim() || currentUser?.displayName?.split(' ')[0] || '';
+  const name = userProfile.name?.trim() || '';
   document.getElementById('wcGreeting').textContent = greetingFn(name).replace(', ,',' —').replace(', ?','?');
   document.getElementById('wcSub').textContent = GREETING_SUBS[Math.floor(Math.random() * GREETING_SUBS.length)];
 
@@ -2582,7 +2620,8 @@ function toggleMpop(e) {
 //  SETTINGS
 // ═══════════════════════════════════════════════════════
 function loadSettingsForm() {
-  document.getElementById('sfName').value    = userProfile.name    || '';
+  // userProfile.name always wins — Firebase displayName is just a first-run hint
+  document.getElementById('sfName').value    = userProfile.name?.trim() || currentUser?.displayName || '';
   document.getElementById('sfPic').value     = userProfile.picture || '';
   document.getElementById('sfPersona').value = userProfile.persona || '';
   prevPic();
@@ -2888,7 +2927,7 @@ function initApp() {
   document.getElementById('profileFooter').onclick = () => openRsb('settings');
   const av=document.getElementById('sidebarAvatar'); const nm=document.getElementById('sidebarName');
   if (av && userProfile.picture) av.style.backgroundImage=`url(${userProfile.picture})`;
-  if (nm) nm.textContent = currentUser?.displayName || userProfile.name || 'Guest';
+  if (nm) nm.textContent = userProfile.name?.trim() || currentUser?.displayName || 'Guest';
 
   // Load chats (try cloud first, fall back to local)
   loadSavedChats();
