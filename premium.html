@@ -128,6 +128,19 @@ hr{border:none;border-top:1px solid var(--br);margin:5px 0;}
 .mdb td{border:1px solid var(--br);padding:6px 10px;color:var(--tx-s);}.mdb tr:hover td{background:var(--hv);}
 .mdb code:not(.hlc){background:var(--bg-h);border:1px solid var(--br);padding:1px 5px;border-radius:var(--r2);font-family:var(--mono);font-size:12px;color:var(--accent);}
 .cbw{margin:10px 0;border:1px solid var(--br);border-radius:var(--r8);overflow:hidden;background:var(--bg-e);}
+.cb-menu-wrap{position:relative;display:inline-flex;}
+.cb-menu-btn{letter-spacing:.1em;}
+.cb-dropdown{display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg-c);border:1px solid var(--br-s);border-radius:var(--r8);box-shadow:0 8px 28px rgba(0,0,0,.5);min-width:190px;overflow:hidden;z-index:500;}
+.cb-dropdown.open{display:block;animation:mIn .14s ease;}
+.cb-dropdown button{display:block;width:100%;padding:9px 14px;background:transparent;border:none;text-align:left;color:var(--tx-s);font-family:var(--mono);font-size:11.5px;cursor:pointer;transition:background .1s;border-bottom:1px solid var(--br);}
+.cb-dropdown button:last-child{border-bottom:none;}
+.cb-dropdown button:hover{background:var(--hv);color:var(--tx);}
+/* IDE drag/drop */
+.fdi.drag-over,.fii.drag-over{background:var(--accent-g)!important;border:1px dashed var(--accent);border-radius:var(--r2);}
+.fdi[draggable],.fii[draggable]{cursor:grab;}
+.fdi[draggable]:active,.fii[draggable]:active{cursor:grabbing;opacity:.6;}
+/* IDE edit indicator */
+.ide-editing-badge{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;color:var(--orange);background:rgba(237,168,74,.1);border:1px solid rgba(237,168,74,.2);border-radius:3px;padding:1px 7px;letter-spacing:.06em;margin-left:6px;}
 .cbh{display:flex;justify-content:space-between;align-items:center;padding:5px 12px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--br);font-size:9.5px;color:var(--tx-t);font-family:var(--mono);}
 .cbc{background:transparent;border:1px solid var(--br);color:var(--tx-t);font-size:9.5px;padding:2px 7px;border-radius:var(--r2);cursor:pointer;transition:all .12s;}
 .cbc:hover{background:var(--hv);border-color:var(--br-s);color:var(--tx-s);}
@@ -1077,6 +1090,7 @@ Discuss anything a truth-seeking friend would. Genuinely off-limits (illegal etc
   if (userProfile.name?.trim()) base += `\n\nSpeaking with ${userProfile.name.trim()}. Use their name occasionally when natural.`;
   base += getMemBlock();
   base += getPersonalityBlock();
+  base += getIdeFileBlock();
   base += CMD_BLOCK;
   return base;
 }
@@ -1096,16 +1110,21 @@ async function apiCall(msgs, maxT = 2048, mdl = 'llama-3.3-70b-versatile') {
 }
 async function apiFast(msgs, maxT = 512) { return apiCall(msgs, maxT, 'llama-3.1-8b-instant'); }
 async function getAIReply(msg) {
+  // detect if user is asking to edit an IDE file
+  const editTarget = detectFileEditRequest(msg);
+  if (editTarget) _pendingFileEdit = editTarget;
+
   convHist.push({ role: 'user', content: msg });
   if (convHist.length > 40) convHist = convHist.slice(-40);
   sessionTokens += Math.ceil(msg.length / 4);
   try {
-    const r = await apiCall([{ role: 'system', content: getSysPrompt() }, ...convHist]);
+    let r = await apiCall([{ role: 'system', content: getSysPrompt() }, ...convHist]);
     convHist.push({ role: 'assistant', content: r });
     sessionTokens += Math.ceil(r.length / 4);
     updTopBar();
-    // silently update personality model from every user message
     updatePersonalitySilently(msg);
+    // check if reply contains a file edit
+    r = await checkForFileEdit(r, msg);
     return await procCmds(r);
   } catch(e) { convHist.pop(); console.error(e); return 'Indy is taking a breather — try again in a moment ✦'; }
 }
@@ -2862,18 +2881,7 @@ function ideRun() {
     const s=document.createElement('style');s.id='_ideCSS';s.textContent=code;document.head.appendChild(s);pr('CSS injected ✦','ok');
   } else { pr(`Can't run ${lang} in browser.`,'inf'); pr('JavaScript, TypeScript, HTML, JSON, CSS supported.','inf'); }
 }
-function renderIdeTree() {
-  const el=document.getElementById('ideTreeBody'); if(!el)return;
-  const allPaths=Object.keys(ideFiles); let html='';
-  ideFolders.forEach(folder=>{
-    html+=`<div class="fdi"><span>📁</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;">${folder}</span><button class="fdel" onclick="delFolder('${folder}',event)">⨯</button></div>`;
-    allPaths.filter(p=>p.startsWith(folder)).forEach(path=>{const name=path.replace(folder,'');html+=`<div class="fii${path===ideActiveFile?' act':''}" onclick="ideOpenFile('${path}')"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;">${name}</span><button class="fdel" onclick="ideDeleteFile('${path}',event)">⨯</button></div>`;});
-  });
-  const rootFiles=allPaths.filter(p=>!ideFolders.some(f=>p.startsWith(f)));
-  rootFiles.forEach(path=>{html+=`<div class="fii${path===ideActiveFile?' act':''}" onclick="ideOpenFile('${path}')"><span style="flex:1;">${path}</span><button class="fdel" onclick="ideDeleteFile('${path}',event)">⨯</button></div>`;});
-  if(!html)html='<div style="padding:12px 9px;font-family:var(--mono);font-size:10.5px;color:var(--tx-d);">No files yet</div>';
-  el.innerHTML=html;
-}
+
 function delFolder(folder,e){e.stopPropagation();if(!confirm(`Delete folder ${folder} and all files?`))return;Object.keys(ideFiles).filter(p=>p.startsWith(folder)).forEach(p=>delete ideFiles[p]);ideOpenTabs=ideOpenTabs.filter(p=>!p.startsWith(folder));ideFolders=ideFolders.filter(f=>f!==folder);ideSaveFS();renderIdeTree();renderIdeTabs();}
 function renderIdeTabs() {
   const el=document.getElementById('ideFileTabs'); if(!el)return;
@@ -2939,6 +2947,279 @@ document.addEventListener('dblclick', e => {
   const b = e.target.closest('.mg.user .mbub');
   if (b) { const t=(b.innerText||'').trim(); const inp=document.getElementById('ui'); inp.value=t; inp.focus(); updCC(t); inp.style.height='auto'; inp.style.height=Math.min(inp.scrollHeight,200)+'px'; showToast('Message loaded for editing'); }
 });
+
+
+// ═══════════════════════════════════════════════════════
+//  CODE BLOCK MENU ACTIONS
+// ═══════════════════════════════════════════════════════
+function toggleCbMenu(btn) {
+  const dd = btn.nextElementSibling;
+  const isOpen = dd.classList.contains('open');
+  // close all others first
+  document.querySelectorAll('.cb-dropdown.open').forEach(d => d.classList.remove('open'));
+  if (!isOpen) {
+    dd.classList.add('open');
+    // close on outside click
+    setTimeout(() => {
+      document.addEventListener('click', function _close(e) {
+        if (!dd.contains(e.target)) { dd.classList.remove('open'); document.removeEventListener('click', _close); }
+      });
+    }, 10);
+  }
+}
+
+function cbAction(btn, action) {
+  const cbw  = btn.closest('.cbw');
+  const dd   = btn.closest('.cb-dropdown');
+  dd?.classList.remove('open');
+  const code = cbw?.querySelector('code')?.textContent || '';
+  const lang = cbw?.dataset?.lang || 'js';
+
+  if (action === 'new') {
+    // prompt for filename, default to something sensible based on lang
+    const extMap = { javascript:'js', typescript:'ts', python:'py', html:'html', css:'css', json:'json', c:'c', cpp:'cpp', java:'java', go:'go', rust:'rs', ruby:'rb', php:'php', bash:'sh', sql:'sql', markdown:'md' };
+    const ext   = extMap[lang] || lang;
+    const defName = `snippet_${Date.now().toString(36)}.${ext}`;
+    const name  = prompt(`Save as new IDE file:\n(folder/filename or just filename)`, defName);
+    if (!name) return;
+    const folder = ideFolders.find(f => name.startsWith(f)) || '';
+    const path   = folder ? name : name;
+    ideFiles[path] = code;
+    if (folder && !ideFolders.includes(folder)) ideFolders.push(folder);
+    ideSaveFS();
+    ideOpenFile(path);
+    openRsb('code');
+    showToast(`Saved to IDE: ${path} ✦`);
+  }
+  else if (action === 'replace') {
+    if (!ideActiveFile) { showToast('No file open in IDE — open one first'); openRsb('code'); return; }
+    if (!confirm(`Replace contents of "${ideActiveFile}" with this code?`)) return;
+    ideFiles[ideActiveFile] = code;
+    ideSaveFS();
+    document.getElementById('ideEd').value = code;
+    ideUpdateLineNumbers();
+    showToast(`${ideActiveFile} replaced ✦`);
+    openRsb('code');
+  }
+  else if (action === 'append') {
+    if (!ideActiveFile) { showToast('No file open in IDE — open one first'); openRsb('code'); return; }
+    ideFiles[ideActiveFile] = (ideFiles[ideActiveFile] || '') + '\n\n' + code;
+    ideSaveFS();
+    document.getElementById('ideEd').value = ideFiles[ideActiveFile];
+    ideUpdateLineNumbers();
+    showToast(`Appended to ${ideActiveFile} ✦`);
+    openRsb('code');
+  }
+  else if (action === 'chat') {
+    const snippet = code.length > 600 ? code.substring(0, 600) + '\n…(truncated)' : code;
+    document.getElementById('ui').value = `Explain this ${lang} code:\n\`\`\`${lang}\n${snippet}\n\`\`\``;
+    updCC(document.getElementById('ui').value);
+    document.getElementById('ui').focus();
+    switchView('chat');
+    showToast('Ready — hit send to ask Indy ✦');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  IDE DRAG & DROP FILE ORGANISATION
+// ═══════════════════════════════════════════════════════
+let _ideDragPath = null;
+
+function renderIdeTree() {
+  const el = document.getElementById('ideTreeBody'); if (!el) return;
+  const allPaths = Object.keys(ideFiles); let html = '';
+
+  ideFolders.forEach(folder => {
+    html += `<div class="fdi" draggable="true"
+      data-folder="${folder}"
+      ondragstart="ideDragStart(event,'folder','${folder}')"
+      ondragover="ideDragOver(event,this)"
+      ondragleave="ideDragLeave(this)"
+      ondrop="ideDrop(event,'folder','${folder}')"
+    ><span>📁</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;">${folder}</span><button class="fdel" onclick="delFolder('${folder}',event)">⨯</button></div>`;
+    allPaths.filter(p => p.startsWith(folder)).forEach(path => {
+      const name = path.replace(folder, '');
+      html += `<div class="fii${path === ideActiveFile ? ' act' : ''}" draggable="true"
+        data-path="${path}"
+        onclick="ideOpenFile('${path}')"
+        ondragstart="ideDragStart(event,'file','${path}')"
+        ondragover="ideDragOver(event,this)"
+        ondragleave="ideDragLeave(this)"
+        ondrop="ideDrop(event,'file','${path}')"
+      ><span style="flex:1;overflow:hidden;text-overflow:ellipsis;">${name}</span><button class="fdel" onclick="ideDeleteFile('${path}',event)">⨯</button></div>`;
+    });
+  });
+
+  const rootFiles = allPaths.filter(p => !ideFolders.some(f => p.startsWith(f)));
+  rootFiles.forEach(path => {
+    html += `<div class="fii${path === ideActiveFile ? ' act' : ''}" draggable="true"
+      data-path="${path}"
+      onclick="ideOpenFile('${path}')"
+      ondragstart="ideDragStart(event,'file','${path}')"
+      ondragover="ideDragOver(event,this)"
+      ondragleave="ideDragLeave(this)"
+      ondrop="ideDrop(event,'file','${path}')"
+    ><span style="flex:1;">${path}</span><button class="fdel" onclick="ideDeleteFile('${path}',event)">⨯</button></div>`;
+  });
+
+  if (!html) html = '<div style="padding:12px 9px;font-family:var(--mono);font-size:10.5px;color:var(--tx-d);">No files yet</div>';
+  el.innerHTML = html;
+}
+
+function ideDragStart(e, type, pathOrFolder) {
+  _ideDragPath = { type, path: pathOrFolder };
+  e.dataTransfer.effectAllowed = 'move';
+}
+function ideDragOver(e, el) {
+  e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+  el.classList.add('drag-over');
+}
+function ideDragLeave(el) { el.classList.remove('drag-over'); }
+
+function ideDrop(e, targetType, targetPathOrFolder) {
+  e.preventDefault();
+  document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+  if (!_ideDragPath) return;
+
+  const src = _ideDragPath;
+  _ideDragPath = null;
+
+  if (src.type === 'file') {
+    const srcPath = src.path;
+    const fileName = srcPath.split('/').pop();
+
+    if (targetType === 'folder') {
+      // Drop file INTO a folder
+      const newPath = targetPathOrFolder + fileName;
+      if (newPath === srcPath) return; // no-op
+      ideFiles[newPath] = ideFiles[srcPath];
+      delete ideFiles[srcPath];
+      if (ideActiveFile === srcPath) ideActiveFile = newPath;
+      // update open tabs
+      const ti = ideOpenTabs.indexOf(srcPath);
+      if (ti > -1) ideOpenTabs[ti] = newPath;
+      ideSaveFS(); renderIdeTree(); renderIdeTabs();
+      if (ideActiveFile === newPath) { document.getElementById('ideEd').value = ideFiles[newPath] || ''; ideUpdateLineNumbers(); }
+      showToast(`Moved → ${newPath}`);
+    }
+    else if (targetType === 'file') {
+      // Drop file ONTO another file — nest src INSIDE a sub-folder named after target file
+      // e.g. drop script.js onto index.html → index.html/ folder
+      const targetFile = targetPathOrFolder;
+      const folderName = targetFile.split('/').pop() + '/';
+      const targetFolder = (targetFile.includes('/') ? targetFile.substring(0, targetFile.lastIndexOf('/') + 1) : '') + folderName;
+      if (!ideFolders.includes(targetFolder)) ideFolders.push(targetFolder);
+      const newPath = targetFolder + fileName;
+      if (newPath === srcPath) return;
+      ideFiles[newPath] = ideFiles[srcPath];
+      delete ideFiles[srcPath];
+      if (ideActiveFile === srcPath) ideActiveFile = newPath;
+      const ti = ideOpenTabs.indexOf(srcPath);
+      if (ti > -1) ideOpenTabs[ti] = newPath;
+      ideSaveFS(); renderIdeTree(); renderIdeTabs();
+      if (ideActiveFile === newPath) { document.getElementById('ideEd').value = ideFiles[newPath] || ''; ideUpdateLineNumbers(); }
+      showToast(`Moved → ${newPath}`);
+    }
+  }
+  else if (src.type === 'folder' && targetType === 'folder') {
+    // Nest one folder inside another — rename all its files
+    const srcFolder = src.path;
+    if (srcFolder === targetPathOrFolder) return;
+    const newFolderPath = targetPathOrFolder + srcFolder;
+    Object.keys(ideFiles).filter(p => p.startsWith(srcFolder)).forEach(p => {
+      const newP = p.replace(srcFolder, newFolderPath);
+      ideFiles[newP] = ideFiles[p];
+      delete ideFiles[p];
+      const ti = ideOpenTabs.indexOf(p);
+      if (ti > -1) ideOpenTabs[ti] = newP;
+      if (ideActiveFile === p) ideActiveFile = newP;
+    });
+    ideFolders = ideFolders.filter(f => f !== srcFolder);
+    if (!ideFolders.includes(newFolderPath)) ideFolders.push(newFolderPath);
+    ideSaveFS(); renderIdeTree(); renderIdeTabs();
+    showToast(`Folder moved → ${newFolderPath}`);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  INDY EDITS FILES DIRECTLY
+// ═══════════════════════════════════════════════════════
+// Indy can detect "edit my X file" requests and patch files directly
+let _pendingFileEdit = null; // { path, instruction }
+
+function detectFileEditRequest(msg) {
+  // Patterns: "edit my index.html", "update script.js", "fix the styles in style.css",
+  // "rewrite main.py", "add X to app.js", "change Y in component.jsx"
+  const patterns = [
+    /(?:edit|update|fix|rewrite|modify|change|refactor|improve|add .+ to|remove .+ from)\s+(?:my\s+)?(?:the\s+)?([^\s,]+\.[a-z0-9]+)/i,
+    /(?:in|inside|to)\s+([^\s,]+\.[a-z0-9]{1,6})\b/i,
+  ];
+  for (const pat of patterns) {
+    const m = msg.match(pat);
+    if (m) {
+      const filename = m[1].replace(/['"]/g, '');
+      // Find matching file in IDE (by name, partial match)
+      const match = Object.keys(ideFiles).find(p =>
+        p.endsWith('/' + filename) || p === filename || p.toLowerCase().includes(filename.toLowerCase())
+      );
+      if (match) return match;
+    }
+  }
+  return null;
+}
+
+function getIdeFileBlock() {
+  // Inject open/relevant IDE files into system prompt context
+  if (!ideActiveFile || !ideFiles[ideActiveFile]) return '';
+  const content = ideFiles[ideActiveFile];
+  const preview = content.length > 3000 ? content.substring(0, 3000) + '\n…[truncated]' : content;
+  return `\n\n=== INDY IDE — ACTIVE FILE ===\nFile: ${ideActiveFile}\n\`\`\`\n${preview}\n\`\`\`\nIf the user asks you to edit, fix, or update this file, respond with the COMPLETE updated file contents wrapped in a code block with the filename as a comment on the first line: // filename: ${ideActiveFile}\nDo NOT respond with partial snippets — always return the full file content so it can be written directly.`;
+}
+
+// Intercept AI replies that contain a full file edit response
+async function checkForFileEdit(reply, originalMsg) {
+  if (!_pendingFileEdit) return reply;
+  const path = _pendingFileEdit;
+  _pendingFileEdit = null;
+
+  // Look for code block with filename comment
+  const fileMatch = reply.match(/\/\/\s*filename:\s*([^\n]+)\n([\s\S]*?)(?:```|$)/i) ||
+                    reply.match(/```[a-z]*\n\/\/\s*filename:\s*([^\n]+)\n([\s\S]*?)```/i) ||
+                    reply.match(/```[a-z]*\n#\s*filename:\s*([^\n]+)\n([\s\S]*?)```/i);
+
+  if (fileMatch) {
+    const newContent = fileMatch[2] || fileMatch[1];
+    const detectedPath = fileMatch[1]?.trim();
+    const targetPath = Object.keys(ideFiles).find(p => p.endsWith('/' + (detectedPath || '')) || p === detectedPath) || path;
+    if (targetPath && ideFiles[targetPath] !== undefined) {
+      ideFiles[targetPath] = newContent.trim();
+      ideSaveFS();
+      if (ideActiveFile === targetPath) {
+        document.getElementById('ideEd').value = newContent.trim();
+        ideUpdateLineNumbers();
+      }
+      showToast(`✦ ${targetPath} updated by Indy`);
+      openRsb('code');
+      return reply + `\n\n<div class="ide-editing-badge">⚡ IDE Updated: ${targetPath}</div>`;
+    }
+  }
+  // Fallback: look for any code block and write to the pending file
+  const codeMatch = reply.match(/```[a-z]*\n([\s\S]+?)```/);
+  if (codeMatch && path) {
+    const newContent = codeMatch[1].trim();
+    // Only auto-write if user explicitly asked to edit
+    const wasEditRequest = /^(?:edit|update|fix|rewrite|modify|refactor|improve)\b/i.test(originalMsg);
+    if (wasEditRequest && confirm(`Indy wants to update "${path}" — apply the changes?`)) {
+      ideFiles[path] = newContent;
+      ideSaveFS();
+      if (ideActiveFile === path) { document.getElementById('ideEd').value = newContent; ideUpdateLineNumbers(); }
+      showToast(`✦ ${path} updated`);
+      openRsb('code');
+      return reply + `\n\n<div class="ide-editing-badge">⚡ IDE Updated: ${path}</div>`;
+    }
+  }
+  return reply;
+}
 
 // ═══════════════════════════════════════════════════════
 //  RSB RESIZE HANDLE
@@ -3242,8 +3523,11 @@ function initApp() {
 
       <div class="wn-section">
         <div class="wn-section-title">Code IDE</div>
-        <div class="wn-item"><div class="wn-icon">⌨</div><div class="wn-item-body"><div class="wn-item-title">Built-in Code IDE<span class="wn-item-tag new">New</span></div><div class="wn-item-desc">Full file tree, folders, multi-tab editor, syntax highlighting. Run JS/TS in-browser, preview HTML, validate JSON/CSS.</div></div></div>
-        <div class="wn-item"><div class="wn-icon">↔</div><div class="wn-item-body"><div class="wn-item-title">Resizable IDE Panel<span class="wn-item-tag new">New</span></div><div class="wn-item-desc">Drag the left edge of any right panel to resize it. Perfect for when you need more room to code.</div></div></div>
+        <div class="wn-item"><div class="wn-icon">⌨</div><div class="wn-item-body"><div class="wn-item-title">Built-in Code IDE<span class="wn-item-tag new">New</span></div><div class="wn-item-desc">Full file tree, folders, multi-tab editor, syntax highlighting, line numbers. Run JS/TS in-browser, preview HTML, validate JSON/CSS.</div></div></div>
+        <div class="wn-item"><div class="wn-icon">↔</div><div class="wn-item-body"><div class="wn-item-title">Resizable IDE Panel<span class="wn-item-tag new">New</span></div><div class="wn-item-desc">Drag the left edge of the panel to resize it to whatever width you need.</div></div></div>
+        <div class="wn-item"><div class="wn-icon">🗂</div><div class="wn-item-body"><div class="wn-item-title">Drag & Drop File Organisation<span class="wn-item-tag new">New</span></div><div class="wn-item-desc">Drag any file onto a folder to move it inside. Drag a file onto another file to nest it in a sub-folder named after that file. Drag folders into other folders too.</div></div></div>
+        <div class="wn-item"><div class="wn-icon">•••</div><div class="wn-item-body"><div class="wn-item-title">Code Block Actions<span class="wn-item-tag new">New</span></div><div class="wn-item-desc">Every code block Indy produces has a ••• menu. Save it as a new IDE file, replace or append to the active file, or ask Indy to explain it — all in one click.</div></div></div>
+        <div class="wn-item"><div class="wn-icon">✏️</div><div class="wn-item-body"><div class="wn-item-title">Indy Edits Your Files Directly<span class="wn-item-tag hot">Hot</span></div><div class="wn-item-desc">Say "edit my index.html" or "fix the bug in script.js" — Indy detects the file, reads its contents, and writes the updated version straight back into the IDE.</div></div></div>
       </div>
 
       <div class="wn-section">
