@@ -558,10 +558,15 @@ textarea.sfinp{min-height:75px;resize:vertical;}
     <div class="slbl">Chats</div>
     <div id="chatList"></div>
   </div>
-  <div class="lsf" id="profileFooter">
+<div class="lsf" id="profileFooter" style="flex-direction:column;gap:0;padding:0;">
+  <div onclick="openRsb('settings')" style="display:flex;align-items:center;gap:8px;padding:10px;width:100%;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--hv)'" onmouseout="this.style.background='transparent'">
     <div class="pfav" id="sidebarAvatar"></div>
     <span class="pfnm" id="sidebarName">Guest</span>
   </div>
+  <div onclick="doSignOut()" style="display:flex;align-items:center;gap:6px;padding:7px 10px;width:100%;cursor:pointer;border-top:1px solid var(--br);transition:background .15s;font-family:var(--mono);font-size:10px;color:var(--tx-d);letter-spacing:.04em;" onmouseover="this.style.color='var(--red)';this.style.background='rgba(224,80,80,.06)'" onmouseout="this.style.color='var(--tx-d)';this.style.background='transparent'" id="signOutBtn">
+    <span>⏻</span><span class="pfnm" style="font-size:10px;">Sign Out</span>
+  </div>
+</div>
 </div>
 
 <!-- MAIN -->
@@ -3942,6 +3947,11 @@ function initApp() {
     <button class="auth-btn" id="authSubmitBtn" onclick="authMode==='signup'?doSignUp():doSignIn()">Sign In</button>
     <div class="auth-err" id="authErr"></div>
     <div class="auth-toggle" id="authToggleText">No account? <span onclick="toggleAuthMode()">Create one</span></div>
+    <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--br);font-family:var(--mono);font-size:10px;color:var(--tx-d);text-align:center;line-height:1.8;letter-spacing:.02em;">
+  Your <span style="color:var(--accent);">IRELAND™️ CO</span> account works across all apps —<br>
+  <span style="color:var(--tx-t);">Indy Actions, Indy Tunes</span> and any future releases.<br>
+  <span style="opacity:.6;">One login. Every app.</span>
+</div>
   </div>
 </div>
 
