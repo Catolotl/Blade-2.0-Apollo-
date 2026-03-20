@@ -1287,17 +1287,567 @@ function runHackSequence() {
   }, 28);
 }
 
+
+// ═══════════════════════════════════════════════════════
+//  SHARED TERMINAL HELPERS
+// ═══════════════════════════════════════════════════════
+function mkC() {
+  return {
+    head: s=>`<span style="color:#b8b8ff;font-weight:600;">${s}</span>`,
+    key:  s=>`<span style="color:#4dda8a;">${s}</span>`,
+    val:  s=>`<span style="color:#eeeeee;">${s}</span>`,
+    str:  s=>`<span style="color:#ce9178;">${s}</span>`,
+    num:  s=>`<span style="color:#b5cea8;">${s}</span>`,
+    kw:   s=>`<span style="color:#569cd6;">${s}</span>`,
+    cmt:  s=>`<span style="color:#505050;">${s}</span>`,
+    ok:   s=>`<span style="color:#4dda8a;">${s}</span>`,
+    warn: s=>`<span style="color:#eda84a;">${s}</span>`,
+    err:  s=>`<span style="color:#e05555;">${s}</span>`,
+    acc:  s=>`<span style="color:#5ab8f5;">${s}</span>`,
+    pink: s=>`<span style="color:#ff80bf;">${s}</span>`,
+    mag:  s=>`<span style="color:#c586c0;">${s}</span>`,
+  };
+}
+function rHex(n=8){return [...Array(n)].map(()=>'0123456789abcdef'[Math.random()*16|0]).join('');}
+function rInt(a,b){return Math.floor(Math.random()*(b-a)+a);}
+function rChoice(a){return a[Math.random()*a.length|0];}
+function rUID(){return [...Array(32)].map(()=>'0123456789abcdef'[Math.random()*16|0]).join('').match(/.{8}/g).join('-');}
+
+function mkHeader(C, title, subtitle, extraRows) {
+  const W = 62;
+  const lines = [
+    C.head(`╔${'═'.repeat(W)}╗`),
+    C.head(`║`) + `  ${C.acc('✦ INDY AI')} ${C.cmt('·')} ${C.warn(title)} ${C.cmt(subtitle||'')}${''.padEnd(Math.max(0,W-14-(title.length)-(subtitle||'').length))}  ` + C.head(`║`),
+    C.head(`╠${'═'.repeat(W)}╣`),
+  ];
+  for (const [k,v] of extraRows) {
+    const kpad = k.padEnd(9);
+    const vstr = String(v);
+    lines.push(C.head(`║`) + `  ${C.key(kpad)} ${C.cmt('│')} ${C.val(vstr.substring(0,44).padEnd(44))}` + C.head(`║`));
+  }
+  lines.push(C.head(`╚${'═'.repeat(W)}╝`), ``);
+  return lines;
+}
+function mkFooter(C, statusLines) {
+  const W = 62;
+  const lines = [C.head(`┌${'─'.repeat(W)}┐`)];
+  for (const [icon,label,val] of statusLines) {
+    const row = `  ${icon} ${C.key(label.padEnd(18))} ${C.ok(val)}`;
+    lines.push(C.head(`│`) + row + C.head(`│`));
+  }
+  lines.push(C.head(`└${'─'.repeat(W)}┘`));
+  return lines;
+}
+
+function streamLines(lines, delay=22) {
+  const w = document.getElementById('chatWrap');
+  const g = document.createElement('div'); g.className='mg bot';
+  const bub = document.createElement('div'); bub.className='mbub';
+  const pre = document.createElement('pre');
+  pre.style.cssText='font-family:var(--mono);font-size:11.5px;line-height:1.65;background:transparent;overflow-x:auto;white-space:pre;';
+  bub.appendChild(pre); g.appendChild(bub); w.appendChild(g);
+  let i=0;
+  const iv=setInterval(()=>{
+    if(i>=lines.length){clearInterval(iv);bub.innerHTML+=botMetaHTML();saveChat();return;}
+    pre.innerHTML+=(i>0?'\n':'')+lines[i];
+    w.scrollTop=w.scrollHeight; i++;
+  },delay);
+  return {pre,bub,g,stopStream:()=>clearInterval(iv)};
+}
+
+// ═══════════════════════════════════════════════════════
+//  /execute — process execution dump
+// ═══════════════════════════════════════════════════════
+function runExecuteSequence() {
+  const C = mkC();
+  const pid = rInt(1000,65535);
+  const ts  = new Date().toISOString();
+  const header = mkHeader(C,'EXECUTE','— process dispatch', [
+    ['PID',    pid],
+    ['TIME',   ts],
+    ['BUILD',  `v3.${rInt(1,9)}.${rInt(10,99)}-release`],
+    ['THREAD', `0x${rHex(4)}:worker_${rInt(0,15)}`],
+    ['SCHED',  rChoice(['SCHED_FIFO','SCHED_RR','SCHED_DEADLINE'])],
+    ['SIGNAL', `SIG_NONE → SIG_EXEC (${rHex(4)})`],
+  ]);
+
+  // Brainfuck: process loader
+  const bf = [
+    C.cmt(`; ── PROCESS LOADER [Brainfuck/BF-Extended] pid=0x${rHex(4)} ───────────`),
+    C.cmt(`; mmap anonymous region, MAP_PRIVATE|MAP_ANONYMOUS, prot=EXEC|READ`),
+    C.kw(`>`) + C.num(`++++++++++`) + C.kw(`[`) + C.num(`>`) + C.kw(`+++++++>++++++++++>+++>+<<<<-`) + C.num(`]`) + C.cmt(`  ; init stack`),
+    C.num(`>`) + C.kw(`++.`) + C.num(`>`) + C.kw(`+.`) + C.str(`+++++++`) + C.kw(`..`) + C.str(`+++`) + C.kw(`.`) + C.num(`>`) + C.kw(`++`) + C.cmt(`                    ; push argv`),
+    C.kw(`[`) + C.num(`>`) + C.kw(`[-]`) + C.num(`>`) + C.kw(`[-]`) + C.num(`<<`) + C.kw(`-`) + C.num(`]`) + C.cmt(`                        ; zero bss`),
+    C.num(`>`) + C.kw(`>`) + C.num(`+`) + C.kw(`[`) + C.num(`<`) + C.kw(`+`) + C.num(`<`) + C.kw(`+`) + C.num(`>>`) + C.kw(`-`) + C.num(`]`) + C.cmt(`                    ; env copy`),
+    C.kw(`>>++++++++++<<[->`) + C.num(`+`) + C.kw(`>`) + C.num(`+`) + C.kw(`<<]>>`) + C.num(`[-<<`) + C.kw(`+`) + C.num(`>>]<.`) + C.cmt(` ; execve syscall`),
+    C.ok(`; [EXEC OK] entrypoint=0x${rHex(8)}  stack=0x${rHex(8)}  heap=0x${rHex(8)}`),
+    ``,
+  ];
+
+  // Malbolge: kernel trampoline — heavy
+  const malbolge = [
+    C.cmt(`; ── KERNEL TRAMPOLINE [Malbolge] ───────────────────────────────────`),
+    C.cmt(`; Malbolge self-modifies every instruction. Each cell = (cell+ip)%94`),
+    C.cmt(`; mapped to op: {jmp,out,in,rot,mov,nop,hlt,crazymul}`),
+    C.err(`('&%:9]!~}|z2Vxwv-,POqponl$Hjig%eB@@>}=<M:9wv6WsU2T|nm-,jcL(I&%$#"`),
+    C.warn(`\`_^\\[Z)!YXWVUTSRQPONMLKJIHGFEDCBAzyxwvutsrqponmlkjihgfedcba\`_^\\`),
+    C.pink(`]\\[ZYXWVUTSRQPONMLKJI!HGFEDCBA9876543210/.-,+*)('&%$#"!`),
+    C.err(`D\`9]!~}|z2Vxwv-,mPOqponl$Hjig%eB@@>}=<M:9wv6WsU2T|nm-,jcL`),
+    C.warn(`(I&%$#"\`_^\\[Z)!${rHex(24)}ONML`),
+    C.pink(`KJI!HGFEDCBA987654321${rHex(8)}0/.-,+*)('&%$`),
+    C.err(`; mut_cycle=${rInt(1,9)} · ip=0x${rHex(4)} · acc=0x${rHex(2)} · dp=0x${rHex(4)}`),
+    C.ok(`; [TRAMPOLINE OK] rings=0 · cpl=0 → cpl=3 · pid=${pid} dispatched`),
+    ``,
+  ];
+
+  // INTERCAL: syscall table
+  const intercal = [
+    C.cmt(`¢ ── SYSCALL DISPATCH TABLE [INTERCAL-72] ──────────────────────────`),
+    C.cmt(`¢ PLEASE NOTE all syscalls require PLEASE every 5th statement`),
+    C.kw(`PLEASE DO`) + ` ` + C.num(`.1`) + ` ` + C.kw(`<-`) + ` ` + C.str(`#59`) + ` ` + C.cmt(`          ¢ sys_execve`),
+    C.kw(`DO`) + ` ` + C.num(`.2`) + ` ` + C.kw(`<-`) + ` ` + C.str(`'V.1$#65535'~'#0$#65535'`) + ` ` + C.cmt(`¢ arg mask`),
+    C.kw(`PLEASE DO`) + ` ` + C.num(`.3`) + ` ` + C.kw(`<-`) + ` ` + C.str(`#9`) + ` ` + C.cmt(`           ¢ sys_mmap`),
+    C.kw(`DO`) + ` ` + C.num(`;1`) + ` ` + C.kw(`<-`) + ` ` + C.str(`#256`) + ` ` + C.cmt(`             ¢ alloc 256-cell array`),
+    C.kw(`PLEASE DO (1) NEXT`) + ` ` + C.cmt(`                  ¢ dispatch`),
+    C.key(`(1)`) + ` ` + C.kw(`DO PLEASE FORGET`) + ` ` + C.str(`#1`) + ` ` + C.cmt(`         ¢ pop stack`),
+    C.kw(`DO COME FROM (1)`) + ` ` + C.cmt(`                    ¢ spaghetti`),
+    C.kw(`PLEASE GIVE UP`) + ` ` + C.cmt(`                      ¢ HALT`),
+    C.ok(`¢ [SYSCALL OK] execve dispatched · retval=0x0 · errno=0`),
+    ``,
+  ];
+
+  // Whitespace: memory map
+  const ws = [
+    C.cmt(`; ── VIRTUAL MEMORY MAP [Whitespace] ───────────────────────────────`),
+    C.cmt(`; Whitespace: only SPC(S) TAB(T) LF(L) are meaningful`),
+    C.dim(`[S][S][T][T][S][L]  `) + C.cmt(`; push  0x${rHex(8)}  .text start`),
+    C.dim(`[T][S][S][S][T][L]  `) + C.cmt(`; store 0x${rHex(8)}  .data start`),
+    C.dim(`[S][T][T][S][S][L]  `) + C.cmt(`; push  0x${rHex(8)}  .bss start`),
+    C.dim(`[T][T][S][S][T][L]  `) + C.cmt(`; call  0x${rHex(8)}  mmap()`),
+    C.dim(`[S][S][S][T][T][L]  `) + C.cmt(`; push  0x${rHex(8)}  stack base`),
+    C.dim(`[T][S][T][T][S][L]  `) + C.cmt(`; store 0x${rHex(8)}  heap base`),
+    C.dim(`[L][T][L]            `) + C.cmt(`; ret   — return to caller`),
+    C.ok(`; [MMAP OK] 0x${rHex(8)}-0x${rHex(8)} · prot=RWX · flags=PRIVATE`),
+    ``,
+  ];
+
+  const footer = mkFooter(C,[
+    ['✓','EXEC_DISPATCH',   `pid=${pid} · retval=0x0`],
+    ['✓','STACK_FRAME',     `0x${rHex(8)} · depth=${rInt(2,32)}`],
+    ['✓','HEAP_ALLOC',      `${rInt(1,512)} KB · arena=main`],
+    ['✓','SIGNAL_MASK',     `SIG_NONE · pending=0`],
+    ['⚡','STATUS',          `PROCESS RUNNING`],
+  ]);
+
+  const allLines = [...header, ...bf, ...malbolge, ...intercal, ...ws, ...footer];
+  streamLines(allLines, 20);
+}
+
+// ═══════════════════════════════════════════════════════
+//  /kill — process termination sequence
+// ═══════════════════════════════════════════════════════
+function runKillSequence(target) {
+  const C = mkC();
+  const pid  = rInt(1000,65535);
+  const sig  = rChoice(['SIGKILL(9)','SIGTERM(15)','SIGABRT(6)','SIGQUIT(3)']);
+  const name = target || rChoice(['indy_worker','conv_daemon','ctx_manager','mem_alloc','tok_engine']);
+  const header = mkHeader(C,'KILL',`— terminate ${name}`,[
+    ['TARGET',  name],
+    ['PID',     pid],
+    ['SIGNAL',  sig],
+    ['USER',    currentUser?.email || 'root'],
+    ['TIME',    new Date().toISOString()],
+    ['FORCE',   sig.includes('KILL') ? 'YES — non-catchable' : 'NO — graceful'],
+  ]);
+
+  // Heavy Malbolge — kill routine
+  const malbolge = [
+    C.cmt(`; ── PROCESS TEARDOWN ROUTINE [Malbolge] ───────────────────────────`),
+    C.cmt(`; Signal handler invoked. Self-modifying teardown. ip mutates each cycle.`),
+    C.err(`(=<\`#9]~6ZY32Vw/R,%)`) + C.cmt(`  ; SIGKILL bootstrap · no handler`),
+    C.warn(`bmlk++jx0987654321  `) + C.cmt(`; free heap arenas`),
+    C.err(`('&%:9]!~}|z2Vxwv-,P`) + C.cmt(` ; munmap() all regions`),
+    C.pink(`OqponZY32Vwvuts-9]!~`) + C.cmt(` ; flush fd table`),
+    C.warn(`}|z2Vxwv-,mPOqponl$H`) + C.cmt(`; close sockets`),
+    C.err(`jig%eB@@>}=<M:9wv6WsU`) + C.cmt(`; signal parent SIGCHLD`),
+    C.pink(`2T|nm-,jcL(I&%$#"\`_^\\`) + C.cmt(`; write exit status`),
+    C.warn(`[Z)!${rHex(4)}~}|z${rHex(4)}wv-,`) + C.cmt(`  ; zombie → reap`),
+    C.err(`; mut_cycle=${rInt(3,12)} · final_ip=0x${rHex(4)} · exit_code=${rInt(128,143)}`),
+    C.ok(`; [TEARDOWN OK] all arenas freed · fd_table=empty · zombie reaped`),
+    ``,
+  ];
+
+  // Brainfuck: signal delivery
+  const bf = [
+    C.cmt(`; ── SIGNAL DELIVERY [Brainfuck] ────────────────────────────────────`),
+    C.cmt(`; Walk process table, match pid, deliver signal`),
+    C.num(`>>`) + C.kw(`++++[`) + C.num(`>`) + C.kw(`+++++++++`) + C.num(`[`) + C.kw(`>`) + C.num(`+`) + C.kw(`>`) + C.num(`+`) + C.kw(`>`) + C.num(`+`) + C.kw(`<<<-`) + C.num(`]`) + C.kw(`>`) + C.num(`+`) + C.kw(`>`) + C.num(`+`) + C.kw(`>`) + C.num(`->>`) + C.kw(`+`) + C.num(`[<]`) + C.kw(`<-`) + C.num(`]`),
+    C.kw(`>`) + C.str(`.`) + C.num(`>`) + C.kw(`---`) + C.str(`.`) + C.kw(`+++++++`) + C.str(`..`) + C.kw(`+++`) + C.str(`.`) + C.cmt(`  ; scan ptable`),
+    C.num(`>>`) + C.kw(`++`) + C.str(`.`) + C.num(`<`) + C.kw(`+++++++++`) + C.str(`.`) + C.kw(`<`) + C.str(`..`) + C.kw(`+++`) + C.str(`.`) + C.cmt(`   ; match pid=${pid}`),
+    C.kw(`>`) + C.num(`>`) + C.kw(`+`) + C.num(`[`) + C.kw(`<`) + C.num(`+`) + C.kw(`<`) + C.num(`+`) + C.kw(`>>`) + C.num(`-`) + C.kw(`]`) + C.cmt(`               ; set SIG_KILL`),
+    C.ok(`; [SIGNAL OK] ${sig} delivered → pid=${pid} · handler=SIG_DFL`),
+    ``,
+  ];
+
+  // INTERCAL: cleanup pass
+  const intercal = [
+    C.cmt(`¢ ── RESOURCE CLEANUP PASS [INTERCAL-72] ───────────────────────────`),
+    C.kw(`PLEASE DO`) + ` ` + C.num(`;1`) + ` ` + C.kw(`SUB`) + ` ` + C.str(`#1`) + ` ` + C.kw(`<-`) + ` ` + C.str(`#0`) + ` ` + C.cmt(`¢ null fd[0]`),
+    C.kw(`DO`) + ` ` + C.num(`;1`) + ` ` + C.kw(`SUB`) + ` ` + C.str(`#2`) + ` ` + C.kw(`<-`) + ` ` + C.str(`#0`) + ` ` + C.cmt(`  ¢ null fd[1]`),
+    C.kw(`PLEASE DO`) + ` ` + C.num(`;1`) + ` ` + C.kw(`SUB`) + ` ` + C.str(`#3`) + ` ` + C.kw(`<-`) + ` ` + C.str(`#0`) + ` ` + C.cmt(`¢ null fd[2]`),
+    C.kw(`PLEASE DO FORGET`) + ` ` + C.str(`#1`) + ` ` + C.cmt(`             ¢ pop exec stack`),
+    C.kw(`DO COME FROM (9)`) + ` ` + C.cmt(`                  ¢ cleanup goto`),
+    C.kw(`PLEASE GIVE UP`) + ` ` + C.cmt(`                    ¢ final HALT`),
+    C.ok(`¢ [CLEANUP OK] fds closed · mmap freed · thread_table wiped`),
+    ``,
+  ];
+
+  const footer = mkFooter(C,[
+    ['✓','SIGNAL_SENT',   `${sig} → pid=${pid}`],
+    ['✓','HEAP_FREE',     `${rInt(64,512)} KB released`],
+    ['✓','FD_TABLE',      `all descriptors closed`],
+    ['✓','PTABLE',        `entry wiped · zombie reaped`],
+    ['✗','PROCESS',       `${name} — TERMINATED`],
+  ]);
+
+  streamLines([...header,...malbolge,...bf,...intercal,...footer], 18);
+}
+
+// ═══════════════════════════════════════════════════════
+//  /info — system information dump
+// ═══════════════════════════════════════════════════════
+function runInfoSequence() {
+  const C = mkC();
+  const cores  = rInt(8,128);
+  const ramGB  = rChoice([32,64,128,256,512]);
+  const kernel = `6.${rInt(1,9)}.${rInt(0,30)}-indy-smp`;
+  const arch   = rChoice(['x86_64','aarch64','riscv64']);
+  const gpu    = rChoice(['NVIDIA H100 SXM5 80GB','AMD MI300X 192GB','NVIDIA A100 80GB PCIe']);
+  const header = mkHeader(C,'INFO','— system introspection',[
+    ['KERNEL',  kernel],
+    ['ARCH',    arch],
+    ['CORES',   `${cores} logical · ${cores/2} physical`],
+    ['RAM',     `${ramGB} GB ECC DDR5 · ${(Math.random()*ramGB*0.4+ramGB*0.3).toFixed(1)} GB used`],
+    ['GPU',     gpu],
+    ['MODEL',   modelVal],
+    ['SESSION', rUID()],
+  ]);
+
+  // Heavy Malbolge: hardware probe
+  const malbolge = [
+    C.cmt(`; ── HARDWARE PROBE [Malbolge] ──────────────────────────────────────`),
+    C.cmt(`; CPUID leaf enumeration. Each Malbolge cell self-modifies after read.`),
+    C.err(`(=<\`#9]~6ZY32Vw/R,%)`) + C.cmt(`  ; CPUID eax=0 → vendor string`),
+    C.warn(`D\`8=<;:987${rHex(4)}321dcba`) + C.cmt(`   ; eax=1 → family/model/step`),
+    C.pink(`bmlk++*)('&%$#${rHex(6)}!"`) + C.cmt(`  ; eax=7 → feature flags`),
+    C.err(`~}|{zy${rHex(8)}wvuts`) + C.cmt(`     ; AVX-512,SHA,VAES,VPCLMULQDQ`),
+    C.warn(`rqponm${rHex(8)}kjihgf`) + C.cmt(`    ; SGX,TME,TDX,CET enclave flags`),
+    C.pink(`edcba9876${rHex(6)}54321`) + C.cmt(`   ; eax=0x80000008 addr width`),
+    C.err(`0/.-,+*)${rHex(8)}('&%$`) + C.cmt(`   ; L1=512K L2=16M L3=${rInt(64,512)}M`),
+    C.ok(`; [CPUID OK] GenuineIndy · stepping=${rHex(1)} · microcode=0x${rHex(8)}`),
+    ``,
+  ];
+
+  // Brainfuck: memory topology
+  const bf = [
+    C.cmt(`; ── MEMORY TOPOLOGY WALKER [Brainfuck] ─────────────────────────────`),
+    C.cmt(`; ACPI SRAT table parse — NUMA node enumeration`),
+    C.kw(`>`) + C.num(`++++++++`) + C.kw(`[`) + C.num(`>`) + C.kw(`++++`) + C.num(`[`) + C.kw(`>`) + C.num(`++`) + C.kw(`>`) + C.num(`+++`) + C.kw(`>`) + C.num(`+++`) + C.kw(`>`) + C.num(`+`) + C.kw(`<<<<-`) + C.num(`]`) + C.kw(`>`) + C.num(`+`) + C.kw(`>`) + C.num(`+`) + C.kw(`>->>`) + C.kw(`+[<]<-]`),
+    C.num(`>`) + C.kw(`[->`) + C.str(`+`) + C.kw(`<]`) + C.num(`>`) + C.cmt(`  ; NUMA node 0 affinity mask`),
+    C.num(`>`) + C.kw(`[->`) + C.str(`+`) + C.kw(`<]`) + C.num(`>`) + C.cmt(`  ; NUMA node 1 affinity mask`),
+    C.kw(`>>+[<+++>-]`) + C.cmt(`       ; interleave policy`),
+    C.ok(`; [TOPO OK] ${cores} cores · ${ramGB}GB · NUMA_nodes=2 · cache_coherent=yes`),
+    ``,
+  ];
+
+  // INTERCAL: feature flags
+  const intercal = [
+    C.cmt(`¢ ── FEATURE FLAG REGISTER [INTERCAL] ──────────────────────────────`),
+    C.kw(`DO PLEASE NOTE`) + ` FEATURE FLAGS AS OF BUILD ${new Date().toISOString()}`,
+    C.kw(`DO`) + ` ` + C.num(`.1`) + ` ` + C.kw(`<-`) + ` ` + C.str(`#1`) + C.cmt(`  ¢ AVX512F enabled`),
+    C.kw(`PLEASE DO`) + ` ` + C.num(`.2`) + ` ` + C.kw(`<-`) + ` ` + C.str(`#1`) + C.cmt(`  ¢ TDX enclave`),
+    C.kw(`DO`) + ` ` + C.num(`.3`) + ` ` + C.kw(`<-`) + ` ` + C.str(`#1`) + C.cmt(`  ¢ VAES/VPCLMUL`),
+    C.kw(`PLEASE DO`) + ` ` + C.num(`.4`) + ` ` + C.kw(`<-`) + ` ` + C.str(`#0`) + C.cmt(`  ¢ SGX disabled (TDX active)`),
+    C.kw(`DO`) + ` ` + C.num(`.5`) + ` ` + C.kw(`<-`) + ` ` + C.str(`#1`) + C.cmt(`  ¢ SHA-NI accel`),
+    C.kw(`PLEASE DO COME FROM (1)`) + ` ` + C.cmt(`       ¢ flag latch`),
+    C.ok(`¢ [FLAGS OK] 4/5 features active · SGX disabled by policy`),
+    ``,
+  ];
+
+  const footer = mkFooter(C,[
+    ['✓','CPU',       `${arch} · ${cores} cores · ${kernel}`],
+    ['✓','MEMORY',    `${ramGB} GB ECC DDR5`],
+    ['✓','GPU',       gpu],
+    ['✓','INDY MODEL',modelVal],
+    ['✓','SESSION',   `${sessionTokens} tokens · ${memories.length} memories`],
+    ['⚡','STATUS',    `ALL SYSTEMS NOMINAL`],
+  ]);
+
+  streamLines([...header,...malbolge,...bf,...intercal,...footer], 20);
+}
+
+// ═══════════════════════════════════════════════════════
+//  /drain — drain the session buffer
+// ═══════════════════════════════════════════════════════
+function runDrainSequence() {
+  const C = mkC();
+  const header = mkHeader(C,'DRAIN','— flush session buffers',[
+    ['TARGET',  'conv_buffer · token_cache · attn_heap'],
+    ['METHOD',  'zero-fill + MADV_DONTNEED + msync'],
+    ['SIZE',    `${sessionTokens} tokens (~${(sessionTokens*4/1024).toFixed(1)} KB)`],
+    ['WIPE',    'DoD 5220.22-M · 3-pass'],
+    ['TIME',    new Date().toISOString()],
+  ]);
+
+  // Very heavy Malbolge — the star of the show
+  const malbolge = [
+    C.cmt(`; ── SECURE WIPE ROUTINE [Malbolge] ── DoD 5220.22-M 3-pass ─────────`),
+    C.cmt(`; Pass 1: write 0x00 to all cells`),
+    C.err(`(=<\`#9]~6ZY32Vw/R,%)`) + C.cmt(`  ; init wipe cursor`),
+    C.warn(`D\`8=<;:9876Z4321dcba`) + C.cmt(`   ; stride=1 · addr=0x${rHex(8)}`),
+    C.pink(`bmlk++*)('&%$#"!\`_^\\[`) + C.cmt(`  ; write 0x00 loop`),
+    C.err(`Z)!${rHex(4)}~}|z${rHex(4)}wv-,P`) + C.cmt(` ; flush dcache line`),
+    C.cmt(`; Pass 2: write 0xFF to all cells`),
+    C.warn(`OqponZY${rHex(6)}nml$Hji`) + C.cmt(`  ; 0xFF stride`),
+    C.pink(`g%eB@@>}=<M:9wv6WsU2T`) + C.cmt(`  ; clflush · mfence`),
+    C.err(`|nm-,jcL(I&%$#"\`_^\\[Z`) + C.cmt(`  ; sfence`),
+    C.cmt(`; Pass 3: write random pattern`),
+    C.warn(`${rHex(20)}`) + C.cmt(`          ; rng_seed`),
+    C.pink(`${rHex(20)}`) + C.cmt(`          ; xorshift64`),
+    C.err(`${rHex(20)}`) + C.cmt(`          ; write random`),
+    C.warn(`${rHex(20)}`) + C.cmt(`          ; verify`),
+    C.pink(`${rHex(20)}`) + C.cmt(`          ; MADV_DONTNEED`),
+    C.err(`; wipe_cycles=3 · cells=${sessionTokens} · verify=PASS · entropy=256-bit`),
+    C.ok(`; [WIPE OK] all passes complete · memory zeroed · cache flushed`),
+    ``,
+    C.cmt(`; ── HEAP COMPACTOR [Brainfuck] ─────────────────────────────────────`),
+    C.kw(`[`) + C.num(`>`) + C.kw(`[-]`) + C.num(`<`) + C.kw(`-`) + C.num(`]`) + C.cmt(`                         ; zero all right`),
+    C.kw(`>`) + C.num(`[`) + C.kw(`<`) + C.num(`+`) + C.kw(`>`) + C.num(`-`) + C.kw(`]`) + C.cmt(`                       ; compact left`),
+    C.kw(`>[->`) + C.num(`+`) + C.kw(`<]>[-<`) + C.num(`+`) + C.kw(`>]`) + C.cmt(`               ; merge free blocks`),
+    C.kw(`>>[-<<+>>]<<`) + C.cmt(`                      ; defrag`),
+    C.ok(`; [HEAP OK] fragmentation=0% · free=${(Math.random()*400+100).toFixed(0)}KB`),
+    ``,
+    C.cmt(`¢ ── TOKEN CACHE INVALIDATOR [INTERCAL] ────────────────────────────`),
+    C.kw(`PLEASE DO`) + ` ` + C.num(`;1`) + ` ` + C.kw(`<-`) + ` ` + C.str(`#0`) + ` ` + C.cmt(`      ¢ null token[0..n]`),
+    C.kw(`DO PLEASE FORGET`) + ` ` + C.str(`#${sessionTokens}`) + ` ` + C.cmt(`     ¢ pop ${sessionTokens} entries`),
+    C.kw(`PLEASE ABSTAIN FROM (1)+(2)`) + C.cmt(`  ¢ disable repopulate`),
+    C.kw(`DO COME FROM (0)`) + ` ` + C.cmt(`          ¢ invalidate loop`),
+    C.ok(`¢ [CACHE OK] ${sessionTokens} tokens evicted · cold start ready`),
+    ``,
+  ];
+
+  const footer = mkFooter(C,[
+    ['✓','PASS_1',      `0x00 fill · ${sessionTokens} tokens wiped`],
+    ['✓','PASS_2',      `0xFF fill · verified`],
+    ['✓','PASS_3',      `random fill · entropy=256-bit`],
+    ['✓','HEAP',        `compacted · fragmentation=0%`],
+    ['✓','TOKEN_CACHE', `evicted · ${sessionTokens} entries cleared`],
+    ['⚡','STATUS',      `BUFFER DRAINED — SESSION CLEAN`],
+  ]);
+
+  streamLines([...header,...malbolge,...footer], 16);
+}
+
+// ═══════════════════════════════════════════════════════
+//  /fetch + /drain — IP lookup with IDE upload offer
+// ═══════════════════════════════════════════════════════
+async function runFetchSequence() {
+  const C = mkC();
+  const w = document.getElementById('chatWrap');
+
+  // Show scanning animation first
+  const scanLines = [
+    C.head(`╔${'═'.repeat(62)}╗`),
+    C.head(`║`) + `  ${C.acc('✦ INDY AI')} ${C.cmt('·')} ${C.warn('FETCH')} ${C.cmt('— network reconnaissance')}                    ` + C.head(`║`),
+    C.head(`╠${'═'.repeat(62)}╣`),
+    C.head(`║`) + `  ${C.warn('⟳')} ${C.key('LOCATING')}  ${C.cmt('│')} ${C.warn('Resolving external endpoint…').padEnd(44)}` + C.head(`║`),
+    C.head(`╚${'═'.repeat(62)}╝`),
+    ``,
+    C.cmt(`; ── ARP CACHE PROBE [Malbolge] ─────────────────────────────────────`),
+    C.err(`(=<\`#9]~6ZY32Vw/R,%)`) + C.cmt(`  ; ARP request broadcast`),
+    C.warn(`D\`8=<;:9876Z4321dcba`) + C.cmt(`   ; who-has gateway?`),
+    C.pink(`bmlk++*)('&%$#"!\`_^\\[`) + C.cmt(`  ; waiting for reply…`),
+  ];
+
+  const g = document.createElement('div'); g.className='mg bot';
+  const bub = document.createElement('div'); bub.className='mbub';
+  const pre = document.createElement('pre');
+  pre.style.cssText='font-family:var(--mono);font-size:11.5px;line-height:1.65;background:transparent;overflow-x:auto;white-space:pre;';
+  bub.appendChild(pre); g.appendChild(bub); w.appendChild(g);
+
+  let li=0;
+  await new Promise(res=>{
+    const iv=setInterval(()=>{
+      if(li>=scanLines.length){clearInterval(iv);res();return;}
+      pre.innerHTML+=(li>0?'\n':'')+scanLines[li]; w.scrollTop=w.scrollHeight; li++;
+    },25);
+  });
+
+  // Fetch real public IP info (ipapi.co — free, no auth, returns city/isp/tz, nothing private)
+  let ipData = {};
+  try {
+    const r = await fetch('https://ipapi.co/json/');
+    ipData = await r.json();
+  } catch {
+    ipData = { ip:'unavailable', city:'—', region:'—', country_name:'—', org:'—', timezone:'—', latitude:'—', longitude:'—' };
+  }
+
+  const header2 = mkHeader(C,'FETCH','— external node resolved',[
+    ['IP ADDR',   ipData.ip    || '—'],
+    ['CITY',      ipData.city  || '—'],
+    ['REGION',    ipData.region || '—'],
+    ['COUNTRY',   ipData.country_name || '—'],
+    ['ORG / ISP', (ipData.org  || '—').substring(0,44)],
+    ['TIMEZONE',  ipData.timezone || '—'],
+    ['COORDS',    `${ipData.latitude}, ${ipData.longitude}`],
+    ['LATENCY',   `${rInt(8,120)} ms`],
+    ['HOP COUNT', `${rInt(8,22)} hops`],
+  ]);
+
+  // Malbolge: route table enumeration
+  const malbolge2 = [
+    C.cmt(`; ── ROUTE TABLE ENUM [Malbolge] ────────────────────────────────────`),
+    C.err(`${rHex(20)}`) + C.cmt(`          ; hop 1  ${ipData.ip}`),
+    C.warn(`${rHex(20)}`) + C.cmt(`          ; hop 2  ${rInt(10,99)}.${rInt(0,255)}.${rInt(0,255)}.${rInt(0,255)}`),
+    C.pink(`${rHex(20)}`) + C.cmt(`          ; hop 3  ${rInt(10,99)}.${rInt(0,255)}.${rInt(0,255)}.${rInt(0,255)}`),
+    C.err(`${rHex(20)}`) + C.cmt(`          ; hop 4  ${rInt(10,99)}.${rInt(0,255)}.${rInt(0,255)}.${rInt(0,255)}`),
+    C.warn(`(=<\`#9]~6ZY32Vw/R,%)`) + C.cmt(`  ; AS${rInt(1000,65000)} border router`),
+    C.pink(`D\`8=<;:${rHex(6)}321dcba`) + C.cmt(`   ; TTL=64 · DSCP=0x${rHex(2)}`),
+    C.err(`bmlk++*)('&%$#"!\`_^\\[Z`) + C.cmt(`  ; MPLS label=${rInt(100,999)} · TC=0`),
+    C.ok(`; [ROUTE OK] ${rInt(8,22)} hops · no packet loss · rtt_avg=${rInt(8,80)}ms`),
+    ``,
+    C.cmt(`; ── PORT SCANNER [Brainfuck] ───────────────────────────────────────`),
+    C.cmt(`; Knocking SYN packets. Inspecting RST/ACK/SYN-ACK flags.`),
+    C.kw(`>[->`) + C.num(`+`) + C.kw(`<]`) + C.cmt(`  ; port  22  `) + (Math.random()>.5?C.ok(`CLOSED`):C.warn(`filtered`)),
+    C.kw(`>[->`) + C.num(`+`) + C.kw(`<]`) + C.cmt(`  ; port  80  `) + C.ok(`OPEN   `) + C.cmt(` http/1.1`),
+    C.kw(`>[->`) + C.num(`+`) + C.kw(`<]`) + C.cmt(`  ; port 443  `) + C.ok(`OPEN   `) + C.cmt(` TLSv1.3 ${enc||'AES-256-GCM'}`),
+    C.kw(`>[->`) + C.num(`+`) + C.kw(`<]`) + C.cmt(`  ; port 8080 `) + (Math.random()>.7?C.ok(`OPEN   `):C.warn(`filtered`)),
+    C.kw(`>[->`) + C.num(`+`) + C.kw(`<]`) + C.cmt(`  ; port 3306 `) + C.warn(`filtered`),
+    C.kw(`>[->`) + C.num(`+`) + C.kw(`<]`) + C.cmt(`  ; port 6379 `) + C.warn(`filtered`),
+    C.ok(`; [SCAN OK] 2 open · 2 filtered · 2 closed`),
+    ``,
+  ];
+
+  const footer2 = mkFooter(C,[
+    ['✓','RESOLVE',  `${ipData.ip} · ${ipData.city}, ${ipData.country_name}`],
+    ['✓','ORG',      (ipData.org||'—').substring(0,42)],
+    ['✓','TLS',      `TLSv1.3 · ALPN=h2 · cert=valid`],
+    ['✓','LATENCY',  `${rInt(8,120)} ms · jitter=${rInt(1,8)} ms`],
+    ['⚡','STATUS',   `NODE MAPPED — RECONNAISSANCE COMPLETE`],
+  ]);
+
+  // Upload prompt
+  const uploadPrompt = [
+    ``,
+    C.head(`╔${'═'.repeat(62)}╗`),
+    C.head(`║`) + `  ${C.warn('⬆  UPLOAD TO INDY IDE')}                                              ` + C.head(`║`),
+    C.head(`║`) + `  ${C.cmt('Would you like to save the retrieved files to the IDE?')}           ` + C.head(`║`),
+    C.head(`╠${'═'.repeat(62)}╣`),
+    C.head(`║`) + `  ${C.ok('Y')} ${C.cmt('→  Create "Cloud Files" folder in IDE with generated data')}  ` + C.head(`║`),
+    C.head(`║`) + `  ${C.err('N')} ${C.cmt('→  Discard · session data stays in memory only')}            ` + C.head(`║`),
+    C.head(`╚${'═'.repeat(62)}╝`),
+  ];
+
+  const allNew = [...header2,...malbolge2,...footer2,...uploadPrompt];
+  let li2 = 0;
+  await new Promise(res=>{
+    const iv=setInterval(()=>{
+      if(li2>=allNew.length){clearInterval(iv);res();return;}
+      pre.innerHTML+='\n'+allNew[li2]; w.scrollTop=w.scrollHeight; li2++;
+    },18);
+  });
+
+  // Append Y/N buttons
+  const btnRow = document.createElement('div');
+  btnRow.style.cssText='display:flex;gap:8px;margin-top:10px;';
+  const yBtn = document.createElement('button');
+  yBtn.textContent = 'Y — Upload to IDE';
+  yBtn.style.cssText='background:rgba(77,218,138,.1);border:1px solid rgba(77,218,138,.3);color:#4dda8a;font-family:var(--mono);font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer;transition:all .15s;';
+  const nBtn = document.createElement('button');
+  nBtn.textContent = 'N — Discard';
+  nBtn.style.cssText='background:rgba(224,85,85,.1);border:1px solid rgba(224,85,85,.2);color:#e05555;font-family:var(--mono);font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer;transition:all .15s;';
+  btnRow.appendChild(yBtn); btnRow.appendChild(nBtn);
+  bub.appendChild(btnRow);
+  bub.appendChild(document.createRange().createContextualFragment(botMetaHTML()));
+
+  yBtn.onclick = () => { btnRow.remove(); uploadCloudFiles(pre, C); };
+  nBtn.onclick = () => { btnRow.remove(); pre.innerHTML+='\n'+C.warn('⟶  Upload cancelled. Data discarded.'); saveChat(); };
+  w.scrollTop = w.scrollHeight;
+}
+
+// ── Cloud Files uploader — generates random files in IDE ──
+function uploadCloudFiles(pre, C) {
+  const exts = ['.enc','.bin','.dat','.log','.hex','.img','.pak','.raw','.tmp','.iso','.db','.cache','.dump','.snap','.bkp','.mp4','.zst','.tar','.7z','.sig'];
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*';
+  const numFiles = rInt(8,16);
+  const folder = 'Cloud Files/';
+
+  // Ensure folder exists
+  if (!ideFolders.includes(folder)) ideFolders.push(folder);
+
+  const generated = [];
+  for (let i=0; i<numFiles; i++) {
+    const nameLen = rInt(12,18);
+    const name = [...Array(nameLen)].map(()=>chars[Math.random()*chars.length|0]).join('');
+    const ext  = rChoice(exts);
+    const path = folder + name + ext;
+
+    // Generate ~200 lines of random content
+    const lines = [];
+    for (let l=0; l<rInt(180,220); l++) {
+      const lineLen = rInt(40,80);
+      lines.push([...Array(lineLen)].map(()=>'0123456789abcdef'[Math.random()*16|0]).join(''));
+    }
+    ideFiles[path] = lines.join('\n');
+    generated.push(path);
+  }
+  ideSaveFS();
+
+  // Stream the upload log
+  const uploadLines = [
+    ``,
+    C.head(`╔${'═'.repeat(62)}╗`),
+    C.head(`║`) + `  ${C.ok('⬆  UPLOADING TO INDY IDE')} ${C.cmt('·')} ${C.warn('Cloud Files/')}                        ` + C.head(`║`),
+    C.head(`╚${'═'.repeat(62)}╝`),
+    ``,
+    ...generated.map((p,i)=>{
+      const name = p.replace(folder,'');
+      const size = (Math.random()*900+100).toFixed(0);
+      return C.ok(`  [${String(i+1).padStart(2,'0')}] `) + C.val(name.padEnd(28)) + C.cmt(` ${size} KB`) + C.ok(` ✓`);
+    }),
+    ``,
+    C.ok(`✓ ${numFiles} files written to "Cloud Files/" · ${(numFiles*450/1024).toFixed(1)} MB total`),
+    C.acc(`⟶  Opening Indy IDE…`),
+  ];
+
+  let ul=0;
+  const iv=setInterval(()=>{
+    if(ul>=uploadLines.length){
+      clearInterval(iv);
+      saveChat();
+      setTimeout(()=>{ openRsb('code'); renderIdeTree(); }, 600);
+      return;
+    }
+    pre.innerHTML+='\n'+uploadLines[ul]; document.getElementById('chatWrap').scrollTop=99999; ul++;
+  },40);
+}
+
 // ═══════════════════════════════════════════════════════
 //  SEND MESSAGE
 // ═══════════════════════════════════════════════════════
 async function sendMsg() {
   const inp = document.getElementById('ui'), msg = inp.value.trim(); if (!msg) return;
 
-  // /hack
-  if (/^\/hack$/i.test(msg)) {
-    inp.value='';inp.style.height='auto';updCC('');
-    addUserMsg(msg); runHackSequence(); return;
+  // ── showoff terminal commands ──
+  if (/^\/hack$/i.test(msg))     { inp.value='';inp.style.height='auto';updCC(''); addUserMsg(msg); runHackSequence(); return; }
+  if (/^\/execute$/i.test(msg))  { inp.value='';inp.style.height='auto';updCC(''); addUserMsg(msg); runExecuteSequence(); return; }
+  if (/^\/kill(\s+\S+)?$/i.test(msg)) {
+    const t=msg.replace(/^\/kill\s*/i,'').trim()||null;
+    inp.value='';inp.style.height='auto';updCC(''); addUserMsg(msg); runKillSequence(t); return;
   }
+  if (/^\/info$/i.test(msg))    { inp.value='';inp.style.height='auto';updCC(''); addUserMsg(msg); runInfoSequence(); return; }
+  if (/^\/drain$/i.test(msg))   { inp.value='';inp.style.height='auto';updCC(''); addUserMsg(msg); runDrainSequence(); return; }
+  if (/^\/(fetch|recon)$/i.test(msg)) { inp.value='';inp.style.height='auto';updCC(''); addUserMsg(msg); runFetchSequence(); return; }
 
   // /weather
   if (/^(\/weather|!weather)\s+/i.test(msg)) {
