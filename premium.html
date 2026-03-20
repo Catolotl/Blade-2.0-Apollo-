@@ -742,11 +742,11 @@ auth.onAuthStateChanged(async user => {
 
 function showAuthScreen() {
   document.getElementById('authScreen').style.display = 'flex';
-  document.getElementById('appRoot').style.display   = 'none';
+  document.getElementById('appRoot').style.display    = 'none';
 }
 function hideAuthScreen() {
   document.getElementById('authScreen').style.display = 'none';
-  document.getElementById('appRoot').style.display   = 'flex';
+  document.getElementById('appRoot').style.display    = 'flex';
 }
 
 // ─── Sign Up ───
@@ -3080,7 +3080,7 @@ document.addEventListener('keydown', e => {
   if ((e.ctrlKey||e.metaKey) && e.key==='b') { e.preventDefault(); toggleLsb(); }
   if ((e.ctrlKey||e.metaKey) && e.key==='f' && !typing) { e.preventDefault(); openChatSearch(); }
   if ((e.ctrlKey||e.metaKey) && e.shiftKey && e.key==='L') { e.preventDefault(); toggleTheme(); }
-  if (e.key==='Escape') { document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open')); closeRsb(); document.getElementById('mpop').classList.remove('open'); }
+  if (e.key==='Escape') { document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open')); closeRsb(); document.getElementById('mpop').classList.remove('open'); dismissWhatsNew(); }
 });
 
 // double-click user msg to edit
@@ -3408,6 +3408,8 @@ const WN_KEY = 'indy_whats_new_v8';
 function showWhatsNew() {
   const ov = document.getElementById('wnOverlay');
   if (!ov) return;
+  // safety guard — never block interaction if something goes wrong
+  ov.style.pointerEvents = 'all';
   ov.style.display = 'flex';
   requestAnimationFrame(() => requestAnimationFrame(() => ov.classList.add('vis')));
 }
@@ -3416,13 +3418,18 @@ function dismissWhatsNew() {
   const ov = document.getElementById('wnOverlay');
   if (!ov) return;
   ov.classList.remove('vis');
-  setTimeout(() => { ov.style.display = 'none'; }, 380);
+  setTimeout(() => {
+    ov.style.display = 'none';
+    ov.style.pointerEvents = 'none';
+  }, 380);
   localStorage.setItem(WN_KEY, 'seen');
 }
 
 function maybeShowWhatsNew() {
+  // only show after the app is fully ready, never during auth
+  if (!currentUser) return;
   if (!localStorage.getItem(WN_KEY)) {
-    setTimeout(() => showWhatsNew(), 1200);
+    setTimeout(() => showWhatsNew(), 1400);
   }
 }
 
@@ -3678,7 +3685,7 @@ function initApp() {
 </div>
 
 <!-- WHAT'S NEW POPUP -->
-<div id="wnOverlay">
+<div id="wnOverlay" onclick="if(event.target===this)dismissWhatsNew()" style="pointer-events:none;">
   <div class="wn-box">
     <div class="wn-head">
       <div class="wn-logo">✦ INDY AI — JVST co.</div>
@@ -3736,12 +3743,12 @@ function initApp() {
 // Move the app body inside appRoot after DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   const root = document.getElementById('appRoot');
-  // Move lsb, main into appRoot
-  ['lsb','main','rsb','rsbbd','summaryModal','shortcutsModal','toast','wnOverlay'].forEach(id => {
+  // Move lsb, main, panels into appRoot — but NOT wnOverlay (it needs to be body-level)
+  ['lsb','main','rsb','rsbbd','summaryModal','shortcutsModal','toast'].forEach(id => {
     const el = document.getElementById(id); if (el) root.appendChild(el);
   });
-  // appRoot needs flex layout
-  root.style.cssText = 'display:none;flex:1;height:100%;width:100%;position:relative;';
+  // appRoot needs flex layout — don't set display here, auth state controls that
+  root.style.cssText = 'flex:1;height:100%;width:100%;position:relative;';
 });
 </script>
 
